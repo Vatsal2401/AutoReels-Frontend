@@ -125,8 +125,8 @@ export default function VideoDetailPage() {
         </div>
 
         {isProcessing && (
-          <Card className="glass-strong">
-            <CardContent className="px-6 py-8">
+          <Card className="glass-strong border-primary/10 shadow-lg">
+            <CardContent className="px-8 py-10">
               <ProgressIndicator video={video} />
             </CardContent>
           </Card>
