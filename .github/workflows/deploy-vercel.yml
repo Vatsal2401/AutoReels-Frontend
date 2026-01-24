@@ -1,10 +1,10 @@
 name: Deploy to Vercel
 
-# Only run when code is pushed/merged to main
+# Only run when code is pushed/merged to master
 on:
   push:
     branches:
-      - main
+      - master
 
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
