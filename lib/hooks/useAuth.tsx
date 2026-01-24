@@ -49,7 +49,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const response: AuthResponse = await authApi.signIn({ email, password });
     tokenStorage.setAccessToken(response.access_token);
     tokenStorage.setRefreshToken(response.refresh_token);
-    setUser(response.user);
+    // Map API response to User type
+    setUser({
+      userId: response.user.id,
+      email: response.user.email,
+    });
     router.push("/dashboard");
   };
 
@@ -57,7 +61,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const response: AuthResponse = await authApi.signUp({ email, password, name });
     tokenStorage.setAccessToken(response.access_token);
     tokenStorage.setRefreshToken(response.refresh_token);
-    setUser(response.user);
+    // Map API response to User type
+    setUser({
+      userId: response.user.id,
+      email: response.user.email,
+    });
     router.push("/dashboard");
   };
 

@@ -36,7 +36,7 @@ export function CreditsIndicator() {
       variant={hasCredits ? "default" : "destructive"}
       className={cn(
         "glass gap-1.5",
-        hasCredits && "border-primary/30"
+        hasCredits ? "border-primary/30" : undefined
       )}
     >
       <CreditCard className="h-3 w-3" />
