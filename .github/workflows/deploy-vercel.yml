@@ -1,6 +1,7 @@
 name: Deploy to Vercel
 
 # Only run when code is pushed/merged to master
+# Updated: Test deployment with new Git config
 on:
   push:
     branches:
