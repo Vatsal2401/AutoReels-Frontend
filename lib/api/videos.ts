@@ -46,4 +46,9 @@ export const videosApi = {
     const response = await apiClient.get<Video[]>("/videos");
     return response.data;
   },
+
+  getDownloadUrl: async (id: string): Promise<{ url: string }> => {
+    const response = await apiClient.get<{ url: string }>(`/videos/${id}/download-url`);
+    return response.data;
+  },
 };

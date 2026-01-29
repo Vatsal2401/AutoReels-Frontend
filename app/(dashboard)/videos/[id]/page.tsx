@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useVideoProgress } from "@/lib/hooks/useVideoProgress";
+import { videosApi } from "@/lib/api/videos";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { ProgressIndicator } from "@/components/video/ProgressIndicator";
 import { VideoPlayer } from "@/components/video/VideoPlayer";
@@ -105,21 +106,26 @@ export default function VideoDetailPage() {
 
         <div className="mb-8 space-y-3">
           <h1 className="text-3xl font-bold leading-tight bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            {video.topic}
+            Video Details
           </h1>
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <div className="flex items-center gap-1.5">
-              <Calendar className="h-4 w-4 shrink-0" />
-              <span className="leading-tight">Created {formatRelativeTime(video.created_at)}</span>
-            </div>
+            {video.completed_at ? (
+              <div className="flex items-center gap-1.5 text-primary">
+                 <CheckCircle2 className="h-4 w-4 shrink-0" />
+                 <span className="leading-tight font-medium">Completed {formatRelativeTime(video.completed_at)}</span>
+              </div>
+            ) : (
+               <div className="flex items-center gap-1.5">
+                <Calendar className="h-4 w-4 shrink-0" />
+                <span className="leading-tight">Created {formatRelativeTime(video.created_at)}</span>
+              </div>
+            )}
+            
             {video.completed_at && (
-              <>
-                <span className="leading-tight">•</span>
-                <div className="flex items-center gap-1.5">
-                  <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
-                  <span className="leading-tight">Completed {formatRelativeTime(video.completed_at)}</span>
-                </div>
-              </>
+               <div className="flex items-center gap-1.5 text-muted-foreground">
+                 <span className="leading-tight">•</span>
+                 <span className="leading-tight">Started {formatRelativeTime(video.created_at)}</span>
+               </div>
             )}
           </div>
         </div>
@@ -169,7 +175,7 @@ export default function VideoDetailPage() {
               <CardContent className="p-0">
                 <div className="bg-gradient-ai p-1">
                   <div className="bg-card rounded-lg">
-                    <VideoPlayer videoUrl={video.final_video_url} title={video.topic} />
+                    <VideoPlayer videoUrl={video.final_video_url} title={video.topic.substring(0, 50) + "..."} />
                   </div>
                 </div>
               </CardContent>
@@ -185,18 +191,22 @@ export default function VideoDetailPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <p className="text-sm font-medium mb-1 text-muted-foreground">Topic</p>
-                    <p className="text-sm">{video.topic}</p>
+                    <p className="text-sm font-medium mb-1 text-muted-foreground">Prompt</p>
+                    <div className="glass rounded-lg p-3 max-h-[150px] overflow-y-auto">
+                      <p className="text-sm leading-relaxed">{video.topic}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium mb-1 text-muted-foreground">Status</p>
-                    <Badge variant="success">
-                      Completed
-                    </Badge>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium mb-1 text-muted-foreground">Created</p>
-                    <p className="text-sm">{formatRelativeTime(video.created_at)}</p>
+                  <div className="flex gap-4">
+                    <div className="flex-1">
+                      <p className="text-sm font-medium mb-1 text-muted-foreground">Status</p>
+                        <Badge variant="success">
+                        Completed
+                        </Badge>
+                    </div>
+                     <div className="flex-1">
+                        <p className="text-sm font-medium mb-1 text-muted-foreground">Generated</p>
+                        <p className="text-sm">{formatRelativeTime(video.completed_at || video.created_at)}</p>
+                     </div>
                   </div>
                 </CardContent>
               </Card>
@@ -245,11 +255,15 @@ export default function VideoDetailPage() {
             <div className="flex flex-col sm:flex-row gap-4">
               <Button
                 size="lg"
-                onClick={() => {
-                  const link = document.createElement("a");
-                  link.href = video.final_video_url!;
-                  link.download = `${video.topic.replace(/\s+/g, "-")}.mp4`;
-                  link.click();
+                onClick={async () => {
+                  try {
+                    const response = await videosApi.getDownloadUrl(video.id);
+                    if (response?.url) {
+                      window.location.href = response.url;
+                    }
+                  } catch (error) {
+                    console.error("Failed to get download URL", error);
+                  }
                 }}
                 className="flex-1"
               >
