@@ -3,17 +3,21 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils/format";
-import { ChevronDown, Check } from "lucide-react";
+import { ChevronDown, Check, User } from "lucide-react";
 
-export interface SelectOption {
+export interface VoiceSelectOption {
   value: string;
-  label: string;
+  name: string;
+  accent: string;
+  gender: "Male" | "Female" | "Neutral";
+  style?: string;
+  description?: string;
 }
 
-export interface SelectEnhancedProps {
+export interface VoiceSelectProps {
   value: string;
   onChange: (value: string) => void;
-  options: SelectOption[];
+  options: VoiceSelectOption[];
   placeholder?: string;
   className?: string;
   disabled?: boolean;
@@ -21,16 +25,16 @@ export interface SelectEnhancedProps {
   name?: string;
 }
 
-export function SelectEnhanced({
+export function VoiceSelect({
   value,
   onChange,
   options,
-  placeholder = "Select an option",
+  placeholder = "Select a voice",
   className,
   disabled = false,
   id,
   name,
-}: SelectEnhancedProps) {
+}: VoiceSelectProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   const [focusedIndex, setFocusedIndex] = React.useState(-1);
   const [mounted, setMounted] = React.useState(false);
@@ -40,7 +44,7 @@ export function SelectEnhanced({
     left: number;
     width: number;
     maxHeight: number;
-  }>({ left: 0, width: 0, maxHeight: 240 });
+  }>({ left: 0, width: 0, maxHeight: 320 });
   const selectRef = React.useRef<HTMLDivElement>(null);
   const optionsRef = React.useRef<HTMLDivElement>(null);
   const selectedOption = options.find((opt) => opt.value === value);
@@ -57,7 +61,7 @@ export function SelectEnhanced({
       const viewportHeight = window.innerHeight;
       const spaceBelow = viewportHeight - rect.bottom;
       const spaceAbove = rect.top;
-      const maxDropdownHeight = 240;
+      const maxDropdownHeight = 320;
       
       // Position above if not enough space below
       const shouldPositionAbove = spaceBelow < maxDropdownHeight && spaceAbove > spaceBelow;
@@ -68,14 +72,14 @@ export function SelectEnhanced({
       
       if (shouldPositionAbove) {
         setDropdownPosition({
-          bottom: viewportHeight - rect.top,
+          bottom: viewportHeight - rect.top, // Perfectly flush
           left: rect.left,
           width: rect.width,
           maxHeight: maxHeight
         });
       } else {
         setDropdownPosition({
-          top: rect.bottom,
+          top: rect.bottom, // Perfectly flush
           left: rect.left,
           width: rect.width,
           maxHeight: maxHeight
@@ -84,6 +88,7 @@ export function SelectEnhanced({
     }
   }, [isOpen]);
 
+  // Close dropdown on click outside
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
@@ -109,6 +114,7 @@ export function SelectEnhanced({
     }
   }, [isOpen]);
 
+  // Keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (disabled) return;
 
@@ -138,14 +144,10 @@ export function SelectEnhanced({
           setFocusedIndex((prev) => (prev > 0 ? prev - 1 : options.length - 1));
         }
         break;
-      case "Escape":
-        e.preventDefault();
-        setIsOpen(false);
-        setFocusedIndex(-1);
-        break;
     }
   };
 
+  // Scroll focused item into view
   React.useEffect(() => {
     if (isOpen && focusedIndex >= 0 && optionsRef.current) {
       const optionElement = optionsRef.current.children[focusedIndex] as HTMLElement;
@@ -160,38 +162,59 @@ export function SelectEnhanced({
     setIsOpen(false);
   };
 
+  const formatMetadata = (option: VoiceSelectOption): string => {
+    return option.style 
+      ? `${option.accent} ${option.gender} • ${option.style}` 
+      : `${option.accent} ${option.gender}`;
+  };
+
   return (
     <div ref={selectRef} className={cn("relative w-full", className)}>
-      <button
-        type="button"
-        id={id}
-        name={name}
-        disabled={disabled}
-        onClick={() => !disabled && setIsOpen(!isOpen)}
-        onKeyDown={handleKeyDown}
-        className={cn(
-          "flex h-11 w-full items-center justify-between rounded-lg border border-border bg-background/80 backdrop-blur-sm px-4 py-2.5 text-sm font-medium transition-all duration-200 text-left",
-          "hover:border-primary/30 hover:bg-background",
-          "focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2 focus:ring-offset-background focus:border-primary",
-          "disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-border",
-          isOpen && "border-primary ring-2 ring-primary/20",
-          className
-        )}
-        aria-expanded={isOpen}
-        aria-haspopup="listbox"
-        aria-label={selectedOption ? `${name || "Select"}: ${selectedOption.label}` : placeholder}
-      >
-        <span className={cn("flex-1 truncate text-left", selectedOption ? "text-foreground" : "text-muted-foreground")}>
-          {selectedOption ? selectedOption.label : placeholder}
-        </span>
-        <ChevronDown
+      {/* Trigger Button */}
+      <div className="relative group">
+        <button
+          type="button"
+          id={id}
+          name={name}
+          disabled={disabled}
+          onClick={() => !disabled && setIsOpen(!isOpen)}
+          onKeyDown={handleKeyDown}
           className={cn(
-            "h-4 w-4 text-muted-foreground transition-transform duration-200 shrink-0 ml-2",
-            isOpen && "transform rotate-180"
+            "flex w-full items-start gap-2 text-left transition-all duration-200",
+            "focus:outline-none focus:ring-0",
+            "disabled:cursor-not-allowed disabled:opacity-50",
+            className
           )}
-        />
-      </button>
+          aria-expanded={isOpen}
+          aria-haspopup="listbox"
+          aria-label={selectedOption ? `Voice: ${selectedOption.name}` : placeholder}
+        >
+          {/* Voice Info */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <span className={cn(
+                "text-base font-medium leading-tight",
+                selectedOption ? "text-foreground" : "text-muted-foreground"
+              )}>
+                {selectedOption ? selectedOption.name : placeholder}
+              </span>
+              <ChevronDown
+                className={cn(
+                  "h-4 w-4 text-muted-foreground transition-transform duration-200 shrink-0",
+                  isOpen && "transform rotate-180"
+                )}
+              />
+            </div>
+            {selectedOption && (
+              <p className="text-xs text-muted-foreground mt-0.5 truncate leading-tight">
+                {formatMetadata(selectedOption)}
+              </p>
+            )}
+          </div>
+        </button>
+      </div>
 
+      {/* Dropdown Menu */}
       {isOpen && mounted && createPortal(
         <>
           <div
@@ -205,13 +228,13 @@ export function SelectEnhanced({
               top: dropdownPosition.top !== undefined ? `${dropdownPosition.top}px` : 'auto',
               bottom: dropdownPosition.bottom !== undefined ? `${dropdownPosition.bottom}px` : 'auto',
               left: `${dropdownPosition.left}px`,
-              width: `${Math.max(dropdownPosition.width, 180)}px`
+              width: `${Math.max(dropdownPosition.width, 240)}px`
             }}
             role="listbox"
           >
             <div 
               ref={optionsRef} 
-              className="overflow-auto p-1 custom-scrollbar"
+              className="overflow-auto p-1.5 custom-scrollbar"
               style={{ maxHeight: `${dropdownPosition.maxHeight}px` }}
             >
               {options.map((option, index) => {
@@ -224,24 +247,39 @@ export function SelectEnhanced({
                     role="option"
                     aria-selected={isSelected}
                     onClick={() => handleSelect(option.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        handleSelect(option.value);
-                      }
-                    }}
                     onMouseEnter={() => setFocusedIndex(index)}
                     className={cn(
-                      "relative flex w-full cursor-pointer select-none items-center rounded-md px-3 py-2.5 text-sm outline-none transition-colors focus:outline-none focus:ring-0",
-                      "hover:bg-accent/50 hover:text-accent-foreground",
-                      "focus:bg-accent focus:text-accent-foreground",
-                      isFocused && "bg-accent/70",
-                      isSelected && "bg-primary/10 text-primary font-medium"
+                      "relative flex w-full cursor-pointer select-none items-start gap-2.5 rounded-md px-2 py-2.5 outline-none transition-all duration-150",
+                      "hover:bg-accent/60 hover:text-accent-foreground",
+                      isFocused && "bg-accent/40",
+                      isSelected && "bg-primary/10 text-primary",
+                      "focus:outline-none focus:ring-0"
                     )}
                   >
-                    <span className="flex-1 truncate text-left">{option.label}</span>
+                    {/* Voice Icon */}
+                    <div className={cn(
+                      "h-7 w-7 rounded-full flex items-center justify-center shrink-0 mt-0.5",
+                      isSelected ? "bg-primary/20 text-primary" : "bg-muted/50 text-muted-foreground"
+                    )}>
+                      <User size={13} />
+                    </div>
+
+                    {/* Voice Details */}
+                    <div className="flex-1 min-w-0 py-0.5">
+                      <span className={cn(
+                        "text-sm font-medium leading-tight block",
+                        isSelected && "font-semibold"
+                      )}>
+                        {option.name}
+                      </span>
+                      <p className="text-[11px] text-muted-foreground mt-0.5 leading-tight opacity-80">
+                        {formatMetadata(option)}
+                      </p>
+                    </div>
+
+                    {/* Check Icon */}
                     {isSelected && (
-                      <Check className="ml-2 h-4 w-4 text-primary shrink-0" />
+                      <Check className="h-4 w-4 text-primary shrink-0 mt-1" />
                     )}
                   </button>
                 );

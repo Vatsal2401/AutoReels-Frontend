@@ -96,206 +96,222 @@ export default function VideoDetailPage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-5xl mx-auto space-y-6">
-        <Link href="/dashboard">
-          <Button variant="ghost" className="mb-2">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
-          </Button>
-        </Link>
+      <div className="relative h-full overflow-hidden">
+        {/* Standard SaaS Background */}
+        <div className="absolute inset-0 bg-background pointer-events-none" />
 
-        <div className="mb-8 space-y-3">
-          <h1 className="text-3xl font-bold leading-tight bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Video Details
-          </h1>
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            {video.completed_at ? (
-              <div className="flex items-center gap-1.5 text-primary">
-                 <CheckCircle2 className="h-4 w-4 shrink-0" />
-                 <span className="leading-tight font-medium">Completed {formatRelativeTime(video.completed_at)}</span>
+
+        <div className="max-w-[1700px] mx-auto space-y-3 relative z-10 pb-2 px-12 pt-3 h-full flex flex-col">
+
+          {/* Integrated Header Row */}
+          <div className="flex items-center justify-between border-b border-white/5 pb-6">
+            <div className="flex items-center gap-8">
+              <Link href="/dashboard">
+                <Button variant="outline" size="sm" className="h-8 px-2 text-[10px] font-bold bg-secondary/10 hover:bg-secondary/20 border-white/5 text-zinc-400">
+                  <ArrowLeft className="mr-1.5 h-3 w-3" />
+                  EXIT STUDIO
+                </Button>
+              </Link>
+              <div className="h-4 w-px bg-white/10 mx-2" />
+              <div className="flex flex-col pl-8">
+                <h1 className="text-lg font-bold tracking-tight text-white leading-none">
+                  {isProcessing ? "Synthesizing..." : video.topic}
+                </h1>
+                <span className="text-[10px] text-zinc-500 font-medium mt-1">
+                  Neural Pipeline V3 • {formatRelativeTime(video.completed_at || video.created_at)}
+                </span>
               </div>
-            ) : (
-               <div className="flex items-center gap-1.5">
-                <Calendar className="h-4 w-4 shrink-0" />
-                <span className="leading-tight">Created {formatRelativeTime(video.created_at)}</span>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-zinc-950 rounded-full border border-white/5">
+                <span className="text-[9px] uppercase tracking-widest text-zinc-600 font-black">SessionID:</span>
+                <span className="text-[9px] font-mono text-zinc-500">{video.id.substring(0, 8)}</span>
+              </div>
+              {isCompleted && (
+                   <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 px-2 py-0.5 text-[10px] font-bold">
+                      <CheckCircle2 size={10} className="mr-1" />
+                      READY
+                   </Badge>
+              )}
+            </div>
+          </div>
+
+          {/* Main Stage - Cinematic Theater */}
+          <div className="relative group">
+            {/* Halo Effect */}
+            <div className="absolute inset-0 bg-primary/5 rounded-3xl blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+            
+            {isProcessing && (
+              <div className="animate-fade-in py-12">
+                  <div className="max-w-2xl mx-auto">
+                    <Card className="glass-strong border-white/5 shadow-2xl overflow-hidden relative rounded-[32px]">
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] via-transparent to-accent/[0.02] pointer-events-none" />
+                      <CardContent className="px-10 py-16 relative z-10">
+                        <ProgressIndicator video={video} />
+                      </CardContent>
+                    </Card>
+                  </div>
               </div>
             )}
-            
-            {video.completed_at && (
-               <div className="flex items-center gap-1.5 text-muted-foreground">
-                 <span className="leading-tight">•</span>
-                 <span className="leading-tight">Started {formatRelativeTime(video.created_at)}</span>
-               </div>
+
+            {isFailed && (
+              <div className="animate-fade-in py-12">
+                  <div className="max-w-2xl mx-auto">
+                    <Card className="glass-strong border-destructive/10 bg-destructive/[0.02] rounded-[32px]">
+                      <CardContent className="pt-16 pb-16">
+                        <div className="text-center space-y-8">
+                          <div className="flex justify-center">
+                            <div className="flex items-center justify-center w-24 h-24 rounded-3xl bg-destructive/5 border border-destructive/10">
+                              <AlertCircle className="h-12 w-12 text-destructive/60" />
+                            </div>
+                          </div>
+                          <div className="space-y-3">
+                            <h2 className="text-2xl font-bold text-zinc-300">Synthesis Interrupted</h2>
+                            <p className="text-zinc-500 text-sm max-w-xs mx-auto leading-relaxed">
+                              {video.error_message || "An unexpected error occurred in the neural pipeline."}
+                            </p>
+                          </div>
+                          <div className="flex gap-4 justify-center pt-4">
+                            <Link href="/create">
+                              <Button className="h-12 px-8 rounded-xl font-bold shadow-xl shadow-primary/10">
+                                <Plus className="mr-2 h-4 w-4" />
+                                Retry Selection
+                              </Button>
+                            </Link>
+                            <Link href="/dashboard">
+                              <Button variant="ghost" className="h-12 px-8 rounded-xl text-zinc-500 font-bold uppercase text-[10px] tracking-widest">Abort</Button>
+                            </Link>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+              </div>
+            )}
+
+            {isCompleted && video.final_video_url && (
+              <div className="animate-fade-in relative z-20 flex-1 overflow-hidden">
+                {/* Studio Canvas Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch h-full overflow-hidden">
+                  
+                  {/* Primary Monitor: The Video (8 Columns) */}
+                  <div className="lg:col-span-8 flex flex-col gap-4 h-full">
+                    <div className="bg-zinc-950 border border-white/5 rounded-[32px] overflow-hidden shadow-[0_48px_96px_-32px_rgba(0,0,0,0.7)] relative h-[65vh] min-h-[380px] w-full flex items-center justify-center bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.01)_0%,transparent_100%)] p-6">
+                       <div className="h-full max-h-full aspect-[9/16] flex items-center justify-center relative group">
+                         <div className="absolute inset-0 bg-primary/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+                         <div className="relative w-full h-full rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl">
+                           <VideoPlayer videoUrl={video.final_video_url} title={video.topic} />
+                         </div>
+                       </div>
+                    </div>
+
+                    {/* Primary Monitor Controls */}
+                    <div className="flex items-center justify-between p-6 bg-zinc-900/40 border border-white/5 rounded-2xl">
+                      <div className="flex items-center gap-6">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Native Resolution</span>
+                          <span className="text-xs font-bold text-zinc-300">Portrait 1080x1920 (9:16)</span>
+                        </div>
+                        <div className="w-px h-8 bg-white/5" />
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Generated Fidelity</span>
+                          <span className="text-xs font-bold text-emerald-500/80">Premium Studio V3</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                         <Button
+                          size="lg"
+                          onClick={async () => {
+                            try {
+                              const response = await videosApi.getDownloadUrl(video.id);
+                              if (response?.url) {
+                                window.location.href = response.url;
+                              }
+                            } catch (error) {
+                              console.error("Failed to get download URL", error);
+                            }
+                          }}
+                          className="h-12 px-8 font-black bg-white text-black hover:bg-zinc-200 rounded-xl text-xs"
+                        >
+                          <Download className="mr-2 h-4 w-4" />
+                          DOWNLOAD 4K
+                        </Button>
+                        <Link href="/create">
+                          <Button variant="secondary" className="h-12 px-6 font-bold border-white/5 rounded-xl text-xs">
+                            <Plus className="mr-2 h-4 w-4" />
+                            NEW
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Sidebar Monitor: Metadata & Judgement (4 Columns) */}
+                  <div className="lg:col-span-4 h-full flex flex-col">
+                    <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 space-y-6 shadow-2xl backdrop-blur-sm h-full flex flex-col">
+                      
+                      {/* Section: Seed Metadata */}
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-3 border-b border-white/5 pb-4">
+                           <FileText size={16} className="text-primary/60" />
+                           <h4 className="text-[11px] font-black uppercase tracking-widest text-zinc-200">Creative Input</h4>
+                        </div>
+                        <div className="p-8 bg-black/40 rounded-xl border border-white/5">
+                          <p className="text-sm text-zinc-400 italic font-medium leading-relaxed tracking-wide">"{video.topic}"</p>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                           <div className="p-4 bg-black/20 border border-white/5 rounded-lg">
+                              <span className="block text-[9px] font-black uppercase text-zinc-600 mb-1">Visual Kernel</span>
+                              <span className="text-xs font-bold text-zinc-300">Cinematic V2</span>
+                           </div>
+                           <div className="p-4 bg-black/20 border border-white/5 rounded-lg text-right">
+                              <span className="block text-[9px] font-black uppercase text-zinc-600 mb-1">Aural Pipeline</span>
+                              <span className="text-xs font-bold text-zinc-300">Stereo Studio</span>
+                           </div>
+                        </div>
+                      </div>
+
+                      {/* Section: Semantic script */}
+                      {video.script && (
+                        <div className="space-y-3 flex-1 flex flex-col min-h-0">
+                           <div className="flex items-center gap-3 border-b border-white/5 pb-2">
+                             <CheckCircle2 size={14} className="text-emerald-500/40" />
+                             <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Narrative Analysis</h4>
+                           </div>
+                           <div className="p-8 bg-black/60 rounded-xl border border-white/5 flex-1 overflow-y-auto custom-scrollbar">
+                              <p className="text-xs text-zinc-400 leading-relaxed font-normal whitespace-pre-wrap">
+                                {video.script}
+                              </p>
+                           </div>
+                           <div className="flex justify-between items-center px-1">
+                              <span className="text-[9px] font-medium text-zinc-600">{video.script?.split(' ').length || 0} Words</span>
+                              <Badge variant="outline" className="text-[8px] font-black bg-emerald-500/5 text-emerald-500/40 border-emerald-500/10">VERIFIED</Badge>
+                           </div>
+                        </div>
+                      )}
+
+                      {/* Utility: Upgrade Promo */}
+                      <div className="pt-4 border-t border-white/5">
+                        <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl flex items-center justify-between gap-3">
+                           <div>
+                             <h5 className="text-[10px] font-black uppercase tracking-wider text-zinc-300">Pro Studio</h5>
+                             <p className="text-[9px] text-zinc-600 mt-0.5">4K exports & priority.</p>
+                           </div>
+                           <Button variant="outline" size="sm" className="h-7 border-primary/30 text-[9px] font-black hover:bg-primary/20 text-primary">
+                             PRO
+                           </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         </div>
-
-        {isProcessing && (
-          <Card className="glass-strong border-primary/10 shadow-lg">
-            <CardContent className="px-8 py-10">
-              <ProgressIndicator video={video} />
-            </CardContent>
-          </Card>
-        )}
-
-        {isFailed && (
-          <Card className="glass-strong border-destructive/30">
-            <CardContent className="pt-12 pb-12">
-              <div className="text-center space-y-6">
-                <div className="flex justify-center">
-                  <div className="flex items-center justify-center w-20 h-20 rounded-full bg-destructive/20 border border-destructive/30">
-                    <AlertCircle className="h-10 w-10 text-destructive" />
-                  </div>
-                </div>
-                <div>
-                  <h2 className="text-2xl font-semibold mb-2">Generation Failed</h2>
-                  <p className="text-muted-foreground mb-6">
-                    {video.error_message || "Something went wrong. Let's try again."}
-                  </p>
-                </div>
-                <div className="flex gap-4 justify-center">
-                  <Link href="/create">
-                    <Button>
-                      <Plus className="mr-2 h-4 w-4" />
-                      Try Again
-                    </Button>
-                  </Link>
-                  <Link href="/dashboard">
-                    <Button variant="outline">Back to Dashboard</Button>
-                  </Link>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {isCompleted && video.final_video_url && (
-          <>
-            <Card className="glass-strong overflow-hidden">
-              <CardContent className="p-0">
-                <div className="bg-gradient-ai p-1">
-                  <div className="bg-card rounded-lg">
-                    <VideoPlayer videoUrl={video.final_video_url} title={video.topic.substring(0, 50) + "..."} />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <div className="grid gap-6 md:grid-cols-2">
-              <Card className="glass-strong">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <FileText className="h-5 w-5 text-primary" />
-                    Video Info
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <p className="text-sm font-medium mb-1 text-muted-foreground">Prompt</p>
-                    <div className="glass rounded-lg p-3 max-h-[150px] overflow-y-auto">
-                      <p className="text-sm leading-relaxed">{video.topic}</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-4">
-                    <div className="flex-1">
-                      <p className="text-sm font-medium mb-1 text-muted-foreground">Status</p>
-                        <Badge variant="success">
-                        Completed
-                        </Badge>
-                    </div>
-                     <div className="flex-1">
-                        <p className="text-sm font-medium mb-1 text-muted-foreground">Generated</p>
-                        <p className="text-sm">{formatRelativeTime(video.completed_at || video.created_at)}</p>
-                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="glass-strong">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <FileText className="h-5 w-5 text-primary" />
-                    Script
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {video.script ? (
-                    <>
-                      <button
-                        onClick={() => setShowScript(!showScript)}
-                        className="flex items-center gap-2 text-sm font-medium mb-3 hover:text-primary transition-colors"
-                      >
-                        {showScript ? (
-                          <>
-                            <ChevronUp className="h-4 w-4" />
-                            Hide Script
-                          </>
-                        ) : (
-                          <>
-                            <ChevronDown className="h-4 w-4" />
-                            Show Script
-                          </>
-                        )}
-                      </button>
-                      {showScript && (
-                        <div className="glass rounded-lg p-4">
-                          <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
-                            {video.script}
-                          </p>
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">No script available</p>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button
-                size="lg"
-                onClick={async () => {
-                  try {
-                    const response = await videosApi.getDownloadUrl(video.id);
-                    if (response?.url) {
-                      window.location.href = response.url;
-                    }
-                  } catch (error) {
-                    console.error("Failed to get download URL", error);
-                  }
-                }}
-                className="flex-1"
-              >
-                <Download className="mr-2 h-4 w-4" />
-                Download Video
-              </Button>
-              <Link href="/create" className="flex-1">
-                <Button variant="outline" size="lg" className="w-full">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Another
-                </Button>
-              </Link>
-            </div>
-
-            {/* Watermark notice for free tier */}
-            <Card className="glass-strong border-primary/30 bg-primary/5">
-              <CardContent className="pt-6">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <div>
-                    <p className="font-medium mb-1">Free videos include watermark</p>
-                    <p className="text-sm text-muted-foreground">
-                      Upgrade to remove watermark and get unlimited videos
-                    </p>
-                  </div>
-                  <Button variant="outline">
-                    Upgrade
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </>
-        )}
       </div>
     </DashboardLayout>
   );

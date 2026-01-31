@@ -57,30 +57,33 @@ export function Sidebar() {
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar with hover-expand logic */}
       <aside
         className={cn(
-          "fixed left-0 top-0 h-full w-64 glass-strong border-r border-border z-40 transition-transform duration-300",
-          "lg:translate-x-0",
-          isMobileOpen ? "translate-x-0" : "-translate-x-full"
+          "fixed left-0 top-0 h-full border-r border-white/5 z-[100] transition-all duration-500 ease-in-out bg-black/40 backdrop-blur-3xl group",
+          "lg:w-20 lg:hover:w-64", // Collapsed by default, expands on hover
+          isMobileOpen ? "w-64 translate-x-0" : "w-64 -translate-x-full lg:translate-x-0"
         )}
       >
-        <div className="flex h-full flex-col">
-          {/* Logo */}
-          <div className="flex h-16 items-center gap-3 border-b border-border px-6">
-            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-ai">
-              <Sparkles className="h-5 w-5 text-primary" />
+        <div className="flex h-full flex-col overflow-hidden">
+          {/* Logo Section - Clean & Confidence */}
+          <div className="flex h-20 items-center border-b border-white/[0.03] shrink-0">
+            <div className="flex items-center justify-center w-20 shrink-0">
+              <Sparkles className="h-5 w-5 text-primary/60" />
             </div>
-            <div className="space-y-0.5">
-              <h1 className="text-lg font-bold leading-tight bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                AI Reels
+            <div className="opacity-0 group-hover:opacity-100 transition-all duration-500 whitespace-nowrap overflow-hidden">
+              <h1 className="text-sm font-black tracking-[0.1em] text-zinc-200 uppercase">
+                AI REELS
               </h1>
-              <p className="text-xs text-muted-foreground leading-tight">Premium</p>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <div className="w-1 h-1 rounded-full bg-primary/40" />
+                <p className="text-[9px] text-zinc-600 uppercase tracking-widest font-black">Studio</p>
+              </div>
             </div>
           </div>
 
-          {/* Navigation */}
-          <nav className="flex-1 space-y-1 px-3 py-4">
+          {/* Navigation - Utilitarian Rhythm */}
+          <nav className="flex-1 space-y-1 py-8">
             {navigation.map((item) => {
               let isActive = false;
               const purchaseParam = searchParams?.get("purchase");
@@ -90,7 +93,6 @@ export function Sidebar() {
               } else if (item.href === "/dashboard?purchase=credits") {
                 isActive = pathname === "/dashboard" && purchaseParam === "credits";
               } else if (item.href === "/dashboard") {
-                // For "Dashboard" and "My Reels" which both point to /dashboard
                 isActive = pathname === "/dashboard" && !purchaseParam;
               }
               
@@ -100,42 +102,66 @@ export function Sidebar() {
                   href={item.href}
                   onClick={() => setIsMobileOpen(false)}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-                    isActive
-                      ? "bg-primary/20 text-primary"
-                      : "text-muted-foreground hover:bg-accent/10 hover:text-foreground"
+                    "flex items-center h-12 transition-all duration-300 group/nav relative",
+                    isActive ? "text-zinc-100" : "text-zinc-600 hover:text-zinc-300"
                   )}
                 >
-                  <item.icon className="h-5 w-5" />
-                  {item.name}
+                  {/* Subtle Active Indicator */}
+                  {isActive && (
+                    <div className="absolute left-0 w-[3px] h-6 bg-primary rounded-r-full shadow-[0_0_10px_rgba(124,58,237,0.3)] transition-all" />
+                  )}
+
+                  <div className="flex items-center justify-center w-20 shrink-0">
+                    <item.icon className={cn(
+                      "h-[18px] w-[18px] transition-all duration-500",
+                      isActive ? "text-primary/90" : "group-hover/nav:scale-110"
+                    )} />
+                  </div>
+                  <span className={cn(
+                    "opacity-0 group-hover:opacity-100 transition-all duration-500 font-bold text-[10px] uppercase tracking-[0.25em] whitespace-nowrap overflow-hidden ml-[-4px]",
+                    isActive ? "text-zinc-200" : "text-zinc-500 group-hover/nav:text-zinc-300"
+                  )}>
+                    {item.name}
+                  </span>
                 </Link>
               );
             })}
           </nav>
 
-          {/* User section */}
-          <div className="border-t border-border p-4">
-            <div className="flex items-center gap-3 mb-3 px-2">
-              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-ai">
-                <User className="h-4 w-4 text-primary" />
+          {/* User & Sign Out Section - Minimalist */}
+          <div className="border-t border-white/[0.03] p-4 space-y-4 shrink-0 bg-black/20">
+            {/* User Info */}
+            <div className="flex items-center h-10">
+              <div className="flex items-center justify-center w-12 shrink-0">
+                <div className="w-7 h-7 rounded-lg bg-zinc-900 border border-white/5 flex items-center justify-center">
+                  <User className="h-3.5 w-3.5 text-zinc-600" />
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{user?.email}</p>
-                <p className="text-xs text-muted-foreground">Free Plan</p>
+              <div className="ml-1 opacity-0 group-hover:opacity-100 transition-all duration-500 whitespace-nowrap overflow-hidden min-w-0">
+                <p className="text-[10px] font-black truncate text-zinc-400 leading-tight uppercase tracking-tight">{user?.email?.split('@')[0]}</p>
+                <p className="text-[8px] text-zinc-700 font-black uppercase tracking-widest mt-0.5">Creator Pro</p>
               </div>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
+
+            {/* Logout Button */}
+            <button
               onClick={logout}
-              className="w-full justify-start text-muted-foreground hover:text-destructive"
+              className={cn(
+                "flex items-center w-full h-10 transition-all duration-300 group/logout relative rounded-lg",
+                "text-zinc-700 hover:bg-red-500/5 hover:text-red-500/80"
+              )}
             >
-              <LogOut className="mr-2 h-4 w-4" />
-              Sign Out
-            </Button>
+              <div className="flex items-center justify-center w-12 shrink-0">
+                <LogOut className="h-4 w-4 transition-transform group-hover/logout:-translate-x-0.5" />
+              </div>
+              <span className="opacity-0 group-hover:opacity-100 transition-all duration-500 font-black text-[9px] uppercase tracking-[0.2em] whitespace-nowrap overflow-hidden">
+                Sign Out
+              </span>
+            </button>
           </div>
         </div>
       </aside>
+
     </>
   );
 }

@@ -40,13 +40,7 @@ export default function CreateVideoPage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-5xl mx-auto">
-        <Link href="/dashboard">
-          <Button variant="ghost" size="sm" className="mb-6 -ml-2">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
-          </Button>
-        </Link>
+      <div className="h-full flex flex-col overflow-hidden">
         <CreateVideoForm />
       </div>
     </DashboardLayout>
