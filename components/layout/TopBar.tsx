@@ -11,11 +11,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, User, Settings, CreditCard } from "lucide-react";
+import { LogOut, User, Settings, CreditCard, Sun, Moon, Laptop, Check } from "lucide-react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useTheme } from "next-themes";
 
 export function TopBar() {
   const { user, logout } = useAuth();
+  const { theme, setTheme } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -69,9 +71,28 @@ export function TopBar() {
                 <CreditCard className="mr-2 h-4 w-4" />
                 Buy Credits
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Settings className="mr-2 h-4 w-4" />
-                Settings
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel className="text-xs font-normal text-muted-foreground pt-1">Theme</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => setTheme("light")} className="justify-between">
+                <div className="flex items-center">
+                  <Sun className="mr-2 h-4 w-4" />
+                  <span>Light</span>
+                </div>
+                {theme === "light" && <Check className="h-4 w-4" />}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("dark")} className="justify-between">
+                <div className="flex items-center">
+                  <Moon className="mr-2 h-4 w-4" />
+                  <span>Dark</span>
+                </div>
+                {theme === "dark" && <Check className="h-4 w-4" />}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("system")} className="justify-between">
+                <div className="flex items-center">
+                  <Laptop className="mr-2 h-4 w-4" />
+                  <span>System</span>
+                </div>
+                {theme === "system" && <Check className="h-4 w-4" />}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={logout} className="text-destructive">

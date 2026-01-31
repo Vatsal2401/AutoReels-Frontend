@@ -11,18 +11,8 @@ const DURATIONS: { id: Duration; label: string; desc: string }[] = [
 
 export const DurationSelector: React.FC<MediaSettingsProps> = ({ settings, onUpdate }) => {
   return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-2">
-        <h3 className="text-sm font-medium text-muted-foreground">Duration</h3>
-        <div className="group relative">
-            <Clock size={14} className="text-muted-foreground/50 cursor-help" />
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-popover text-popover-foreground text-xs rounded shadow-lg border border-border hidden group-hover:block transition-opacity">
-                Estimated duration of the final generated video.
-            </div>
-        </div>
-      </div>
-      
-      <div className="flex p-1 bg-secondary/50 rounded-lg">
+    <div className="flex flex-col h-full">
+      <div className="grid grid-cols-1 gap-3 flex-1">
         {DURATIONS.map((dur) => {
             const isSelected = settings.duration === dur.id;
             return (
@@ -31,21 +21,37 @@ export const DurationSelector: React.FC<MediaSettingsProps> = ({ settings, onUpd
                     type="button"
                     onClick={() => onUpdate({ duration: dur.id })}
                     className={cn(
-                        "flex-1 py-2 text-sm font-medium rounded-md transition-all relative overflow-hidden",
+                        "relative flex items-center justify-between px-4 py-3 rounded-xl border transition-all duration-300 group outline-none",
                         isSelected 
-                            ? "bg-primary text-primary-foreground shadow-sm" 
-                            : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                            ? "border-primary bg-primary/5 shadow-[0_0_15px_-3px_rgba(var(--primary-rgb),0.1)]" 
+                            : "border-border/60 bg-card hover:border-primary/30 hover:bg-secondary/50"
                     )}
                 >
-                    <span className="relative z-10">{dur.label}</span>
-                    {/* {isSelected && <span className="text-[10px] opacity-80 ml-1">({dur.desc})</span>} */}
+                    <div className="flex flex-col items-start gap-1">
+                        <span className={cn(
+                            "text-[13px] font-bold transition-colors",
+                            isSelected ? "text-primary" : "text-foreground"
+                        )}>
+                            {dur.label}
+                        </span>
+                        <span className={cn(
+                            "text-[10px] font-medium transition-colors",
+                            isSelected ? "text-primary/70" : "text-muted-foreground"
+                        )}>
+                            Target: {dur.desc}
+                        </span>
+                    </div>
+                    
+                    <div className={cn(
+                        "h-4 w-4 rounded-full border flex items-center justify-center transition-all",
+                        isSelected ? "border-primary bg-primary" : "border-zinc-300 group-hover:border-primary/50"
+                    )}>
+                        {isSelected && <div className="h-1.5 w-1.5 bg-white rounded-full" />}
+                    </div>
                 </button>
             )
         })}
       </div>
-      <p className="text-center text-xs text-muted-foreground">
-        Target: {DURATIONS.find(d => d.id === settings.duration)?.desc}
-      </p>
     </div>
   );
 };

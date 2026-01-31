@@ -16,7 +16,7 @@ export function VideoPlayer({ videoUrl, title, className }: VideoPlayerProps) {
 
   return (
     <div className={cn("w-full h-full flex flex-col items-center justify-center", className)}>
-      <div className="relative w-full h-full bg-black overflow-hidden flex items-center justify-center">
+      <div className="relative w-full h-full bg-transparent overflow-hidden flex items-center justify-center">
         {isLoading && !hasError && (
           <div 
             className="absolute inset-0 flex items-center justify-center z-10"

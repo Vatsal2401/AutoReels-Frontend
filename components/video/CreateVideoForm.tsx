@@ -123,17 +123,17 @@ export function CreateVideoForm() {
   const errorMessage = videoStatus?.error_message;
 
   return (
-    <div className="flex flex-col h-full bg-background/50 rounded-xl border border-border/50 overflow-hidden">
+    <div className="flex flex-col h-full bg-background rounded-xl border border-border overflow-hidden shadow-sm">
       {/* Form Area - Split Pane */}
       <div className="flex flex-1 h-full overflow-hidden">
           
           {/* LEFT: Composition Studio (Scrollable Input Area) */}
-           <div className="flex-1 min-w-0 h-full overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent bg-background/5">
+           <div className="flex-1 min-w-0 h-full overflow-y-auto scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent bg-background">
               <div className="flex flex-col items-center justify-center min-h-full py-12 px-6 space-y-8 w-full max-w-3xl mx-auto">
                   
                   {/* 1. Prompt Input */}
                   <div className="w-full space-y-2">
-                     <div className="group relative bg-zinc-900/30 backdrop-blur-sm border border-white/5 rounded-xl p-4 transition-all duration-300 hover:border-white/10 hover:bg-zinc-900/60 hover:shadow-lg focus-within:ring-1 focus-within:ring-primary/40 focus-within:border-primary/40 focus-within:bg-zinc-900">
+                     <div className="group relative bg-card border border-border rounded-xl p-4 transition-all duration-300 hover:border-primary/50 hover:shadow-md focus-within:ring-1 focus-within:ring-primary focus-within:border-primary focus-within:bg-card">
                        <Textarea
                          id="topic"
                          value={topic}
@@ -141,47 +141,54 @@ export function CreateVideoForm() {
                          placeholder="What story do you want to tell today?"
                          rows={2}
                          maxLength={500}
-                         className="w-full resize-none text-lg font-medium leading-relaxed bg-transparent border-none p-0 placeholder:text-muted-foreground/30 focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[60px]"
+                         className="w-full resize-none text-lg font-medium leading-relaxed bg-transparent border-none p-0 placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[60px] text-foreground"
                          required
                          disabled={createMutation.isPending || (!!activeVideoId && !isCompleted) || !hasCredits}
                        />
                        
-                       <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/5">
-                         <div className="flex items-center gap-2 text-[10px] text-muted-foreground/60 font-medium uppercase tracking-wider group-focus-within:text-primary/70 transition-colors">
+                       <div className="flex items-center justify-between mt-2 pt-2 border-t border-border">
+                         <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-bold uppercase tracking-wider group-focus-within:text-primary transition-colors">
                             <Sparkles className="w-3 h-3" />
                             <span>AI Script</span>
                          </div>
-                         <span className={cn("text-[10px] font-mono transition-colors", topic.length > 450 ? "text-red-500" : "text-muted-foreground/20 group-hover:text-muted-foreground/40")}>
+                         <span className={cn("text-[10px] font-mono transition-colors font-medium", topic.length > 450 ? "text-destructive" : "text-muted-foreground group-hover:text-foreground")}>
                            {topic.length}/500
                          </span>
                        </div>
                      </div>
                   </div>
  
-                  <div className="h-px w-full max-w-xl bg-gradient-to-r from-transparent via-border/30 to-transparent" />
+                  <div className="h-px w-full max-w-xl bg-gradient-to-r from-transparent via-border to-transparent" />
 
                  {/* 2. Visual Style (Dominant) */}
                  <div className="space-y-4">
                     <VisualStyleSelector settings={settings} onUpdate={handleUpdate} />
                  </div>
 
-                 {/* 3. Configuration Grid (Compact 3-Column) */}
-                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-2">
+                 {/* 3. Configuration Grid (Spacious Layout) */}
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-10 pt-6">
                     {/* Column 1: Format */}
-                    <div className="space-y-3">
-                       <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">Format</label>
+                    <div className="space-y-4">
+                       <div className="flex items-center gap-2 pb-1 border-b border-border/50">
+                          <span className="text-[11px] font-bold uppercase tracking-widest text-foreground">Format</span>
+                          <Info className="w-3 h-3 text-muted-foreground/50" />
+                       </div>
                        <FormatSelector settings={settings} onUpdate={handleUpdate} />
                     </div>
 
                     {/* Column 2: Audio */}
-                    <div className="space-y-3">
-                       <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">Audio</label>
+                    <div className="space-y-4">
+                       <div className="flex items-center gap-2 pb-1 border-b border-border/50">
+                          <span className="text-[11px] font-bold uppercase tracking-widest text-foreground">Audio</span>
+                       </div>
                        <NarrationSettings settings={settings} onUpdate={handleUpdate} />
                     </div>
                        
                     {/* Column 3: Duration */}
-                    <div className="space-y-3">
-                       <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">Duration</label>
+                    <div className="space-y-4">
+                       <div className="flex items-center gap-2 pb-1 border-b border-border/50">
+                          <span className="text-[11px] font-bold uppercase tracking-widest text-foreground">Duration</span>
+                       </div>
                        <DurationSelector settings={settings} onUpdate={handleUpdate} />
                     </div>
                  </div>
@@ -189,7 +196,7 @@ export function CreateVideoForm() {
           </div>
 
           {/* RIGHT: Live Preview / Status Panel (Fixed Side) */}
-          <div className="w-[480px] shrink-0 border-l border-white/5 bg-[#0A0A0B] relative h-full overflow-hidden">
+          <div className="w-[480px] shrink-0 border-l border-border bg-secondary relative h-full overflow-hidden">
              <div className="absolute inset-0 overflow-y-auto scrollbar-none pb-48">
                <div className="p-8">
                  <GenerationProgress 
@@ -199,9 +206,9 @@ export function CreateVideoForm() {
                  />
                  
                  {isFailed && errorMessage && (
-                   <div className="mt-4 p-4 rounded-lg bg-red-500/10 border border-red-500/20">
-                     <p className="text-sm text-red-400 font-medium">Generation Failed</p>
-                     <p className="text-xs text-red-300/70 mt-1">{errorMessage}</p>
+                   <div className="mt-4 p-4 rounded-lg bg-destructive/10 border border-destructive/20">
+                     <p className="text-sm text-destructive font-medium">Generation Failed</p>
+                     <p className="text-xs text-destructive/70 mt-1">{errorMessage}</p>
                    </div>
                  )}
              </div>
@@ -209,17 +216,17 @@ export function CreateVideoForm() {
              </div>
  
              {/* Action Bar within Right Panel or Sticky Bottom */}
-             <div className="absolute bottom-0 left-0 right-0 p-8 border-t border-white/5 bg-background/80 backdrop-blur-md z-10 transition-all duration-300">
+             <div className="absolute bottom-0 left-0 right-0 p-8 border-t border-border bg-card z-10 transition-all duration-300 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
                 <div className="space-y-5">
                     
                     <div className="flex items-center justify-between text-xs">
-                       <div className="flex items-center gap-2 text-muted-foreground">
+                       <div className="flex items-center gap-2 text-muted-foreground font-medium">
                            <CreditCard className="w-3.5 h-3.5 text-primary" />
-                           <span>Available: <strong className="text-white">{credits ?? 0}</strong></span>
+                           <span>Available: <strong className="text-foreground">{credits ?? 0}</strong></span>
                        </div>
 
-                       <div className="flex items-center gap-1.5 font-medium text-amber-500">
-                          <Zap className="w-3 h-3 fill-amber-500" />
+                       <div className="flex items-center gap-1.5 font-bold text-amber-600 dark:text-amber-500">
+                          <Zap className="w-3 h-3 fill-current" />
                           <span>1 Credit Cost</span>
                        </div>
                     </div>
@@ -230,7 +237,7 @@ export function CreateVideoForm() {
                           type="button"
                           variant="secondary"
                           onClick={() => router.push(`/videos/${activeVideoId}`)}
-                          className="flex-1 h-14 text-base font-semibold shadow-glow-sm bg-white/10 hover:bg-white/20 text-white border border-white/10"
+                          className="flex-1 h-14 text-base font-semibold shadow-sm border border-border"
                         >
                           <Eye className="mr-2 h-5 w-5" />
                           View Reel
@@ -239,7 +246,7 @@ export function CreateVideoForm() {
 
                       <Button
                         onClick={handleSubmit}
-                        className={cn("flex-1 h-14 text-base font-semibold shadow-glow-sm", (isCompleted || isFailed) ? "flex-1" : "w-full")}
+                        className={cn("flex-1 h-14 text-base font-semibold shadow-md hover:shadow-lg transition-all", (isCompleted || isFailed) ? "flex-1" : "w-full")}
                         size="lg"
                         isLoading={createMutation.isPending || (!!activeVideoId && !isCompleted && !isFailed)}
                         disabled={!topic.trim() || createMutation.isPending || (!!activeVideoId && !isCompleted && !isFailed) || !hasCredits || creditsLoading}

@@ -19,8 +19,6 @@ export const NarrationSettings: React.FC<MediaSettingsProps> = ({ settings, onUp
 
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-medium text-muted-foreground">Narration</h3>
-      
       {/* Voice Card */}
       <div className="p-1 rounded-xl bg-card border border-border">
         <div className="flex items-center gap-3 p-3">

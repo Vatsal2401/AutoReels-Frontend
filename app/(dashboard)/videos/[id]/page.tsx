@@ -124,9 +124,9 @@ export default function VideoDetailPage() {
             </div>
             
             <div className="flex items-center gap-4">
-              <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-zinc-950 rounded-full border border-white/5">
-                <span className="text-[9px] uppercase tracking-widest text-zinc-600 font-black">SessionID:</span>
-                <span className="text-[9px] font-mono text-zinc-500">{video.id.substring(0, 8)}</span>
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-muted border border-border rounded-full shadow-sm">
+                <span className="text-[9px] uppercase tracking-widest text-muted-foreground/70 font-black">SessionID:</span>
+                <span className="text-[9px] font-mono text-muted-foreground font-bold">{video.id.substring(0, 8)}</span>
               </div>
               {isCompleted && (
                    <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 px-2 py-0.5 text-[10px] font-bold">
@@ -145,7 +145,7 @@ export default function VideoDetailPage() {
             {isProcessing && (
               <div className="animate-fade-in py-12">
                   <div className="max-w-2xl mx-auto">
-                    <Card className="glass-strong border-white/5 shadow-2xl overflow-hidden relative rounded-[32px]">
+                    <Card className="bg-card border-border shadow-2xl overflow-hidden relative rounded-[32px]">
                       <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] via-transparent to-accent/[0.02] pointer-events-none" />
                       <CardContent className="px-10 py-16 relative z-10">
                         <ProgressIndicator video={video} />
@@ -158,17 +158,17 @@ export default function VideoDetailPage() {
             {isFailed && (
               <div className="animate-fade-in py-12">
                   <div className="max-w-2xl mx-auto">
-                    <Card className="glass-strong border-destructive/10 bg-destructive/[0.02] rounded-[32px]">
+                    <Card className="bg-card border-destructive/20 bg-destructive/[0.02] rounded-[32px]">
                       <CardContent className="pt-16 pb-16">
                         <div className="text-center space-y-8">
                           <div className="flex justify-center">
-                            <div className="flex items-center justify-center w-24 h-24 rounded-3xl bg-destructive/5 border border-destructive/10">
-                              <AlertCircle className="h-12 w-12 text-destructive/60" />
+                            <div className="flex items-center justify-center w-24 h-24 rounded-3xl bg-destructive/10 border border-destructive/20">
+                              <AlertCircle className="h-12 w-12 text-destructive" />
                             </div>
                           </div>
                           <div className="space-y-3">
-                            <h2 className="text-2xl font-bold text-zinc-300">Synthesis Interrupted</h2>
-                            <p className="text-zinc-500 text-sm max-w-xs mx-auto leading-relaxed">
+                            <h2 className="text-2xl font-bold text-foreground">Synthesis Interrupted</h2>
+                            <p className="text-muted-foreground text-sm max-w-xs mx-auto leading-relaxed">
                               {video.error_message || "An unexpected error occurred in the neural pipeline."}
                             </p>
                           </div>
@@ -180,7 +180,7 @@ export default function VideoDetailPage() {
                               </Button>
                             </Link>
                             <Link href="/dashboard">
-                              <Button variant="ghost" className="h-12 px-8 rounded-xl text-zinc-500 font-bold uppercase text-[10px] tracking-widest">Abort</Button>
+                              <Button variant="ghost" className="h-12 px-8 rounded-xl text-muted-foreground font-bold uppercase text-[10px] tracking-widest">Abort</Button>
                             </Link>
                           </div>
                         </div>
@@ -197,32 +197,33 @@ export default function VideoDetailPage() {
                   
                   {/* Primary Monitor: The Video (8 Columns) */}
                   <div className="lg:col-span-8 flex flex-col gap-4 h-full">
-                    <div className="bg-zinc-950 border border-white/5 rounded-[32px] overflow-hidden shadow-[0_48px_96px_-32px_rgba(0,0,0,0.7)] relative h-[65vh] min-h-[380px] w-full flex items-center justify-center bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.01)_0%,transparent_100%)] p-6">
+                    <div className="bg-muted/30 border border-border/50 rounded-[32px] overflow-hidden shadow-sm relative h-[65vh] min-h-[380px] w-full flex items-center justify-center bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.03)_0%,transparent_100%)] p-6">
                        <div className="h-full max-h-full aspect-[9/16] flex items-center justify-center relative group">
                          <div className="absolute inset-0 bg-primary/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-                         <div className="relative w-full h-full rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl">
+                         <div className="relative w-full h-full rounded-2xl overflow-hidden ring-1 ring-border/20 shadow-2xl">
                            <VideoPlayer videoUrl={video.final_video_url} title={video.topic} />
                          </div>
                        </div>
                     </div>
 
                     {/* Primary Monitor Controls */}
-                    <div className="flex items-center justify-between p-6 bg-zinc-900/40 border border-white/5 rounded-2xl">
+                    <div className="flex items-center justify-between p-6 bg-card border border-border rounded-2xl shadow-sm">
                       <div className="flex items-center gap-6">
                         <div className="flex flex-col gap-1">
-                          <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Native Resolution</span>
-                          <span className="text-xs font-bold text-zinc-300">Portrait 1080x1920 (9:16)</span>
+                          <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Native Resolution</span>
+                          <span className="text-xs font-bold text-foreground">Portrait 1080x1920 (9:16)</span>
                         </div>
-                        <div className="w-px h-8 bg-white/5" />
+                        <div className="w-px h-8 bg-border" />
                         <div className="flex flex-col gap-1">
-                          <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Generated Fidelity</span>
-                          <span className="text-xs font-bold text-emerald-500/80">Premium Studio V3</span>
+                          <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Generated Fidelity</span>
+                          <span className="text-xs font-bold text-emerald-600 dark:text-emerald-500">Premium Studio V3</span>
                         </div>
                       </div>
                       
                       <div className="flex items-center gap-2">
                          <Button
                           size="lg"
+                          variant="secondary"
                           onClick={async () => {
                             try {
                               const response = await videosApi.getDownloadUrl(video.id);
@@ -233,13 +234,13 @@ export default function VideoDetailPage() {
                               console.error("Failed to get download URL", error);
                             }
                           }}
-                          className="h-12 px-8 font-black bg-white text-black hover:bg-zinc-200 rounded-xl text-xs"
+                          className="h-12 px-8 font-bold border border-border rounded-xl text-xs"
                         >
                           <Download className="mr-2 h-4 w-4" />
                           DOWNLOAD 4K
                         </Button>
                         <Link href="/create">
-                          <Button variant="secondary" className="h-12 px-6 font-bold border-white/5 rounded-xl text-xs">
+                          <Button className="h-12 px-6 font-bold shadow-md rounded-xl text-xs">
                             <Plus className="mr-2 h-4 w-4" />
                             NEW
                           </Button>
@@ -250,26 +251,26 @@ export default function VideoDetailPage() {
 
                   {/* Sidebar Monitor: Metadata & Judgement (4 Columns) */}
                   <div className="lg:col-span-4 h-full flex flex-col">
-                    <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 space-y-6 shadow-2xl backdrop-blur-sm h-full flex flex-col">
+                    <div className="bg-card border border-border rounded-2xl p-6 space-y-6 shadow-sm h-full flex flex-col">
                       
                       {/* Section: Seed Metadata */}
                       <div className="space-y-4">
-                        <div className="flex items-center gap-3 border-b border-white/5 pb-4">
-                           <FileText size={16} className="text-primary/60" />
-                           <h4 className="text-[11px] font-black uppercase tracking-widest text-zinc-200">Creative Input</h4>
+                        <div className="flex items-center gap-3 border-b border-border pb-4">
+                           <FileText size={16} className="text-primary" />
+                           <h4 className="text-[11px] font-black uppercase tracking-widest text-foreground">Creative Input</h4>
                         </div>
-                        <div className="p-8 bg-black/40 rounded-xl border border-white/5">
-                          <p className="text-sm text-zinc-400 italic font-medium leading-relaxed tracking-wide">"{video.topic}"</p>
+                        <div className="p-8 bg-muted/50 rounded-xl border border-border">
+                          <p className="text-sm text-foreground italic font-medium leading-relaxed tracking-wide">"{video.topic}"</p>
                         </div>
                         
                         <div className="grid grid-cols-2 gap-4">
-                           <div className="p-4 bg-black/20 border border-white/5 rounded-lg">
-                              <span className="block text-[9px] font-black uppercase text-zinc-600 mb-1">Visual Kernel</span>
-                              <span className="text-xs font-bold text-zinc-300">Cinematic V2</span>
+                           <div className="p-4 bg-secondary/50 border border-border rounded-lg">
+                              <span className="block text-[9px] font-black uppercase text-muted-foreground mb-1">Visual Kernel</span>
+                              <span className="text-xs font-bold text-foreground">Cinematic V2</span>
                            </div>
-                           <div className="p-4 bg-black/20 border border-white/5 rounded-lg text-right">
-                              <span className="block text-[9px] font-black uppercase text-zinc-600 mb-1">Aural Pipeline</span>
-                              <span className="text-xs font-bold text-zinc-300">Stereo Studio</span>
+                           <div className="p-4 bg-secondary/50 border border-border rounded-lg text-right">
+                              <span className="block text-[9px] font-black uppercase text-muted-foreground mb-1">Aural Pipeline</span>
+                              <span className="text-xs font-bold text-foreground">Stereo Studio</span>
                            </div>
                         </div>
                       </div>
@@ -277,30 +278,30 @@ export default function VideoDetailPage() {
                       {/* Section: Semantic script */}
                       {video.script && (
                         <div className="space-y-3 flex-1 flex flex-col min-h-0">
-                           <div className="flex items-center gap-3 border-b border-white/5 pb-2">
-                             <CheckCircle2 size={14} className="text-emerald-500/40" />
-                             <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Narrative Analysis</h4>
+                           <div className="flex items-center gap-3 border-b border-border pb-2">
+                             <CheckCircle2 size={14} className="text-emerald-500" />
+                             <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Narrative Analysis</h4>
                            </div>
-                           <div className="p-8 bg-black/60 rounded-xl border border-white/5 flex-1 overflow-y-auto custom-scrollbar">
-                              <p className="text-xs text-zinc-400 leading-relaxed font-normal whitespace-pre-wrap">
+                           <div className="p-8 bg-muted/30 rounded-xl border border-border flex-1 overflow-y-auto custom-scrollbar">
+                              <p className="text-xs text-foreground/80 leading-relaxed font-normal whitespace-pre-wrap">
                                 {video.script}
                               </p>
                            </div>
                            <div className="flex justify-between items-center px-1">
-                              <span className="text-[9px] font-medium text-zinc-600">{video.script?.split(' ').length || 0} Words</span>
-                              <Badge variant="outline" className="text-[8px] font-black bg-emerald-500/5 text-emerald-500/40 border-emerald-500/10">VERIFIED</Badge>
+                              <span className="text-[9px] font-medium text-muted-foreground">{video.script?.split(' ').length || 0} Words</span>
+                              <Badge variant="outline" className="text-[8px] font-black bg-emerald-500/10 text-emerald-600 border-emerald-500/20">VERIFIED</Badge>
                            </div>
                         </div>
                       )}
 
                       {/* Utility: Upgrade Promo */}
-                      <div className="pt-4 border-t border-white/5">
-                        <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl flex items-center justify-between gap-3">
+                      <div className="pt-4 border-t border-border">
+                        <div className="p-4 bg-primary/5 border border-primary/10 rounded-xl flex items-center justify-between gap-3">
                            <div>
-                             <h5 className="text-[10px] font-black uppercase tracking-wider text-zinc-300">Pro Studio</h5>
-                             <p className="text-[9px] text-zinc-600 mt-0.5">4K exports & priority.</p>
+                             <h5 className="text-[10px] font-black uppercase tracking-wider text-foreground">Pro Studio</h5>
+                             <p className="text-[9px] text-muted-foreground mt-0.5">4K exports & priority.</p>
                            </div>
-                           <Button variant="outline" size="sm" className="h-7 border-primary/30 text-[9px] font-black hover:bg-primary/20 text-primary">
+                           <Button variant="outline" size="sm" className="h-7 border-primary/30 text-[9px] font-black hover:bg-primary/10 text-primary">
                              PRO
                            </Button>
                         </div>

@@ -43,10 +43,10 @@ export const FormatSelector: React.FC<MediaSettingsProps> = ({ settings, onUpdat
               onMouseLeave={() => setHoveredId(null)}
               onClick={() => onUpdate({ aspectRatio: format.id })}
               className={cn(
-                "group relative flex flex-col items-center justify-between p-3 rounded-2xl border-2 transition-all duration-300 outline-none h-[110px]",
+                "group relative flex flex-col items-center justify-between p-3 rounded-xl border transition-all duration-300 outline-none h-[110px]",
                 isSelected
-                  ? "bg-primary/10 border-primary shadow-[0_0_20px_-5px_rgba(255,255,255,0.15)] scale-[1.02]"
-                  : "bg-background/40 border-border/50 hover:border-border hover:bg-zinc-800/20"
+                  ? "bg-primary/10 border-primary shadow-[0_0_20px_-5px_rgba(var(--primary-rgb),0.2)] scale-[1.02]"
+                  : "bg-background/40 border-border/60 hover:border-primary/30 hover:bg-secondary/50"
               )}
             >
               {/* Physical Representation of Aspect Ratio */}

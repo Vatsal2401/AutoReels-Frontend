@@ -17,7 +17,7 @@ const statusConfig: Record<
   VideoStatus,
   { label: string; variant: string; color: string; description: string }
 > = {
-  pending: { label: "In Queue", variant: "secondary", color: "text-zinc-500", description: "Warming up engines..." },
+  pending: { label: "In Queue", variant: "secondary", color: "text-muted-foreground", description: "Warming up engines..." },
   script_generating: { label: "Writing", variant: "secondary", color: "text-amber-500", description: "Crafting script..." },
   script_complete: { label: "Directing", variant: "secondary", color: "text-blue-500", description: "Sourcing assets..." },
   processing: { label: "Creating", variant: "secondary", color: "text-indigo-500", description: "Baking visuals..." },
@@ -52,124 +52,129 @@ export function VideoCard({ video }: VideoCardProps) {
   return (
     <Card
       className={cn(
-        "group relative overflow-hidden transition-all duration-500 border-white/5 bg-zinc-900/10 backdrop-blur-xl hover:border-white/10",
-        "flex flex-col h-full hover:shadow-2xl",
-        isFailed && "border-red-500/10 bg-red-500/[0.01]"
+        "group relative overflow-hidden transition-all duration-300 border-border/60 bg-card hover:border-border hover:shadow-lg",
+        "flex flex-col h-full",
+        isFailed && "border-destructive/20 bg-destructive/[0.02]"
       )}
     >
       {/* Visual Area - Locked 16:9 */}
-      <div className="relative aspect-video overflow-hidden bg-black/60">
+      <div className="relative aspect-video overflow-hidden bg-secondary/20 border-b border-border/40">
         {!isCompleted && !isFailed && (
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(124,58,237,0.03)_0%,transparent_80%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(var(--primary-rgb),0.05)_0%,transparent_70%)]" />
         )}
         
         {/* Discrete Status Badge */}
-        <div className="absolute top-4 left-4 z-20">
+        <div className="absolute top-3 left-3 z-20">
           <div className={cn(
-            "px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-[0.25em] shadow-lg",
-            isProcessing ? "bg-primary/90 text-white" : 
-            isCompleted ? "bg-emerald-500/80 text-black" :
-            "bg-zinc-800 text-zinc-500"
+            "px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider backdrop-blur-sm border border-transparent shadow-sm",
+            isProcessing ? "bg-background/80 text-primary border-primary/20" : 
+            isCompleted ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" :
+            isFailed ? "bg-destructive/10 text-destructive border-destructive/20" :
+            "bg-secondary/80 text-muted-foreground border-border"
           )}>
-            {config.label}
+            {isFailed ? "Needs Attention" : config.label}
           </div>
         </div>
 
-        {/* Content Display */}
+        {/* Thumbnail Content */}
         <div className="absolute inset-0 flex items-center justify-center p-6">
           {isProcessing ? (
-            <div className="w-full max-w-[140px] space-y-3">
-              <div className="flex items-center justify-between gap-3">
-                 <p className="text-[8px] font-black text-zinc-600 uppercase tracking-[0.2em] truncate">{config.description}</p>
-                 <Loader2 className="w-2.5 h-2.5 animate-spin text-primary/40" />
-              </div>
-              <div className="h-[1px] w-full bg-white/5 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-primary/40 transition-all duration-700 ease-in-out"
-                  style={{ width: `${getProgress(video.status)}%` }}
-                />
-              </div>
+            <div className="w-full max-w-[120px] space-y-3">
+               <div className="flex items-center justify-center gap-2">
+                 <Loader2 className="w-3 h-3 animate-spin text-primary" />
+                 <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-widest">{config.description}</span>
+               </div>
+               <div className="h-0.5 w-full bg-secondary rounded-full overflow-hidden">
+                 <div 
+                   className="h-full bg-primary transition-all duration-1000 ease-in-out"
+                   style={{ width: `${getProgress(video.status)}%` }}
+                 />
+               </div>
             </div>
           ) : isCompleted ? (
-            <div className="relative z-10 w-11 h-11 rounded-full bg-zinc-200 text-black flex items-center justify-center shadow-2xl opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-2 group-hover:translate-y-0">
-               <Play className="w-4 h-4 fill-black ml-0.5" />
+            <div className="relative z-10 w-10 h-10 rounded-full bg-white/90 shadow-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 scale-90 group-hover:scale-100">
+               <Play className="w-4 h-4 text-foreground ml-0.5" />
             </div>
           ) : isFailed ? (
-            <div className="flex flex-col items-center gap-2 px-6 text-center">
-               <AlertCircle className="w-5 h-5 text-red-500" />
-               <p className="text-[10px] font-semibold text-red-400 line-clamp-2 tracking-tight leading-relaxed">
-                  {video.error_message || "Generation timeout"}
-               </p>
+            <div className="flex flex-col items-center justify-center opacity-40">
+               <Layers className="w-8 h-8 text-muted-foreground mb-2" />
             </div>
           ) : null}
         </div>
 
         {/* Action Overlay */}
         {isCompleted && (
-          <Link href={`/videos/${video.id}`} className="absolute inset-0 z-30 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-all duration-300">
-             <div className="bg-zinc-900/80 backdrop-blur-md px-4 py-2 rounded-xl border border-white/5 text-[9px] font-black text-zinc-300 uppercase tracking-[0.3em] mb-[-40px] group-hover:mb-0 transition-all duration-500 delay-75 shadow-2xl">
-                Enter Studio
-             </div>
-          </Link>
+          <Link href={`/videos/${video.id}`} className="absolute inset-0 z-30 flex items-center justify-center bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         )}
       </div>
 
-      {/* Info Cluster - Dense Alignment */}
-      <div className="p-4 flex flex-col flex-1 gap-4">
-        <div className="space-y-2.5">
-          <h3 className="text-[13px] font-bold text-zinc-300 line-clamp-1 group-hover:text-zinc-100 transition-colors tracking-tight">
-            {video.topic}
-          </h3>
+      {/* Info Content */}
+      <div className="p-4 flex flex-col flex-1 gap-3">
+        <div className="space-y-1.5 flex-1 min-h-0">
+          <div className="flex items-start justify-between gap-4">
+             <h3 className="text-sm font-semibold text-foreground leading-snug line-clamp-2 group-hover:text-primary transition-colors">
+               {video.topic}
+             </h3>
+          </div>
           
-          <div className="flex items-center gap-2 flex-wrap">
-             <div className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-zinc-800/20 text-[8px] font-black text-zinc-600 uppercase tracking-widest border border-white/5">
-                {video.metadata?.imageAspectRatio || "9:16"}
-             </div>
-             <div className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-zinc-800/20 text-[8px] font-black text-zinc-600 uppercase tracking-widest border border-white/5">
-                {video.metadata?.duration || "60s"}
-             </div>
-             <div className="h-3 w-px bg-white/5 mx-0.5" />
-             <span className="text-[9px] font-medium text-zinc-600 uppercase tracking-widest">
-               {formatRelativeTime(video.created_at)}
-             </span>
+          {/* Metadata Row */}
+          <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-medium">
+             <span>{video.metadata?.imageAspectRatio || "9:16"}</span>
+             <span className="w-0.5 h-0.5 rounded-full bg-border" />
+             <span>{video.metadata?.duration || "60s"}</span>
+             <span className="w-0.5 h-0.5 rounded-full bg-border" />
+             <span>{formatRelativeTime(video.created_at)}</span>
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-2 border-t border-white/5 pt-4">
-           <div className="flex gap-1.5">
-              {isCompleted && (
-                <Button 
-                   variant="ghost" 
-                   className="h-8 w-8 p-0 rounded-lg hover:bg-zinc-800/40 text-zinc-600 hover:text-zinc-300 transition-all"
-                   onClick={(e) => {
-                     e.preventDefault();
-                     if (video.final_video_url) window.open(video.final_video_url, "_blank");
-                   }}
-                >
-                   <Download className="w-4 h-4" />
-                </Button>
-              )}
+        {/* Error Message (Below Thumbnail) */}
+        {isFailed && (video.error_message) && (
+           <div className="px-3 py-2 bg-destructive/5 border border-destructive/10 rounded-md">
+              <p className="text-[10px] text-destructive/80 leading-relaxed font-medium line-clamp-2">
+                 {video.error_message}
+              </p>
            </div>
-           
-           <div className="min-w-0">
-             {isFailed ? (
+        )}
+
+        {/* Footer Actions */}
+        <div className="flex items-center justify-between pt-2 mt-auto border-t border-border/40">
+           {isCompleted ? (
+             <div className="flex w-full items-center justify-between gap-2">
+               <Button 
+                 variant="ghost" 
+                 size="sm"
+                 className="h-7 text-[10px] font-medium text-muted-foreground hover:text-foreground px-0 hover:bg-transparent"
+                 onClick={(e) => {
+                    e.preventDefault();
+                    if (video.final_video_url) window.open(video.final_video_url, "_blank");
+                 }}
+               >
+                 <Download className="w-3 h-3 mr-1.5" />
+                 Download
+               </Button>
+               
+               <Link href={`/videos/${video.id}`} className="flex-1 flex justify-end">
+                  <span className="text-[10px] font-bold text-primary group-hover:underline underline-offset-4 decoration-primary/30">
+                    View Details
+                  </span>
+               </Link>
+             </div>
+           ) : isFailed ? (
+             <div className="flex w-full items-center justify-end">
                <Link href={`/create?topic=${encodeURIComponent(video.topic)}`}>
-                 <Button variant="ghost" size="sm" className="h-8 text-red-500/60 hover:text-red-500 hover:bg-red-500/5 text-[9px] font-black uppercase tracking-[0.2em] gap-2 px-3 rounded-lg">
-                   <RotateCcw className="w-3 h-3" />
-                   Rescue
+                 <Button variant="outline" size="sm" className="h-7 border-destructive/20 text-destructive/80 hover:text-destructive hover:bg-destructive/5 hover:border-destructive/30 text-[10px] font-bold shadow-none">
+                   <RotateCcw className="w-3 h-3 mr-1.5" />
+                   Retry
                  </Button>
                </Link>
-             ) : isProcessing ? (
-               <div className="text-[8px] font-black text-primary/30 uppercase tracking-[0.3em] pr-2">Processing...</div>
-             ) : (
-                <Link href={`/videos/${video.id}`}>
-                  <Button variant="ghost" size="sm" className="h-8 hover:bg-zinc-800/40 text-zinc-500 hover:text-zinc-200 text-[9px] font-black uppercase tracking-[0.2em] px-3 rounded-lg group/btn transition-all">
-                    Details
-                    <Maximize2 className="w-3 h-3 ml-2 opacity-0 group-hover/btn:opacity-40 transition-all translate-x-1 group-hover:translate-x-0" />
-                  </Button>
-                </Link>
-             )}
-           </div>
+             </div>
+           ) : (
+             <div className="w-full flex justify-end">
+               <span className="text-[10px] font-medium text-muted-foreground/50 italic">
+                 Processing...
+               </span>
+             </div>
+           )}
         </div>
       </div>
     </Card>

@@ -77,7 +77,7 @@ export function ProgressIndicator({ video }: ProgressIndicatorProps) {
         </div>
         
         {/* Progress Bar with Scanner Effect */}
-        <div className="relative h-3 w-full bg-secondary/50 rounded-full overflow-hidden border border-white/5 ring-1 ring-white/5">
+        <div className="relative h-3 w-full bg-secondary/50 rounded-full overflow-hidden border border-border ring-1 ring-border">
           <div
             className={cn(
               "absolute top-0 left-0 h-full rounded-full transition-all duration-1000 ease-in-out",
@@ -124,7 +124,7 @@ export function ProgressIndicator({ video }: ProgressIndicatorProps) {
                     key={step} 
                     className={cn(
                         "relative flex items-center gap-6 transition-all duration-500",
-                        isPending ? "opacity-50" : "opacity-100"
+                        isPending ? "opacity-50 grayscale" : "opacity-100"
                     )}
                 >
                     {/* Ring Indicator */}
@@ -135,7 +135,7 @@ export function ProgressIndicator({ video }: ProgressIndicatorProps) {
                             "border-2",
                             isCompleted && "bg-primary border-primary shadow-glow ring-4 ring-primary/20",
                             isCurrent && "bg-background border-primary shadow-pulse-glow animate-pulse-glow",
-                            isPending && "bg-zinc-900 border-zinc-800"
+                            isPending && "bg-secondary border-border"
                             )}
                         >
                             {isCompleted ? (
@@ -143,7 +143,7 @@ export function ProgressIndicator({ video }: ProgressIndicatorProps) {
                             ) : isCurrent ? (
                                 <div className="h-2 w-2 rounded-full bg-primary animate-ping" />
                             ) : (
-                                <div className="h-2 w-2 rounded-full bg-zinc-700" />
+                                <div className="h-2 w-2 rounded-full bg-muted-foreground/30" />
                             )}
                         </div>
                     </div>
@@ -182,10 +182,10 @@ export function ProgressIndicator({ video }: ProgressIndicatorProps) {
 
       {/* Footer Meta */}
       {isProcessing && (
-        <div className="mt-8 p-6 rounded-2xl border border-white/5 bg-white/2 ring-1 ring-white/5 backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="mt-8 p-6 rounded-2xl border border-border bg-card ring-1 ring-border/50 backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-4">
            <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-lg bg-zinc-900 flex items-center justify-center border border-white/10">
-                    <Loader2 size={14} className="text-zinc-500 animate-spin" />
+                <div className="h-8 w-8 rounded-lg bg-secondary flex items-center justify-center border border-border">
+                    <Loader2 size={14} className="text-muted-foreground animate-spin" />
                 </div>
                 <div>
                     <p className="text-[10px] font-bold text-muted-foreground uppercase">Estimated Wait</p>

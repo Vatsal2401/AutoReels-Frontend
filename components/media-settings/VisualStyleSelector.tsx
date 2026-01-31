@@ -23,21 +23,21 @@ export const VisualStyleSelector: React.FC<MediaSettingsProps> = ({ settings, on
   return (
     <div className="space-y-4">
        <div className="flex items-center justify-between">
-          <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/80">Visual Style</label>
+          <label className="text-xs font-bold uppercase tracking-widest text-foreground">Visual Style</label>
           
           <Dialog open={isLibraryOpen} onOpenChange={setIsLibraryOpen}>
             <DialogTrigger asChild>
-              <button className="text-[10px] font-medium text-primary hover:text-primary/80 transition-colors flex items-center gap-1 group">
+              <button className="text-[10px] font-bold text-primary hover:text-primary/80 transition-colors flex items-center gap-1 group">
                 EXPLORE LIBRARY <ChevronRight className="w-3 h-3 transition-transform group-hover:translate-x-0.5" />
               </button>
             </DialogTrigger>
             <DialogContent 
               style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)', position: 'fixed', maxWidth: '90vw', maxHeight: '75vh', margin: 0 }}
-              className="w-full max-w-3xl overflow-y-auto bg-background/95 backdrop-blur-xl border border-white/10 shadow-2xl duration-200 z-[100] p-5 rounded-xl !translate-x-[-50%] !translate-y-[-50%] !top-[50%] !left-[50%] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-white/20 pr-3"
+              className="w-full max-w-3xl overflow-y-auto bg-background/95 backdrop-blur-xl border border-border shadow-2xl duration-200 z-[100] p-5 rounded-xl !translate-x-[-50%] !translate-y-[-50%] !top-[50%] !left-[50%] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-muted-foreground/20 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-muted-foreground/40 pr-3"
             >
               <DialogHeader className="pb-4">
-                <DialogTitle className="text-lg font-bold tracking-tight">Visual Style Library</DialogTitle>
-                <DialogDescription className="text-xs">
+                <DialogTitle className="text-lg font-bold tracking-tight text-foreground">Visual Style Library</DialogTitle>
+                <DialogDescription className="text-xs text-muted-foreground">
                   Choose a visual aesthetic for your video generation.
                 </DialogDescription>
               </DialogHeader>
@@ -45,7 +45,7 @@ export const VisualStyleSelector: React.FC<MediaSettingsProps> = ({ settings, on
               <div className="space-y-5 py-2">
                 {STYLE_CATEGORIES.map((category) => (
                   <div key={category.id} className="space-y-2">
-                    <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider pl-1">{category.label}</h3>
+                    <h3 className="text-[10px] font-bold text-foreground uppercase tracking-wider pl-1">{category.label}</h3>
                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
                       {category.styles.map((style) => (
                         <button
@@ -55,7 +55,7 @@ export const VisualStyleSelector: React.FC<MediaSettingsProps> = ({ settings, on
                             setIsLibraryOpen(false);
                           }}
                           className={cn(
-                            "group relative aspect-video w-full rounded-md overflow-hidden border border-white/5 transition-all text-left bg-zinc-900",
+                            "group relative aspect-video w-full rounded-md overflow-hidden border border-border transition-all text-left bg-muted",
                             currentStyleId === style.id ? "ring-2 ring-primary ring-offset-1 ring-offset-background" : "hover:scale-[1.02]"
                           )}
                         >
@@ -64,7 +64,7 @@ export const VisualStyleSelector: React.FC<MediaSettingsProps> = ({ settings, on
                           <div className="absolute bottom-2 left-2 right-2">
                             <span className={cn(
                               "text-xs font-bold text-white block",
-                              currentStyleId === style.id && "text-primary-foreground"
+                              currentStyleId === style.id && "text-white"
                             )}>
                               {style.label}
                             </span>
@@ -114,13 +114,13 @@ function LargeStyleCard({ style, isActive, onClick }: LargeStyleCardProps) {
       type="button"
       onClick={onClick}
       className={cn(
-        "relative shrink-0 w-32 h-20 rounded-lg overflow-hidden transition-all duration-300 group snap-start",
+        "relative shrink-0 w-32 h-20 rounded-lg overflow-hidden transition-all duration-300 group snap-start border border-border",
         isActive 
           ? "ring-2 ring-primary ring-offset-1 ring-offset-background shadow-lg scale-[1.02] z-10" 
-          : "opacity-60 hover:opacity-100 hover:scale-[1.02] grayscale-[0.5] hover:grayscale-0"
+          : "opacity-80 hover:opacity-100 hover:scale-[1.02] grayscale-[0.3] hover:grayscale-0"
       )}
     >
-       <div className="absolute inset-0 bg-zinc-900" />
+       <div className="absolute inset-0 bg-muted" />
        
        <Image
          src={style.thumbnail}
@@ -139,7 +139,7 @@ function LargeStyleCard({ style, isActive, onClick }: LargeStyleCardProps) {
        <div className="absolute bottom-3 left-3">
           <span className={cn(
              "text-xs font-bold uppercase tracking-wider text-white drop-shadow-md",
-             isActive ? "text-primary-foreground" : ""
+             isActive ? "text-white" : ""
           )}>
              {style.label}
           </span>
