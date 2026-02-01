@@ -59,11 +59,8 @@ export function SelectEnhanced({
       const spaceAbove = rect.top;
       const maxDropdownHeight = 240;
       
-      // Position above if not enough space below
       const shouldPositionAbove = spaceBelow < maxDropdownHeight && spaceAbove > spaceBelow;
-      
-      // Calculate actual max height based on available space
-      const availableSpace = shouldPositionAbove ? spaceAbove - 16 : spaceBelow - 16;
+      const availableSpace = shouldPositionAbove ? spaceAbove - 8 : spaceBelow - 8;
       const maxHeight = Math.min(maxDropdownHeight, availableSpace);
       
       if (shouldPositionAbove) {
@@ -170,11 +167,11 @@ export function SelectEnhanced({
         onClick={() => !disabled && setIsOpen(!isOpen)}
         onKeyDown={handleKeyDown}
         className={cn(
-          "flex h-11 w-full items-center justify-between rounded-lg border border-border bg-background/80 backdrop-blur-sm px-4 py-2.5 text-sm font-medium transition-all duration-200 text-left",
-          "hover:border-primary/30 hover:bg-background",
-          "focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2 focus:ring-offset-background focus:border-primary",
-          "disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-border",
-          isOpen && "border-primary ring-2 ring-primary/20",
+          "flex h-10 w-full items-center justify-between rounded-lg border border-border bg-background px-3 py-2 text-sm font-semibold transition-all duration-200 text-left shadow-sm",
+          "hover:border-input-hover hover:bg-zinc-50 dark:hover:bg-zinc-900",
+          "focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary",
+          "disabled:cursor-not-allowed disabled:opacity-50",
+          isOpen && "border-primary ring-1 ring-primary bg-background",
           className
         )}
         aria-expanded={isOpen}
@@ -186,8 +183,8 @@ export function SelectEnhanced({
         </span>
         <ChevronDown
           className={cn(
-            "h-4 w-4 text-muted-foreground transition-transform duration-200 shrink-0 ml-2",
-            isOpen && "transform rotate-180"
+            "h-4 w-4 text-muted-foreground/50 transition-transform duration-200 shrink-0 ml-2",
+            isOpen && "transform rotate-180 text-foreground"
           )}
         />
       </button>
@@ -195,23 +192,26 @@ export function SelectEnhanced({
       {isOpen && mounted && createPortal(
         <>
           <div
-            className="fixed inset-0 z-[60]"
+            className="fixed inset-0 z-[100]"
             onClick={() => setIsOpen(false)}
             aria-hidden="true"
           />
           <div
-            className="fixed z-[70] rounded-lg border border-border bg-card shadow-xl backdrop-blur-sm animate-fade-in"
+            className={cn(
+              "fixed z-[110] rounded-lg border border-border bg-popover shadow-lg overflow-hidden",
+              "animate-in fade-in slide-in-from-top-1 duration-150 ease-out"
+            )}
             style={{
-              top: dropdownPosition.top !== undefined ? `${dropdownPosition.top}px` : 'auto',
-              bottom: dropdownPosition.bottom !== undefined ? `${dropdownPosition.bottom}px` : 'auto',
+              top: dropdownPosition.top !== undefined ? `${dropdownPosition.top + 2}px` : 'auto',
+              bottom: dropdownPosition.bottom !== undefined ? `${dropdownPosition.bottom + 2}px` : 'auto',
               left: `${dropdownPosition.left}px`,
-              width: `${Math.max(dropdownPosition.width, 180)}px`
+              width: `${dropdownPosition.width}px`
             }}
             role="listbox"
           >
             <div 
               ref={optionsRef} 
-              className="overflow-auto p-1 custom-scrollbar"
+              className="overflow-auto py-1 custom-scrollbar"
               style={{ maxHeight: `${dropdownPosition.maxHeight}px` }}
             >
               {options.map((option, index) => {
@@ -232,16 +232,14 @@ export function SelectEnhanced({
                     }}
                     onMouseEnter={() => setFocusedIndex(index)}
                     className={cn(
-                      "relative flex w-full cursor-pointer select-none items-center rounded-md px-3 py-2.5 text-sm outline-none transition-colors focus:outline-none focus:ring-0",
-                      "hover:bg-accent/50 hover:text-accent-foreground",
-                      "focus:bg-accent focus:text-accent-foreground",
-                      isFocused && "bg-accent/70",
-                      isSelected && "bg-primary/10 text-primary font-medium"
+                      "relative flex w-full cursor-pointer select-none items-center px-4 py-2 text-sm transition-colors",
+                      isFocused && "bg-zinc-100 dark:bg-zinc-800",
+                      isSelected && "bg-zinc-50 dark:bg-zinc-900 font-semibold"
                     )}
                   >
                     <span className="flex-1 truncate text-left">{option.label}</span>
                     {isSelected && (
-                      <Check className="ml-2 h-4 w-4 text-primary shrink-0" />
+                      <Check className="h-3.5 w-3.5 text-foreground shrink-0 ml-3" />
                     )}
                   </button>
                 );

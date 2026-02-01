@@ -23,7 +23,7 @@ export const VisualStyleSelector: React.FC<MediaSettingsProps> = ({ settings, on
   return (
     <div className="space-y-4">
        <div className="flex items-center justify-between">
-          <label className="text-xs font-bold uppercase tracking-widest text-foreground">Visual Style</label>
+          <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">Visual Aesthetic</label>
           
           <Dialog open={isLibraryOpen} onOpenChange={setIsLibraryOpen}>
             <DialogTrigger asChild>
@@ -33,7 +33,7 @@ export const VisualStyleSelector: React.FC<MediaSettingsProps> = ({ settings, on
             </DialogTrigger>
             <DialogContent 
               style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)', position: 'fixed', maxWidth: '90vw', maxHeight: '75vh', margin: 0 }}
-              className="w-full max-w-3xl overflow-y-auto bg-background/95 backdrop-blur-xl border border-border shadow-2xl duration-200 z-[100] p-5 rounded-xl !translate-x-[-50%] !translate-y-[-50%] !top-[50%] !left-[50%] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-muted-foreground/20 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-muted-foreground/40 pr-3"
+              className="w-full max-w-3xl overflow-y-auto scrollbar-saas bg-background/95 backdrop-blur-xl border border-border shadow-2xl duration-200 z-[100] p-5 rounded-xl !translate-x-[-50%] !translate-y-[-50%] !top-[50%] !left-[50%] pr-3"
             >
               <DialogHeader className="pb-4">
                 <DialogTitle className="text-lg font-bold tracking-tight text-foreground">Visual Style Library</DialogTitle>
@@ -108,16 +108,16 @@ interface LargeStyleCardProps {
   onClick: () => void;
 }
 
-function LargeStyleCard({ style, isActive, onClick }: LargeStyleCardProps) {
+const LargeStyleCard: React.FC<LargeStyleCardProps> = ({ style, isActive, onClick }) => {
   return (
     <button
       type="button"
       onClick={onClick}
       className={cn(
-        "relative shrink-0 w-32 h-20 rounded-lg overflow-hidden transition-all duration-300 group snap-start border border-border",
+        "relative shrink-0 w-36 h-24 rounded-2xl overflow-hidden transition-all duration-300 group snap-start border",
         isActive 
-          ? "ring-2 ring-primary ring-offset-1 ring-offset-background shadow-lg scale-[1.02] z-10" 
-          : "opacity-80 hover:opacity-100 hover:scale-[1.02] grayscale-[0.3] hover:grayscale-0"
+          ? "border-primary ring-4 ring-primary/10 shadow-xl scale-[1.05] z-10" 
+          : "border-border opacity-60 hover:opacity-100 hover:scale-[1.02] grayscale-[0.2] hover:grayscale-0"
       )}
     >
        <div className="absolute inset-0 bg-muted" />
@@ -130,23 +130,30 @@ function LargeStyleCard({ style, isActive, onClick }: LargeStyleCardProps) {
            "object-cover transition-transform duration-700",
            isActive ? "scale-110" : "group-hover:scale-110"
          )}
-         sizes="160px"
+         sizes="200px"
        />
        
        {/* Cinematic Vignette */}
-       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80" />
+       <div className={cn(
+         "absolute inset-0 transition-opacity duration-300",
+         isActive 
+          ? "bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-100" 
+          : "bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-80"
+       )} />
 
-       <div className="absolute bottom-3 left-3">
+       <div className="absolute bottom-3 left-3 right-3 text-left">
           <span className={cn(
-             "text-xs font-bold uppercase tracking-wider text-white drop-shadow-md",
-             isActive ? "text-white" : ""
+             "text-[10px] sm:text-xs font-black uppercase tracking-widest text-white drop-shadow-md transition-all",
+             isActive ? "text-white scale-105" : "text-white/80"
           )}>
              {style.label}
           </span>
        </div>
        
        {isActive && (
-          <div className="absolute top-0 left-0 w-full h-full bg-primary/10 mix-blend-overlay" />
+          <div className="absolute top-3 right-3 w-5 h-5 bg-primary rounded-full flex items-center justify-center shadow-lg border border-white/20 animate-in zoom-in-50 duration-300">
+             <span className="text-[10px] text-primary-foreground font-black">✓</span>
+          </div>
        )}
     </button>
   );

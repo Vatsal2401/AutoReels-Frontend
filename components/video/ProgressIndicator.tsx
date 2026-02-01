@@ -8,7 +8,7 @@ interface ProgressIndicatorProps {
   video: Video;
 }
 
-const statusMessages: Record<VideoStatus, string> = {
+const statusMessages: Record<string, string> = {
   pending: "Starting generation",
   script_generating: "Generating script",
   script_complete: "Creating audio",
@@ -16,24 +16,43 @@ const statusMessages: Record<VideoStatus, string> = {
   rendering: "Rendering video",
   completed: "Your reel is ready!",
   failed: "Generation failed",
+  // New backend steps
+  script: "Generating script",
+  audio: "Creating audio",
+  caption: "Generating captions",
+  captions: "Generating captions",
+  image: "Generating visual",
+  images: "Generating visuals",
+  video: "Synthesizing video",
+  render: "Final rendering",
 };
 
-const statusSteps: VideoStatus[] = [
-  "pending",
-  "script_generating",
-  "script_complete",
-  "processing",
-  "rendering",
-  "completed",
-];
-
 export function ProgressIndicator({ video }: ProgressIndicatorProps) {
-  const currentStepIndex = statusSteps.indexOf(video.status);
-  const isProcessing = !["completed", "failed"].includes(video.status);
-  const isFailed = video.status === "failed";
-  const totalSteps = statusSteps.length - 1; // Exclude completed
-  // Use a slightly weighted progress for better UX (more movement in early steps)
-  const progressPercentage = currentStepIndex === -1 ? 0 : (currentStepIndex / totalSteps) * 100;
+  const steps = video.steps || [];
+  const currentStatus = video.status;
+  
+  // Logical mapping for progress bar if steps are not available
+  const legacySteps: VideoStatus[] = ["pending", "script_generating", "script_complete", "processing", "rendering", "completed"];
+  
+  const isProcessing = !["completed", "failed"].includes(currentStatus);
+  const isFailed = currentStatus === "failed";
+
+  // Calculate percentage
+  let progressPercentage = 0;
+  if (steps.length > 0) {
+    const completedSteps = steps.filter(s => s.status === "success").length;
+    const processingSteps = steps.filter(s => s.status === "processing").length;
+    // Each step is 1/total. Processing step is 0.5.
+    progressPercentage = ((completedSteps + (processingSteps * 0.5)) / steps.length) * 100;
+  } else {
+    const currentStepIndex = legacySteps.indexOf(currentStatus as VideoStatus);
+    const totalSteps = legacySteps.length - 1;
+    progressPercentage = currentStepIndex === -1 ? 0 : (currentStepIndex / totalSteps) * 100;
+  }
+
+  // Ensure 100% only on completed
+  if (currentStatus === "completed") progressPercentage = 100;
+  if (progressPercentage > 95 && currentStatus !== "completed") progressPercentage = 95;
 
   return (
     <div className="w-full max-w-2xl mx-auto">
@@ -55,7 +74,7 @@ export function ProgressIndicator({ video }: ProgressIndicatorProps) {
              </span>
         </div>
         <h3 className="text-3xl font-extrabold text-foreground tracking-tight mb-2">
-            {isFailed ? "Generation Failed" : isProcessing ? "Cinematic Synthesis" : statusMessages[video.status]}
+            {isFailed ? "Generation Failed" : isProcessing ? "Cinematic Synthesis" : (statusMessages[currentStatus] || "Complete")}
         </h3>
         <p className={cn(
           "text-sm max-w-sm mx-auto",
@@ -102,26 +121,40 @@ export function ProgressIndicator({ video }: ProgressIndicatorProps) {
         {/* Status Label */}
         <div className="mt-2 text-center h-5">
              <p className="text-xs text-primary font-medium italic animate-pulse">
-                {isProcessing && `Current Node: ${statusMessages[video.status]}...`}
+                {isProcessing && `Pipeline: ${statusMessages[currentStatus] || "Orchestrating"}...`}
              </p>
         </div>
       </div>
 
-      {/* Steps List (Staggered-like using logical grouping) */}
+      {/* Steps List */}
       <div className="relative">
         {/* Vertical Track Overlay */}
         <div className="absolute left-[19px] top-4 bottom-4 w-px bg-gradient-to-b from-primary/50 via-primary/20 to-transparent" />
 
         <div className="space-y-6">
-            {statusSteps.slice(0, -1).map((step, index) => {
-            const stepIndex = statusSteps.indexOf(step);
-            const isCompleted = stepIndex < currentStepIndex;
-            const isCurrent = stepIndex === currentStepIndex;
-            const isPending = stepIndex > currentStepIndex;
+            {(steps.length > 0 ? steps : legacySteps.slice(0, -1)).map((stepObjOrName, index) => {
+              const stepName = typeof stepObjOrName === "string" ? stepObjOrName : stepObjOrName.step;
+              const stepStatus = typeof stepObjOrName === "string" ? "" : stepObjOrName.status;
+              
+              let isCompleted = false;
+              let isCurrent = false;
+
+              if (typeof stepObjOrName === "string") {
+                const legacySteps: VideoStatus[] = ["pending", "script_generating", "script_complete", "processing", "rendering", "completed"];
+                const currentStepIndex = legacySteps.indexOf(currentStatus as VideoStatus);
+                const thisStepIndex = legacySteps.indexOf(stepObjOrName as VideoStatus);
+                isCompleted = thisStepIndex < currentStepIndex;
+                isCurrent = thisStepIndex === currentStepIndex;
+              } else {
+                isCompleted = stepStatus === "success";
+                isCurrent = stepStatus === "processing";
+              }
+
+              const isPending = !isCompleted && !isCurrent;
 
             return (
                 <div 
-                    key={step} 
+                    key={stepName} 
                     className={cn(
                         "relative flex items-center gap-6 transition-all duration-500",
                         isPending ? "opacity-50 grayscale" : "opacity-100"
@@ -133,15 +166,15 @@ export function ProgressIndicator({ video }: ProgressIndicatorProps) {
                             className={cn(
                             "h-10 w-10 rounded-full flex items-center justify-center transition-all duration-500",
                             "border-2",
-                            isCompleted && "bg-primary border-primary shadow-glow ring-4 ring-primary/20",
-                            isCurrent && "bg-background border-primary shadow-pulse-glow animate-pulse-glow",
+                            isCompleted && "bg-primary border-primary ring-4 ring-primary/10",
+                            isCurrent && "bg-background border-primary",
                             isPending && "bg-secondary border-border"
                             )}
                         >
                             {isCompleted ? (
                                 <CheckCircle2 className="h-5 w-5 text-primary-foreground" />
                             ) : isCurrent ? (
-                                <div className="h-2 w-2 rounded-full bg-primary animate-ping" />
+                                <div className="h-2 w-2 rounded-full bg-primary" />
                             ) : (
                                 <div className="h-2 w-2 rounded-full bg-muted-foreground/30" />
                             )}
@@ -156,7 +189,7 @@ export function ProgressIndicator({ video }: ProgressIndicatorProps) {
                                     "text-sm font-bold uppercase tracking-widest transition-colors",
                                     isCurrent ? "text-primary" : "text-muted-foreground"
                                 )}>
-                                    {statusMessages[step]}
+                                    {statusMessages[stepName] || stepName}
                                 </h4>
                                 <p className={cn(
                                     "text-xs mt-0.5",

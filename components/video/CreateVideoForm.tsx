@@ -1,23 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { videosApi, CreateVideoDto } from "@/lib/api/videos";
 import { useCredits } from "@/lib/hooks/useCredits";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { GenerationProgress } from "./GenerationProgress";
 import { VisualStyleSelector } from "../media-settings/VisualStyleSelector";
-// import { AdvancedControls } from "../media-settings/AdvancedControls";
 import { FormatSelector } from "../media-settings/FormatSelector";
 import { NarrationSettings } from "../media-settings/NarrationSettings";
 import { DurationSelector } from "../media-settings/DurationSelector";
 import { MediaSettings } from "../media-settings/types";
 import { getFullPrompt } from "../media-settings/styles";
-import Link from "next/link";
-import { AlertCircle, Sparkles, Zap, CreditCard, Info, Eye } from "lucide-react";
+import { AlertCircle, Sparkles, Zap, CreditCard, Info, Eye, CheckCircle2, Loader2, FileText } from "lucide-react";
 import { cn } from "@/lib/utils/format";
 
 const DURATION_MAPPING = {
@@ -26,7 +24,6 @@ const DURATION_MAPPING = {
   'Long': '90-120'
 };
 
-// Helper to map backend status to frontend visualization steps
 const getStepFromStatus = (status: string) => {
   switch (status) {
     case 'pending': return 'start';
@@ -61,6 +58,7 @@ export function CreateVideoForm() {
       visualStyleId: 'cinematic',
       aspectRatio: '9:16',
       voiceId: '21m00Tcm4TlvDq8ikWAM', // Rachel
+      voiceLabel: 'Rachel',
       language: 'English (US)',
       duration: 'Short',
       imageProvider: 'gemini',
@@ -72,19 +70,17 @@ export function CreateVideoForm() {
       }
   });
 
-  const handleUpdate = (updates: Partial<MediaSettings>) => {
+  const handleUpdate = useCallback((updates: Partial<MediaSettings>) => {
       setSettings(prev => ({ ...prev, ...updates }));
-  };
+  }, []);
 
   const createMutation = useMutation({
     mutationFn: videosApi.createVideo,
     onSuccess: (data) => {
-      // Don't redirect, just start tracking
       setActiveVideoId(data.video_id);
     },
   });
 
-  // Poll for status if we have an active video
   const { data: videoStatus } = useQuery({
     queryKey: ['video-status', activeVideoId],
     queryFn: () => videosApi.getVideo(activeVideoId!),
@@ -98,11 +94,9 @@ export function CreateVideoForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!topic.trim()) return;
-    if (!hasCredits) {
-      return;
-    }
+    if (!hasCredits) return;
 
-    setActiveVideoId(null); // Reset for new generation
+    setActiveVideoId(null);
 
     const payload: CreateVideoDto = {
       topic: topic.trim(),
@@ -124,85 +118,92 @@ export function CreateVideoForm() {
 
   return (
     <div className="flex flex-col h-full bg-background rounded-xl border border-border overflow-hidden shadow-sm">
-      {/* Form Area - Split Pane */}
       <div className="flex flex-1 h-full overflow-hidden">
           
-          {/* LEFT: Composition Studio (Scrollable Input Area) */}
-           <div className="flex-1 min-w-0 h-full overflow-y-auto scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent bg-background">
-              <div className="flex flex-col items-center justify-center min-h-full py-12 px-6 space-y-8 w-full max-w-3xl mx-auto">
+          {/* LEFT: Composition Studio */}
+          <div className="flex-1 min-w-0 h-full overflow-y-auto scrollbar-saas bg-zinc-50/20 dark:bg-zinc-950/20">
+              <div className="flex flex-col min-h-full py-12 px-8 space-y-16 w-full max-w-4xl mx-auto">
                   
-                  {/* 1. Prompt Input */}
-                  <div className="w-full space-y-2">
-                     <div className="group relative bg-card border border-border rounded-xl p-4 transition-all duration-300 hover:border-primary/50 hover:shadow-md focus-within:ring-1 focus-within:ring-primary focus-within:border-primary focus-within:bg-card">
-                       <Textarea
-                         id="topic"
-                         value={topic}
-                         onChange={(e) => setTopic(e.target.value)}
-                         placeholder="What story do you want to tell today?"
-                         rows={2}
-                         maxLength={500}
-                         className="w-full resize-none text-lg font-medium leading-relaxed bg-transparent border-none p-0 placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[60px] text-foreground"
-                         required
-                         disabled={createMutation.isPending || (!!activeVideoId && !isCompleted) || !hasCredits}
-                       />
-                       
-                       <div className="flex items-center justify-between mt-2 pt-2 border-t border-border">
-                         <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-bold uppercase tracking-wider group-focus-within:text-primary transition-colors">
-                            <Sparkles className="w-3 h-3" />
-                            <span>AI Script</span>
-                         </div>
-                         <span className={cn("text-[10px] font-mono transition-colors font-medium", topic.length > 450 ? "text-destructive" : "text-muted-foreground group-hover:text-foreground")}>
-                           {topic.length}/500
-                         </span>
-                       </div>
+                  {/* 1. Header & Creative Intent (Hero) */}
+                  <div className="w-full space-y-8 text-center pb-12 border-b border-border/40">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-full border border-primary/20 scale-90">
+                        <Sparkles className="w-3 h-3 text-primary" />
+                        <span className="text-[10px] font-bold text-primary uppercase tracking-tighter">AI Synthesis Engine</span>
+                      </div>
+                      <h2 className="text-5xl font-black text-foreground tracking-tight max-w-[600px] mx-auto leading-tight italic">
+                        Transform your <span className="text-primary italic">vision</span> into cinematic reality.
+                      </h2>
+                      <div className="group relative bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[32px] p-8 transition-all duration-500 hover:border-primary/40 hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] focus-within:ring-2 focus-within:ring-primary/10 focus-within:border-primary h-auto min-h-[220px] flex flex-col">
+                        <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 mb-4 px-1 text-left">Creative Intent</label>
+                        <Textarea
+                          id="topic"
+                          value={topic}
+                          onChange={(e) => setTopic(e.target.value)}
+                          placeholder="Tell the AI what story you want to narrate..."
+                          rows={3}
+                          maxLength={500}
+                          className="w-full resize-none text-xl font-medium leading-relaxed bg-transparent border-none p-0 placeholder:text-muted-foreground/40 focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[100px] text-foreground"
+                          required
+                          disabled={createMutation.isPending || (!!activeVideoId && !isCompleted) || !hasCredits}
+                        />
+                        
+                        <div className="flex items-center justify-between mt-auto pt-4 border-t border-border/50">
+                          <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-bold uppercase tracking-wider group-focus-within:text-primary transition-colors">
+                             <Sparkles className="w-3 h-3" />
+                             <span>AI SCRIPT GENERATION ACTIVE</span>
+                          </div>
+                          <span className={cn("text-[10px] font-mono transition-colors font-medium", topic.length > 450 ? "text-destructive" : "text-muted-foreground group-hover:text-foreground text-left")}>
+                            {topic.length}/500
+                          </span>
+                        </div>
+                      </div>
+                  </div>
+
+                  {/* 2. Visual Style (Dominant) */}
+                  <div className="w-full space-y-8">
+                     <div className="flex items-center gap-3 px-1 border-b border-border/40 pb-3">
+                        <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                        <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">Cinematic Universe</h3>
+                     </div>
+                     <VisualStyleSelector settings={settings} onUpdate={handleUpdate} />
+                  </div>
+
+                  {/* 3. Configuration Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-12 pt-8 pb-12">
+                     <div className="space-y-6">
+                        <div className="flex items-center gap-3 pb-3 border-b border-border/40 px-1">
+                           <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">Format</span>
+                           <Info className="w-3 h-3 text-muted-foreground/30" />
+                        </div>
+                        <FormatSelector settings={settings} onUpdate={handleUpdate} />
+                     </div>
+
+                     <div className="space-y-6">
+                        <div className="flex items-center gap-3 pb-3 border-b border-border/40 px-1">
+                           <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">Voice Narration</span>
+                        </div>
+                        <NarrationSettings settings={settings} onUpdate={handleUpdate} />
+                     </div>
+                        
+                     <div className="space-y-6">
+                        <div className="flex items-center gap-3 pb-3 border-b border-border/40 px-1">
+                           <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">Video Length</span>
+                        </div>
+                        <DurationSelector settings={settings} onUpdate={handleUpdate} />
                      </div>
                   </div>
- 
-                  <div className="h-px w-full max-w-xl bg-gradient-to-r from-transparent via-border to-transparent" />
-
-                 {/* 2. Visual Style (Dominant) */}
-                 <div className="space-y-4">
-                    <VisualStyleSelector settings={settings} onUpdate={handleUpdate} />
-                 </div>
-
-                 {/* 3. Configuration Grid (Spacious Layout) */}
-                 <div className="grid grid-cols-1 md:grid-cols-3 gap-10 pt-6">
-                    {/* Column 1: Format */}
-                    <div className="space-y-4">
-                       <div className="flex items-center gap-2 pb-1 border-b border-border/50">
-                          <span className="text-[11px] font-bold uppercase tracking-widest text-foreground">Format</span>
-                          <Info className="w-3 h-3 text-muted-foreground/50" />
-                       </div>
-                       <FormatSelector settings={settings} onUpdate={handleUpdate} />
-                    </div>
-
-                    {/* Column 2: Audio */}
-                    <div className="space-y-4">
-                       <div className="flex items-center gap-2 pb-1 border-b border-border/50">
-                          <span className="text-[11px] font-bold uppercase tracking-widest text-foreground">Audio</span>
-                       </div>
-                       <NarrationSettings settings={settings} onUpdate={handleUpdate} />
-                    </div>
-                       
-                    {/* Column 3: Duration */}
-                    <div className="space-y-4">
-                       <div className="flex items-center gap-2 pb-1 border-b border-border/50">
-                          <span className="text-[11px] font-bold uppercase tracking-widest text-foreground">Duration</span>
-                       </div>
-                       <DurationSelector settings={settings} onUpdate={handleUpdate} />
-                    </div>
-                 </div>
-             </div>
+              </div>
           </div>
 
-          {/* RIGHT: Live Preview / Status Panel (Fixed Side) */}
+          {/* RIGHT: Live Preview / Status Panel */}
           <div className="w-[480px] shrink-0 border-l border-border bg-secondary relative h-full overflow-hidden">
-             <div className="absolute inset-0 overflow-y-auto scrollbar-none pb-48">
+             <div className="absolute inset-0 overflow-y-auto scrollbar-saas pb-48">
                <div className="p-8">
                  <GenerationProgress 
                     status={activeVideoId ? (isFailed ? 'error' : isCompleted ? 'completed' : 'generating') : 'idle'} 
                     progress={activeVideoId ? getProgressFromStatus(currentStatus) : 0}
                     currentStep={activeVideoId ? getStepFromStatus(currentStatus) : 'start'}
+                    settings={settings}
                  />
                  
                  {isFailed && errorMessage && (
@@ -211,20 +212,17 @@ export function CreateVideoForm() {
                      <p className="text-xs text-destructive/70 mt-1">{errorMessage}</p>
                    </div>
                  )}
-             </div>
-
+               </div>
              </div>
  
-             {/* Action Bar within Right Panel or Sticky Bottom */}
+             {/* Action Bar */}
              <div className="absolute bottom-0 left-0 right-0 p-8 border-t border-border bg-card z-10 transition-all duration-300 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
                 <div className="space-y-5">
-                    
                     <div className="flex items-center justify-between text-xs">
                        <div className="flex items-center gap-2 text-muted-foreground font-medium">
                            <CreditCard className="w-3.5 h-3.5 text-primary" />
                            <span>Available: <strong className="text-foreground">{credits ?? 0}</strong></span>
                        </div>
-
                        <div className="flex items-center gap-1.5 font-bold text-amber-600 dark:text-amber-500">
                           <Zap className="w-3 h-3 fill-current" />
                           <span>1 Credit Cost</span>

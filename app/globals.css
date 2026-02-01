@@ -219,6 +219,32 @@
     background-color: hsl(var(--muted-foreground) / 0.5);
   }
 
+  /* Premium SaaS Scrollbar */
+  .scrollbar-saas {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.2) transparent;
+    scrollbar-gutter: stable;
+  }
+
+  .scrollbar-saas::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollbar-saas::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-saas::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted-foreground) / 0.1);
+    border-radius: 20px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  .scrollbar-saas::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--muted-foreground) / 0.25);
+  }
+
   /* Fade-in animation for dropdown and tooltip */
   .animate-fade-in {
     animation: fade-in-dropdown 0.15s ease-out;
@@ -237,12 +263,26 @@
   }
 
   /* Glow effect for play button */
+  /* Glow effect for play button */
   .shadow-glow {
     box-shadow: 0 0 20px -5px hsl(var(--primary) / 0.5);
   }
 
   .shadow-glow:hover {
     box-shadow: 0 0 25px -3px hsl(var(--primary) / 0.7);
+  }
+
+  /* Premium Sonner Toasts */
+  [data-sonner-toast] {
+    @apply rounded-xl border border-border bg-card text-foreground shadow-lg font-medium !important;
+  }
+
+  [data-sonner-toast] [data-title] {
+    @apply text-sm !important;
+  }
+
+  [data-sonner-toast] [data-description] {
+    @apply text-xs opacity-70 !important;
   }
 }
 

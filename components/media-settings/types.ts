@@ -12,6 +12,7 @@ export interface MediaSettings {
     visualStyleId: string;
     aspectRatio: AspectRatio;
     voiceId: string;
+    voiceLabel?: string;
     language: string;
     duration: Duration;
     imageProvider: 'gemini' | 'replicate' | 'dalle' | 'mock';

@@ -43,42 +43,46 @@ export const FormatSelector: React.FC<MediaSettingsProps> = ({ settings, onUpdat
               onMouseLeave={() => setHoveredId(null)}
               onClick={() => onUpdate({ aspectRatio: format.id })}
               className={cn(
-                "group relative flex flex-col items-center justify-between p-3 rounded-xl border transition-all duration-300 outline-none h-[110px]",
+                "group relative flex flex-col items-center justify-between p-2 rounded-xl border transition-all duration-300 outline-none h-[90px]",
                 isSelected
-                  ? "bg-primary/10 border-primary shadow-[0_0_20px_-5px_rgba(var(--primary-rgb),0.2)] scale-[1.02]"
-                  : "bg-background/40 border-border/60 hover:border-primary/30 hover:bg-secondary/50"
+                  ? "bg-primary/5 border-primary shadow-sm"
+                  : "bg-background border-border hover:border-primary/20 hover:bg-secondary/30"
               )}
             >
               {/* Physical Representation of Aspect Ratio */}
-              <div className="flex-1 flex items-center justify-center w-full">
+              <div className="flex-1 flex items-center justify-center w-full relative pt-1.5">
+                {format.id === '9:16' && (
+                  <div className="absolute top-0 right-0 -translate-y-2 translate-x-1">
+                    <div className="px-1 py-0.5 bg-primary/10 border border-primary/20 rounded-sm">
+                      <span className="text-[6px] font-black text-primary uppercase tracking-tighter block leading-none">REC</span>
+                    </div>
+                  </div>
+                )}
                 <div className={cn(
-                  "border-2 rounded-md transition-all duration-500",
-                  format.id === '9:16' ? "h-12 w-7" : 
-                  format.id === '1:1' ? "h-10 w-10" : 
-                  "h-7 w-12",
-                  isSelected ? "border-primary bg-primary/20" : "border-zinc-500 group-hover:border-zinc-300"
+                  "border rounded-sm transition-all duration-300 relative",
+                  format.id === '9:16' ? "h-9 w-5" : 
+                  format.id === '1:1' ? "h-7 w-7" : 
+                  "h-5 w-9",
+                  isSelected ? "border-primary bg-primary/10" : "border-zinc-400 group-hover:border-zinc-600"
                 )}>
                   {/* Subtle screen indicator */}
                   <div className={cn(
-                    "w-1.5 h-1.5 rounded-full mx-auto mt-1 opacity-20",
-                    format.id === '16:9' ? "mt-auto mb-1" : "",
-                    isSelected ? "bg-primary" : "bg-zinc-500"
+                    "w-1 h-1 rounded-full mx-auto mt-0.5 opacity-30",
+                    format.id === '16:9' ? "mt-auto mb-0.5" : "",
+                    isSelected ? "bg-primary" : "bg-black"
                   )} />
                 </div>
               </div>
 
               {/* Labels */}
-              <div className="flex flex-col items-center mt-2">
+              <div className="flex flex-col items-center mt-1 w-full relative">
                 <span className={cn(
-                  "text-[12px] font-bold transition-colors leading-none",
-                  isSelected ? "text-foreground" : "text-zinc-400"
+                  "text-xs font-bold transition-colors leading-none tracking-tight",
+                  isSelected ? "text-foreground" : "text-foreground/80"
                 )}>
                   {name}
                 </span>
-                <span className={cn(
-                  "text-[10px] font-medium opacity-50 mt-1",
-                  isSelected ? "text-primary/90" : "text-zinc-600"
-                )}>
+                <span className="text-[10px] font-medium text-muted-foreground/60 mt-1">
                   {ratio}
                 </span>
               </div>

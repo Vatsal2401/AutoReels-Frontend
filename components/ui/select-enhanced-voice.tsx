@@ -3,14 +3,12 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils/format";
-import { ChevronDown, Check, User } from "lucide-react";
+import { ChevronDown, Check } from "lucide-react";
 
 export interface VoiceSelectOption {
   value: string;
-  name: string;
-  accent: string;
-  gender: "Male" | "Female" | "Neutral";
-  style?: string;
+  label: string;
+  meta: string;
   description?: string;
 }
 
@@ -47,8 +45,16 @@ export function VoiceSelect({
   }>({ left: 0, width: 0, maxHeight: 320 });
   const selectRef = React.useRef<HTMLDivElement>(null);
   const optionsRef = React.useRef<HTMLDivElement>(null);
-  const selectedOption = options.find((opt) => opt.value === value);
-  const currentIndex = options.findIndex((opt) => opt.value === value);
+  
+  /** ✅ SINGLE SOURCE OF TRUTH - Always derive from value prop */
+  const selectedOption = React.useMemo(
+    () => options.find((opt) => opt.value === value),
+    [options, value]
+  );
+  const currentIndex = React.useMemo(
+    () => options.findIndex((opt) => opt.value === value),
+    [options, value]
+  );
 
   React.useEffect(() => {
     setMounted(true);
@@ -61,25 +67,25 @@ export function VoiceSelect({
       const viewportHeight = window.innerHeight;
       const spaceBelow = viewportHeight - rect.bottom;
       const spaceAbove = rect.top;
-      const maxDropdownHeight = 320;
+      const maxDropdownHeight = 280;
       
       // Position above if not enough space below
       const shouldPositionAbove = spaceBelow < maxDropdownHeight && spaceAbove > spaceBelow;
       
       // Calculate actual max height based on available space
-      const availableSpace = shouldPositionAbove ? spaceAbove - 16 : spaceBelow - 16;
+      const availableSpace = shouldPositionAbove ? spaceAbove - 8 : spaceBelow - 8;
       const maxHeight = Math.min(maxDropdownHeight, availableSpace);
       
       if (shouldPositionAbove) {
         setDropdownPosition({
-          bottom: viewportHeight - rect.top, // Perfectly flush
+          bottom: viewportHeight - rect.top,
           left: rect.left,
           width: rect.width,
           maxHeight: maxHeight
         });
       } else {
         setDropdownPosition({
-          top: rect.bottom, // Perfectly flush
+          top: rect.bottom,
           left: rect.left,
           width: rect.width,
           maxHeight: maxHeight
@@ -144,6 +150,11 @@ export function VoiceSelect({
           setFocusedIndex((prev) => (prev > 0 ? prev - 1 : options.length - 1));
         }
         break;
+      case "Escape":
+        e.preventDefault();
+        setIsOpen(false);
+        setFocusedIndex(-1);
+        break;
     }
   };
 
@@ -160,130 +171,127 @@ export function VoiceSelect({
   const handleSelect = (optionValue: string) => {
     onChange(optionValue);
     setIsOpen(false);
-  };
-
-  const formatMetadata = (option: VoiceSelectOption): string => {
-    return option.style 
-      ? `${option.accent} ${option.gender} • ${option.style}` 
-      : `${option.accent} ${option.gender}`;
+    setFocusedIndex(-1);
   };
 
   return (
     <div ref={selectRef} className={cn("relative w-full", className)}>
       {/* Trigger Button */}
-      <div className="relative group">
-        <button
-          type="button"
-          id={id}
-          name={name}
-          disabled={disabled}
-          onClick={() => !disabled && setIsOpen(!isOpen)}
-          onKeyDown={handleKeyDown}
-          className={cn(
-            "flex w-full items-start gap-2 text-left transition-all duration-200",
-            "focus:outline-none focus:ring-0",
-            "disabled:cursor-not-allowed disabled:opacity-50",
-            className
-          )}
-          aria-expanded={isOpen}
-          aria-haspopup="listbox"
-          aria-label={selectedOption ? `Voice: ${selectedOption.name}` : placeholder}
-        >
-          {/* Voice Info */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <span className={cn(
-                "text-base font-medium leading-tight",
-                selectedOption ? "text-foreground" : "text-muted-foreground"
-              )}>
-                {selectedOption ? selectedOption.name : placeholder}
-              </span>
-              <ChevronDown
-                className={cn(
-                  "h-4 w-4 text-muted-foreground transition-transform duration-200 shrink-0",
-                  isOpen && "transform rotate-180"
-                )}
-              />
-            </div>
-            {selectedOption && (
-              <p className="text-xs text-muted-foreground mt-0.5 truncate leading-tight">
-                {formatMetadata(selectedOption)}
-              </p>
-            )}
+      <button
+        type="button"
+        id={id}
+        name={name}
+        disabled={disabled}
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+        onKeyDown={handleKeyDown}
+        className={cn(
+          "group flex min-h-[56px] w-full items-center justify-between rounded-lg border border-border bg-background px-4 py-2 text-sm transition-all duration-200 text-left shadow-sm",
+          "hover:border-input-hover hover:bg-zinc-50/50 dark:hover:bg-zinc-900/50",
+          "focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary",
+          "disabled:cursor-not-allowed disabled:opacity-50",
+          isOpen && "border-primary ring-1 ring-primary bg-background",
+          className
+        )}
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+        aria-label={selectedOption ? `Voice: ${selectedOption.label}` : placeholder}
+      >
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between">
+            <span className={cn(
+              "text-sm font-semibold tracking-tight truncate",
+              selectedOption ? "text-foreground" : "text-muted-foreground"
+            )}>
+              {selectedOption ? selectedOption.label : placeholder}
+            </span>
+            <ChevronDown
+              className={cn(
+                "h-4 w-4 text-muted-foreground/50 transition-transform duration-200 shrink-0 ml-2",
+                isOpen && "transform rotate-180 text-foreground"
+              )}
+            />
           </div>
-        </button>
-      </div>
+          {selectedOption && (
+            <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider mt-0.5">
+              {selectedOption.meta}
+            </p>
+          )}
+        </div>
+      </button>
 
       {/* Dropdown Menu */}
       {isOpen && mounted && createPortal(
         <>
           <div
-            className="fixed inset-0 z-[60]"
+            className="fixed inset-0 z-[100]"
             onClick={() => setIsOpen(false)}
             aria-hidden="true"
           />
           <div
-            className="fixed z-[70] rounded-lg border border-border bg-card shadow-xl backdrop-blur-sm animate-fade-in"
+            className={cn(
+              "fixed z-[110] rounded-lg border border-border bg-popover shadow-lg overflow-hidden",
+              "animate-in fade-in slide-in-from-top-1 duration-150 ease-out"
+            )}
             style={{
-              top: dropdownPosition.top !== undefined ? `${dropdownPosition.top}px` : 'auto',
-              bottom: dropdownPosition.bottom !== undefined ? `${dropdownPosition.bottom}px` : 'auto',
+              top: dropdownPosition.top !== undefined ? `${dropdownPosition.top + 2}px` : 'auto',
+              bottom: dropdownPosition.bottom !== undefined ? `${dropdownPosition.bottom + 2}px` : 'auto',
               left: `${dropdownPosition.left}px`,
-              width: `${Math.max(dropdownPosition.width, 240)}px`
+              width: `${dropdownPosition.width}px`
             }}
             role="listbox"
           >
             <div 
               ref={optionsRef} 
-              className="overflow-auto p-1.5 custom-scrollbar"
+              className="overflow-auto py-1 custom-scrollbar"
               style={{ maxHeight: `${dropdownPosition.maxHeight}px` }}
             >
-              {options.map((option, index) => {
-                const isSelected = value === option.value;
-                const isFocused = focusedIndex === index;
-                return (
-                  <button
-                    key={option.value}
-                    type="button"
-                    role="option"
-                    aria-selected={isSelected}
-                    onClick={() => handleSelect(option.value)}
-                    onMouseEnter={() => setFocusedIndex(index)}
-                    className={cn(
-                      "relative flex w-full cursor-pointer select-none items-start gap-2.5 rounded-md px-2 py-2.5 outline-none transition-all duration-150",
-                      "hover:bg-accent/60 hover:text-accent-foreground",
-                      isFocused && "bg-accent/40",
-                      isSelected && "bg-primary/10 text-primary",
-                      "focus:outline-none focus:ring-0"
-                    )}
-                  >
-                    {/* Voice Icon */}
-                    <div className={cn(
-                      "h-7 w-7 rounded-full flex items-center justify-center shrink-0 mt-0.5",
-                      isSelected ? "bg-primary/20 text-primary" : "bg-muted/50 text-muted-foreground"
-                    )}>
-                      <User size={13} />
-                    </div>
+              {options.length === 0 ? (
+                <div className="py-6 text-center text-xs text-muted-foreground font-medium">
+                  No voices found
+                </div>
+              ) : (
+                options.map((option, index) => {
+                  const isSelected = value === option.value;
+                  const isFocused = focusedIndex === index;
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      role="option"
+                      aria-selected={isSelected}
+                      onClick={() => handleSelect(option.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          handleSelect(option.value);
+                        }
+                      }}
+                      onMouseEnter={() => setFocusedIndex(index)}
+                      className={cn(
+                        "relative flex w-full cursor-pointer select-none items-center px-4 py-2.5 outline-none transition-colors",
+                        isFocused && "bg-zinc-100 dark:bg-zinc-800",
+                        isSelected && "bg-zinc-50 dark:bg-zinc-900",
+                      )}
+                    >
+                      <div className="flex-1 min-w-0 text-left flex flex-col">
+                        <span className={cn(
+                          "text-sm font-semibold tracking-tight transition-colors truncate",
+                          isSelected ? "text-foreground" : "text-foreground/90"
+                        )}>
+                          {option.label}
+                        </span>
+                        <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider mt-0.5">
+                          {option.meta}
+                        </p>
+                      </div>
 
-                    {/* Voice Details */}
-                    <div className="flex-1 min-w-0 py-0.5">
-                      <span className={cn(
-                        "text-sm font-medium leading-tight block",
-                        isSelected && "font-semibold"
-                      )}>
-                        {option.name}
-                      </span>
-                      <p className="text-[11px] text-muted-foreground mt-0.5 leading-tight opacity-80">
-                        {formatMetadata(option)}
-                      </p>
-                    </div>
-
-                    {/* Check Icon */}
-                    {isSelected && (
-                      <Check className="h-4 w-4 text-primary shrink-0 mt-1" />
-                    )}
-                  </button>
-                );
-              })}
+                      {isSelected && (
+                        <Check className="h-3.5 w-3.5 text-foreground shrink-0 ml-3" />
+                      )}
+                    </button>
+                  );
+                })
+              )}
             </div>
           </div>
         </>,

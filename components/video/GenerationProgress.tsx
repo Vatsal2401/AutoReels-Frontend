@@ -1,11 +1,12 @@
-import React from 'react';
-import { cn } from "@/lib/utils";
-import { CheckCircle2, Circle, Loader2 } from "lucide-react";
+import { MediaSettings } from '../media-settings/types';
+import { Smartphone, Square, Monitor, Clock, Mic, Image as ImageIcon, CheckCircle2, Circle, Loader2, FileText } from "lucide-react";
+import { cn } from "@/lib/utils/format";
 
 interface GenerationProgressProps {
   status: 'idle' | 'generating' | 'completed' | 'error';
   progress?: number;
   currentStep?: string;
+  settings?: MediaSettings;
 }
 
 const STEPS = [
@@ -16,20 +17,91 @@ const STEPS = [
   { id: 'render', label: 'Rendering Video' },
 ];
 
-export function GenerationProgress({ status, progress = 0, currentStep = 'start' }: GenerationProgressProps) {
+export function GenerationProgress({ status, progress = 0, currentStep = 'start', settings }: GenerationProgressProps) {
   // Determine active step index for visualization
   const activeStepIndex = STEPS.findIndex(s => s.id === currentStep);
   
   if (status === 'idle') {
       return (
-          <div className="h-full w-full flex flex-col items-center justify-center p-8 text-center space-y-4 border border-border rounded-xl bg-card shadow-sm">
-              <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mb-2">
-                  <div className="w-8 h-8 rounded-full bg-primary/20 animate-pulse" />
+          <div className="h-full w-full flex flex-col p-8 text-left space-y-8 border border-border rounded-xl bg-card shadow-sm overflow-hidden relative">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2" />
+              
+              <div className="space-y-2 relative z-10">
+                <h3 className="text-2xl font-black text-foreground tracking-tight">Ready to <span className="text-primary italic">Synthesize</span></h3>
+                <p className="text-xs text-muted-foreground font-medium">
+                    Review your cinematic configuration before launching the neural engine.
+                </p>
               </div>
-              <h3 className="text-lg font-bold text-foreground">Ready to Synthesize</h3>
-              <p className="text-sm text-muted-foreground max-w-[200px] font-medium">
-                  Configure your parameters on the left to begin the creation process.
-              </p>
+
+              {settings && (
+                <div className="space-y-4 relative z-10">
+                   <div className="flex items-center gap-3 px-1 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 border-b border-border/50 pb-2">
+                      <FileText className="w-3 h-3" />
+                      Configuration Summary
+                   </div>
+                   
+                   <div className="grid grid-cols-1 gap-3">
+                      <div className="flex items-center justify-between p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-900 border border-border/60">
+                         <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                               <ImageIcon className="w-4 h-4" />
+                            </div>
+                            <div className="flex flex-col">
+                               <span className="text-[9px] font-black text-muted-foreground/60 uppercase tracking-tighter">Style</span>
+                               <span className="text-xs font-bold text-foreground capitalize">{settings.visualStyleId.replace('_', ' ')}</span>
+                            </div>
+                         </div>
+                         <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
+                      </div>
+
+                      <div className="flex items-center justify-between p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-900 border border-border/60">
+                         <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                               {settings.aspectRatio === '9:16' ? <Smartphone className="w-4 h-4" /> : settings.aspectRatio === '1:1' ? <Square className="w-4 h-4" /> : <Monitor className="w-4 h-4" />}
+                            </div>
+                            <div className="flex flex-col">
+                               <span className="text-[9px] font-black text-muted-foreground/60 uppercase tracking-tighter">Canvas</span>
+                               <span className="text-xs font-bold text-foreground">{settings.aspectRatio === '9:16' ? 'Vertical (9:16)' : settings.aspectRatio === '1:1' ? 'Square (1:1)' : 'Horizontal (16:9)'}</span>
+                            </div>
+                         </div>
+                         <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
+                      </div>
+
+                      <div className="flex items-center justify-between p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-900 border border-border/60">
+                         <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                               <Clock className="w-4 h-4" />
+                            </div>
+                            <div className="flex flex-col">
+                               <span className="text-[9px] font-black text-muted-foreground/60 uppercase tracking-tighter">Duration</span>
+                               <span className="text-xs font-bold text-foreground">{settings.duration} Target</span>
+                            </div>
+                         </div>
+                         <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
+                      </div>
+
+                      <div className="flex items-center justify-between p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-900 border border-border/60">
+                         <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                               <Mic className="w-4 h-4" />
+                            </div>
+                            <div className="flex flex-col">
+                               <span className="text-[9px] font-black text-muted-foreground/60 uppercase tracking-tighter">Audio</span>
+                               <span className="text-xs font-bold text-foreground">
+                                 {settings.language} ({settings.voiceLabel || 'Voice'})
+                               </span>
+                            </div>
+                         </div>
+                         <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
+                      </div>
+                   </div>
+                </div>
+              )}
+
+              <div className="mt-auto pt-6 border-t border-border/50 flex items-center gap-3 opacity-60">
+                 <Loader2 className="w-4 h-4 text-primary animate-spin" />
+                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Awaiting Command...</span>
+              </div>
           </div>
       );
   }

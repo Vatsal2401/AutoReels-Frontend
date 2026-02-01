@@ -18,7 +18,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
              <TopBar />
            </Suspense>
         </div>
-        <main className="flex-1 overflow-y-auto relative">{children}</main>
+        <main className="flex-1 overflow-y-auto scrollbar-saas relative">{children}</main>
       </div>
     </div>
   );
