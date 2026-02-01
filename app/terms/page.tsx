@@ -6,7 +6,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = generatePageMetadata({
   title: "Terms of Service",
   description:
-    "Read AI Reels' Terms of Service to understand the rules and guidelines for using our AI-powered video generation platform.",
+    "Read AutoReels' Terms of Service to understand the rules and guidelines for using our AI-powered video generation platform.",
   path: "/terms",
 });
 
@@ -34,7 +34,7 @@ export default function TermsPage() {
                   1. Acceptance of Terms
                 </h2>
                 <p className="leading-relaxed">
-                  By accessing and using AI Reels ("the Service"), you accept and agree to 
+                  By accessing and using AutoReels ("the Service"), you accept and agree to 
                   be bound by the terms and provision of this agreement. If you do not 
                   agree to these Terms of Service, please do not use our Service.
                 </p>
@@ -45,7 +45,7 @@ export default function TermsPage() {
                   2. Description of Service
                 </h2>
                 <p>
-                  AI Reels provides an AI-powered platform that generates video reels 
+                  AutoReels provides an AI-powered platform that generates video reels 
                   automatically based on user-provided topics. The Service includes script 
                   generation, audio narration, visual creation, and video compilation.
                 </p>
@@ -159,7 +159,7 @@ export default function TermsPage() {
                 </h2>
                 <p>
                   The Service, including its original content, features, and functionality, 
-                  is owned by AI Reels and protected by international copyright, trademark, 
+                  is owned by AutoReels and protected by international copyright, trademark, 
                   and other intellectual property laws.
                 </p>
               </section>
@@ -169,7 +169,7 @@ export default function TermsPage() {
                   9. Limitation of Liability
                 </h2>
                 <p>
-                  To the maximum extent permitted by law, AI Reels shall not be liable for 
+                  To the maximum extent permitted by law, AutoReels shall not be liable for 
                   any indirect, incidental, special, consequential, or punitive damages 
                   resulting from your use of the Service.
                 </p>
@@ -205,7 +205,7 @@ export default function TermsPage() {
                   If you have questions about these Terms of Service, please contact us at:
                 </p>
                 <p className="mt-2">
-                  <strong>Email:</strong> legal@aireels.com
+                  <strong>Email:</strong> legal@autoreels.in
                 </p>
               </section>
             </div>

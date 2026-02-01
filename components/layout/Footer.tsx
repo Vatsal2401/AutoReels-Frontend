@@ -7,7 +7,7 @@ export function Footer() {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           {/* AI Reels Column */}
           <div className="space-y-3">
-            <h3 className="text-base font-semibold text-foreground leading-tight">AI Reels</h3>
+            <h3 className="text-base font-semibold text-foreground leading-tight">AutoReels</h3>
             <p className="text-sm leading-relaxed text-muted-foreground">
               Generate viral faceless reels in 60 seconds with AI.
             </p>
@@ -86,7 +86,7 @@ export function Footer() {
         {/* Copyright Section */}
         <div className="mt-12 border-t border-border pt-8">
           <p className="text-center text-sm text-muted-foreground leading-tight">
-            © {new Date().getFullYear()} AI Reels. All rights reserved.
+            © {new Date().getFullYear()} AutoReels. All rights reserved.
           </p>
         </div>
       </div>

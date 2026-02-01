@@ -19,8 +19,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11.2%;
 
-    /* Primary: Vibrant Royal Blue (approx #2563eb). The "Blue" in "Blue and White". */
-    --primary: 221.2 83.2% 53.3%;
+    /* Primary: Vibrant Indigo (matches dashboard screenshots) */
+    --primary: 243 75% 59%;
     --primary-foreground: 210 40% 98%;
 
     /* Secondary: Light Blue/Gray mix */
@@ -33,8 +33,8 @@
     /* Slate 500 - excellent readability for subtext */
 
     /* Accent: Hover highlights */
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 221.2 83.2% 53.3%;
+    --accent: 243 75% 59%;
+    --accent-foreground: 0 0% 100%;
 
     /* Destructive */
     --destructive: 0 84.2% 60.2%;
@@ -44,8 +44,8 @@
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
 
-    /* Ring: Matches Primary Blue */
-    --ring: 221.2 83.2% 53.3%;
+    /* Ring: Matches Primary Indigo */
+    --ring: 243 75% 59%;
 
     --radius: 0.5rem;
 

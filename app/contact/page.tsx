@@ -8,7 +8,7 @@ import { Mail, MessageSquare } from "lucide-react";
 export const metadata: Metadata = generatePageMetadata({
   title: "Contact Us",
   description:
-    "Get in touch with AI Reels. Have questions, feedback, or need support? Contact our team and we'll get back to you as soon as possible.",
+    "Get in touch with AutoReels. Have questions, feedback, or need support? Contact our team and we'll get back to you as soon as possible.",
   path: "/contact",
 });
 
@@ -44,7 +44,7 @@ export default function ContactPage() {
                     </div>
                     <div className="space-y-1">
                       <h3 className="font-semibold leading-tight">Email</h3>
-                      <p className="text-muted-foreground leading-tight">support@aireels.com</p>
+                      <p className="text-muted-foreground leading-tight">support@autoreels.in</p>
                       <p className="text-sm text-muted-foreground leading-relaxed">
                         We typically respond within 24 hours
                       </p>

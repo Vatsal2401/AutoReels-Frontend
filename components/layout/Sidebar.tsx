@@ -70,7 +70,7 @@ export function Sidebar({ isOpen: forceOpen, onClose }: SidebarProps) {
               isMobileOpen && "opacity-100"
             )}>
               <h1 className="text-sm font-black tracking-[0.1em] text-foreground uppercase">
-                AI REELS
+                AUTOREELS
               </h1>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <div className="w-1 h-1 rounded-full bg-primary" />
