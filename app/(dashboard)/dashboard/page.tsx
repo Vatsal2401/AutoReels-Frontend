@@ -93,22 +93,22 @@ function DashboardContent() {
         <div className="h-full overflow-y-auto custom-scrollbar bg-background">
           <div className="flex flex-col lg:flex-row min-h-full w-full max-w-[1700px] mx-auto">
             {/* MAIN CONTENT Area */}
-            <div className="flex-1 p-8 lg:p-14 space-y-20 border-r border-border min-w-0">
+            <div className="flex-1 p-6 sm:p-8 lg:p-14 space-y-12 lg:space-y-20 border-b lg:border-b-0 lg:border-r border-border min-w-0">
               
               {/* Emergency / Monetization Banner */}
               {showLowCreditWarning && (
-                <div className="flex items-center justify-between gap-6 p-6 rounded-[32px] bg-amber-500/[0.03] border border-amber-500/10 animate-in fade-in slide-in-from-top-4 duration-1000">
-                   <div className="flex items-center gap-5">
-                      <div className="w-11 h-11 rounded-2xl bg-amber-500/5 flex items-center justify-center border border-amber-500/10">
-                        <AlertCircle className="w-5 h-5 text-amber-500/60" />
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 p-4 sm:p-6 rounded-[24px] lg:rounded-[32px] bg-amber-500/[0.03] border border-amber-500/10 animate-in fade-in slide-in-from-top-4 duration-1000">
+                   <div className="flex items-center gap-4 sm:gap-5 w-full sm:w-auto">
+                      <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-amber-500/5 flex items-center justify-center border border-amber-500/10 shrink-0">
+                        <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500/60" />
                       </div>
-                      <div className="space-y-1">
-                        <p className="text-[10px] font-black uppercase tracking-[0.25em] text-amber-500/50">Resource Depletion</p>
-                        <p className="text-sm text-muted-foreground font-medium tracking-tight">Critical fuel levels ({credits} units). Recharge to sustain production.</p>
+                      <div className="space-y-0.5 sm:space-y-1">
+                        <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.25em] text-amber-500/50">Resource Depletion</p>
+                        <p className="text-xs sm:text-sm text-muted-foreground font-medium tracking-tight">Critical fuel ({credits} units). Recharge to sustain.</p>
                       </div>
                    </div>
-                   <Link href="/dashboard?purchase=credits">
-                      <Button size="sm" className="bg-amber-500/90 hover:bg-amber-600 text-black font-black uppercase tracking-wider h-11 px-8 rounded-2xl shadow-lg transition-all duration-300 hover:scale-[1.02]">
+                   <Link href="/dashboard?purchase=credits" className="w-full sm:w-auto">
+                      <Button size="sm" className="w-full sm:w-auto bg-amber-500/90 hover:bg-amber-600 text-black font-black uppercase tracking-wider h-10 sm:h-11 px-8 rounded-xl sm:rounded-2xl shadow-lg transition-all duration-300 hover:scale-[1.02]">
                         Top Up
                       </Button>
                    </Link>
@@ -136,15 +136,15 @@ function DashboardContent() {
                     </p>
                   </div>
                   
-                  <div className="flex items-center gap-3">
-                    <Link href="/create">
-                      <Button size="lg" disabled={!hasCredits && !creditsLoading} className="h-12 px-8 font-black uppercase tracking-widest bg-primary hover:bg-primary/90 text-primary-foreground shadow-xl transition-all duration-300 hover:scale-[1.02] active:scale-95 rounded-xl">
+                  <div className="flex flex-col sm:flex-row items-center gap-3">
+                    <Link href="/create" className="w-full sm:w-auto">
+                      <Button size="lg" disabled={!hasCredits && !creditsLoading} className="w-full sm:w-auto h-12 lg:h-14 px-8 font-black uppercase tracking-widest bg-primary hover:bg-primary/90 text-primary-foreground shadow-xl transition-all duration-300 hover:scale-[1.02] active:scale-95 rounded-xl text-xs sm:text-base">
                         <Plus className="mr-2.5 h-4 w-4" />
                         Generate Reel
                       </Button>
                     </Link>
-                    <Link href="/dashboard?purchase=credits">
-                      <Button variant="ghost" className="h-12 px-5 text-muted-foreground hover:text-foreground hover:bg-muted font-black text-[9px] uppercase tracking-[0.25em] rounded-xl">
+                    <Link href="/dashboard?purchase=credits" className="w-full sm:w-auto">
+                      <Button variant="ghost" className="w-full sm:w-auto h-12 px-5 text-muted-foreground hover:text-foreground hover:bg-muted font-black text-[9px] uppercase tracking-[0.25em] rounded-xl">
                         Add Credits
                       </Button>
                     </Link>
@@ -210,7 +210,7 @@ function DashboardContent() {
                     </div>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 animate-in fade-in slide-in-from-bottom-6 duration-1000">
+                  <div className="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 animate-in fade-in slide-in-from-bottom-6 duration-1000">
                     {videos.map((video) => (
                       <VideoCard key={video.id} video={video} />
                     ))}
@@ -220,25 +220,25 @@ function DashboardContent() {
             </div>
 
             {/* STUDIO UTILITY PANEL (25%) */}
-            <div className="w-full lg:w-[380px] p-8 lg:p-14 shrink-0 space-y-14 bg-muted/20 border-l border-border">
+            <div className="w-full lg:w-[380px] p-8 lg:p-14 shrink-0 space-y-10 lg:space-y-14 bg-muted/20 border-t lg:border-t-0 lg:border-l border-border">
                
                {/* Pro Tips Section */}
-               <div className="space-y-8">
+               <div className="space-y-6 lg:space-y-8">
                  <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Studio Insights</h3>
-                 <div className="space-y-5">
-                    <div className="p-5 rounded-3xl border border-border bg-card hover:border-foreground/20 transition-all duration-300 group cursor-default shadow-sm">
+                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 sm:gap-5">
+                    <div className="p-5 rounded-3xl border border-border bg-card hover:border-foreground/20 transition-all duration-300 group cursor-default shadow-sm sm:h-auto">
                        <p className="text-[11px] font-black text-muted-foreground group-hover:text-foreground transition-colors uppercase tracking-wider">Lighting Matters</p>
-                       <p className="text-xs text-muted-foreground/80 mt-2 leading-relaxed font-medium">Using 'Cinematic Blue' style tends to get 2x more engagement on Reels.</p>
+                       <p className="text-xs text-muted-foreground/80 mt-2 leading-relaxed font-medium">Using 'Cinematic Blue' style tends to get 2x more engagement.</p>
                     </div>
-                    <div className="p-5 rounded-3xl border border-border bg-card shadow-sm">
+                    <div className="p-5 rounded-3xl border border-border bg-card shadow-sm sm:h-auto">
                        <p className="text-[11px] font-black text-muted-foreground uppercase tracking-wider">Quick Growth</p>
-                       <p className="text-xs text-muted-foreground/80 mt-2 leading-relaxed font-medium">Consistent posting (3x/week) is the fastest way to grow your AI channel.</p>
+                       <p className="text-xs text-muted-foreground/80 mt-2 leading-relaxed font-medium">Consistent posting (3x/week) is the fastest way to grow.</p>
                     </div>
                  </div>
                </div>
 
                {/* Resource Status */}
-               <div className="p-8 rounded-[40px] bg-card border border-border space-y-8 shadow-xl relative overflow-hidden group">
+               <div className="p-6 sm:p-8 rounded-[32px] lg:rounded-[40px] bg-card border border-border space-y-6 lg:space-y-8 shadow-xl relative overflow-hidden group">
                   <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 blur-3xl rounded-full -mr-12 -mt-12 transition-all group-hover:bg-primary/10" />
                   <div className="flex items-center justify-between relative z-10">
                     <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Fuel Level</h4>
@@ -260,7 +260,7 @@ function DashboardContent() {
                   </Link>
                </div>
 
-               <div className="pt-24 text-center space-y-3 flex flex-col items-center opacity-30">
+               <div className="pt-12 lg:pt-24 text-center space-y-3 flex flex-col items-center opacity-30">
                   <div className="w-8 h-px bg-border" />
                   <p className="text-[8px] font-black tracking-[0.4em] uppercase text-muted-foreground">Ecosystem v3.1</p>
                </div>

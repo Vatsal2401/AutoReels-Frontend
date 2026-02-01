@@ -100,32 +100,33 @@ export default function VideoDetailPage() {
 
   return (
     <DashboardLayout>
-      <div className="relative h-full flex flex-col">
+      <div className="relative lg:h-full flex flex-col">
         {/* Background Layer */}
         <div className="absolute inset-0 bg-background pointer-events-none" />
 
-        <div className="max-w-[1700px] mx-auto w-full relative z-10 flex flex-col h-full px-6 lg:px-12 py-6">
+        <div className="max-w-[1700px] mx-auto w-full relative z-10 flex flex-col lg:h-full px-4 lg:px-12 py-4 lg:py-6">
           
           {/* Studio Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6 mb-6">
-            <div className="flex items-center gap-4 lg:gap-8">
-              <Link href="/dashboard">
-                <Button variant="outline" size="sm" className="h-9 px-3 text-[10px] font-bold tracking-wider hover:bg-accent border-border text-muted-foreground transition-all">
-                  <ArrowLeft className="mr-2 h-3 w-3" />
-                  EXIT STUDIO
+            <div className="flex items-start sm:items-center gap-3 lg:gap-8">
+              <Link href="/dashboard" className="shrink-0">
+                <Button variant="outline" size="sm" className="h-9 px-2 sm:px-3 text-[10px] font-bold tracking-wider hover:bg-accent border-border text-muted-foreground transition-all">
+                  <ArrowLeft className="mr-1 sm:mr-2 h-3 w-3" />
+                  <span className="hidden sm:inline">EXIT STUDIO</span>
+                  <span className="sm:hidden">EXIT</span>
                 </Button>
               </Link>
               <div className="h-6 w-px bg-border hidden sm:block" />
-              <div className="flex flex-col">
-                <h1 className="text-base lg:text-lg font-bold tracking-tight text-foreground leading-tight max-w-[300px] lg:max-w-[500px] truncate">
+              <div className="flex flex-col min-w-0">
+                <h1 className="text-sm lg:text-lg font-bold tracking-tight text-foreground leading-tight truncate">
                   {isProcessing ? "Synthesizing Neural Flow..." : video.topic}
                 </h1>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">
+                  <span className="text-[9px] lg:text-[10px] text-muted-foreground font-semibold uppercase tracking-wider whitespace-nowrap">
                     Neural Pipeline V3
                   </span>
                   <span className="text-[10px] text-muted-foreground/40">•</span>
-                  <span className="text-[10px] text-muted-foreground/70 font-medium">
+                  <span className="text-[9px] lg:text-[10px] text-muted-foreground/70 font-medium whitespace-nowrap">
                     {formatRelativeTime(video.completed_at || video.created_at)}
                   </span>
                 </div>
@@ -204,11 +205,11 @@ export default function VideoDetailPage() {
             )}
 
             {isCompleted && video.final_video_url && (
-              <div className="animate-fade-in grid grid-cols-1 lg:grid-cols-12 gap-8 h-full min-h-0">
+              <div className="animate-fade-in grid grid-cols-1 lg:grid-cols-12 gap-8 lg:h-full min-h-0">
                 
                 {/* Stage Canvas: Video Player (8 Columns) */}
-                <div className="lg:col-span-8 flex flex-col gap-6 h-full min-h-0">
-                  <div className="flex-1 bg-muted/10 border border-border/50 rounded-[32px] overflow-hidden relative flex items-center justify-center p-6 lg:p-12">
+                <div className="lg:col-span-8 flex flex-col gap-6 lg:h-full min-h-0">
+                  <div className="flex-1 bg-muted/10 border border-border/50 rounded-2xl lg:rounded-[32px] overflow-hidden relative flex items-center justify-center p-4 lg:p-12">
                     <div className="h-full w-full max-h-full aspect-[9/16] flex items-center justify-center relative z-10">
                       <div className="w-full h-full rounded-2xl overflow-hidden shadow-sm ring-1 ring-border/40">
                         <VideoPlayer videoUrl={video.final_video_url} title={video.topic} />
@@ -217,32 +218,32 @@ export default function VideoDetailPage() {
                   </div>
 
                   {/* Playback Controls & Info */}
-                  <div className="flex flex-wrap items-center justify-between p-5 bg-zinc-50/50 dark:bg-zinc-900/50 border border-border/60 rounded-2xl shadow-sm gap-6">
-                    <div className="flex items-center gap-8">
-                      <div className="flex flex-col gap-1">
-                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Canvas Resolution</span>
-                        <span className="text-xs font-bold text-foreground">Vertical 1080x1920</span>
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between p-4 sm:p-5 bg-zinc-50/50 dark:bg-zinc-900/50 border border-border/60 rounded-2xl shadow-sm gap-4 sm:gap-6">
+                    <div className="flex items-center justify-around sm:justify-start gap-4 sm:gap-8">
+                      <div className="flex flex-col gap-0.5 lg:gap-1">
+                        <span className="text-[8px] lg:text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Canvas Resolution</span>
+                        <span className="text-[10px] lg:text-xs font-bold text-foreground whitespace-nowrap">Vertical 1080x1920</span>
                       </div>
                       <div className="w-px h-8 bg-border" />
-                      <div className="flex flex-col gap-1">
-                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Studio Version</span>
-                        <span className="text-xs font-bold text-primary">Neural V3.2</span>
+                      <div className="flex flex-col gap-0.5 lg:gap-1">
+                        <span className="text-[8px] lg:text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Studio Version</span>
+                        <span className="text-[10px] lg:text-xs font-bold text-primary whitespace-nowrap">Neural V3.2</span>
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 sm:gap-3">
                        <DownloadButton 
                           videoId={video.id} 
                           topic={video.topic || 'video'}
                           variant="secondary"
                           size="lg"
-                          className="h-11 px-6 font-bold border border-border rounded-xl text-xs hover:bg-muted transition-colors"
+                          className="flex-1 sm:flex-none h-11 px-4 lg:px-6 font-bold border border-border rounded-xl text-xs hover:bg-muted transition-colors"
                        >
                          DOWNLOAD 4K
                        </DownloadButton>
-                       <Link href="/create">
-                        <Button className="h-11 px-6 font-bold shadow-lg shadow-primary/10 rounded-xl text-xs">
-                          <Plus className="mr-2 h-4 w-4" />
+                       <Link href="/create" className="flex-1 sm:flex-none">
+                        <Button className="w-full h-11 px-4 lg:px-6 font-bold shadow-lg shadow-primary/10 rounded-xl text-xs">
+                          <Plus className="mr-1.5 h-4 w-4" />
                           CREATE NEW
                         </Button>
                       </Link>
@@ -251,8 +252,8 @@ export default function VideoDetailPage() {
                 </div>
 
                 {/* Studio Sidebar: Metadata & Logic (4 Columns) */}
-                <div className="lg:col-span-4 flex flex-col gap-6 h-full min-h-0 pb-6 lg:pb-0">
-                  <div className="flex-1 bg-zinc-50/50 dark:bg-zinc-900/50 border border-border/60 rounded-2xl p-6 flex flex-col gap-6 shadow-sm overflow-hidden">
+                <div className="lg:col-span-4 flex flex-col gap-6 lg:h-full min-h-0 pb-6 lg:pb-0">
+                  <div className="lg:flex-1 bg-zinc-50/50 dark:bg-zinc-900/50 border border-border/60 rounded-2xl p-6 flex flex-col gap-6 shadow-sm lg:overflow-hidden">
                     
                     {/* Creative Input Section */}
                     <div className="flex flex-col gap-3 min-h-0">
@@ -260,18 +261,18 @@ export default function VideoDetailPage() {
                          <FileText size={14} className="text-primary" />
                          <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Original Prompt</h4>
                       </div>
-                      <div className="p-4 bg-muted/30 rounded-xl border border-border/50 max-h-[120px] overflow-y-auto custom-scrollbar">
+                      <div className="p-3 sm:p-4 bg-muted/30 rounded-xl border border-border/50 max-h-[120px] overflow-y-auto custom-scrollbar">
                         <p className="text-xs text-foreground/90 italic font-medium leading-relaxed">
                           {video.topic}
                         </p>
                       </div>
                       
                       <div className="grid grid-cols-2 gap-3">
-                         <div className="p-3.5 bg-secondary/30 border border-border/40 rounded-xl">
+                         <div className="p-3 lg:p-3.5 bg-secondary/30 border border-border/40 rounded-xl">
                             <span className="block text-[8px] font-black uppercase text-muted-foreground/70 mb-1">Visual Kernel</span>
                             <span className="text-xs font-bold text-foreground">{video.metadata?.imageStyle || "Cinematic V2"}</span>
                          </div>
-                         <div className="p-3.5 bg-secondary/30 border border-border/40 rounded-xl">
+                         <div className="p-3 lg:p-3.5 bg-secondary/30 border border-border/40 rounded-xl">
                             <span className="block text-[8px] font-black uppercase text-muted-foreground/70 mb-1">Aural Pipeline</span>
                             <span className="text-xs font-bold text-foreground">Stereo Studio</span>
                          </div>
@@ -288,7 +289,7 @@ export default function VideoDetailPage() {
                          <Badge variant="outline" className="text-[8px] font-bold bg-emerald-500/5 text-emerald-600 border-emerald-500/10">SYNTAX OK</Badge>
                        </div>
                        
-                       <div className="flex-1 bg-muted/10 rounded-xl border border-border/40 p-5 overflow-y-auto custom-scrollbar">
+                       <div className="lg:flex-1 bg-muted/10 rounded-xl border border-border/40 p-4 sm:p-5 lg:overflow-y-auto custom-scrollbar min-h-[200px] lg:min-h-0">
                           {video.script ? (
                             <p className="text-xs text-foreground/80 leading-relaxed font-medium whitespace-pre-wrap">
                               {video.script}

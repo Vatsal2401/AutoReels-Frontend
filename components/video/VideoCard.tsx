@@ -138,7 +138,7 @@ export function VideoCard({ video }: VideoCardProps) {
         )}
 
         {/* Footer Actions */}
-        <div className="flex items-center justify-between pt-2 mt-auto border-t border-border/40">
+        <div className="flex items-center justify-between pt-3 mt-auto border-t border-border/40">
            {isCompleted ? (
              <div className="flex w-full items-center justify-between gap-2">
                <DownloadButton 

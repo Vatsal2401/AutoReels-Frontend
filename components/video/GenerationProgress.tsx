@@ -23,11 +23,11 @@ export function GenerationProgress({ status, progress = 0, currentStep = 'start'
   
   if (status === 'idle') {
       return (
-          <div className="h-full w-full flex flex-col p-8 text-left space-y-8 border border-border rounded-xl bg-card shadow-sm overflow-hidden relative">
+          <div className="min-h-full w-full flex flex-col p-6 lg:p-8 text-left space-y-6 lg:space-y-8 border border-border rounded-xl bg-card shadow-sm overflow-hidden relative">
               <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2" />
               
               <div className="space-y-2 relative z-10">
-                <h3 className="text-2xl font-black text-foreground tracking-tight">Ready to <span className="text-primary italic">Synthesize</span></h3>
+                <h3 className="text-xl lg:text-2xl font-black text-foreground tracking-tight">Ready to <span className="text-primary italic">Synthesize</span></h3>
                 <p className="text-xs text-muted-foreground font-medium">
                     Review your cinematic configuration before launching the neural engine.
                 </p>
@@ -107,12 +107,12 @@ export function GenerationProgress({ status, progress = 0, currentStep = 'start'
   }
 
   return (
-    <div className="h-full w-full p-8 rounded-xl border border-border bg-card flex flex-col relative overflow-hidden shadow-sm">
+    <div className="min-h-full w-full p-6 lg:p-8 rounded-xl border border-border bg-card flex flex-col relative overflow-hidden shadow-sm">
       {/* Background Ambient Glow */}
       <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-primary/5 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none opacity-50" />
       
       {/* Header */}
-      <div className="space-y-6 mb-12 relative z-10">
+      <div className="space-y-4 lg:space-y-6 mb-8 lg:mb-12 relative z-10">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-bold tracking-widest text-primary uppercase">
            <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
            AI Engine Active
@@ -129,7 +129,7 @@ export function GenerationProgress({ status, progress = 0, currentStep = 'start'
       </div>
 
       {/* Progress Bar */}
-      <div className="space-y-2 mb-12 relative z-10">
+      <div className="space-y-2 mb-8 lg:mb-12 relative z-10">
          <div className="flex justify-between text-xs font-medium text-muted-foreground">
              <span>Overall Progress</span>
              <span className="text-primary font-bold">{progress}%</span>

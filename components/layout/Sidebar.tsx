@@ -25,29 +25,23 @@ const navigation = [
   { name: "Credits", href: "/dashboard?purchase=credits", icon: CreditCard },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  isOpen?: boolean;
+  onClose?: (open: boolean) => void;
+}
+
+export function Sidebar({ isOpen: forceOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { user, logout } = useAuth();
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isInternalOpen, setIsInternalOpen] = useState(false);
+
+  const isMobileOpen = forceOpen !== undefined ? forceOpen : isInternalOpen;
+  const setIsMobileOpen = onClose || setIsInternalOpen;
 
   return (
     <>
-      {/* Mobile menu button */}
-      <div className="lg:hidden fixed top-4 left-4 z-50">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setIsMobileOpen(!isMobileOpen)}
-          className="glass"
-        >
-          {isMobileOpen ? (
-            <X className="h-5 w-5" />
-          ) : (
-            <Menu className="h-5 w-5" />
-          )}
-        </Button>
-      </div>
+      {/* Mobile menu button - REMOVED from here, now in TopBar */}
 
       {/* Mobile overlay */}
       {isMobileOpen && (
@@ -62,7 +56,7 @@ export function Sidebar() {
         className={cn(
           "fixed left-0 top-0 h-full border-r border-border z-[100] transition-all duration-500 ease-in-out bg-card/95 backdrop-blur-3xl group",
           "lg:w-20 lg:hover:w-64", // Collapsed by default, expands on hover
-          isMobileOpen ? "w-64 translate-x-0" : "w-64 -translate-x-full lg:translate-x-0"
+          isMobileOpen ? "w-52 translate-x-0" : "w-52 -translate-x-full lg:translate-x-0"
         )}
       >
         <div className="flex h-full flex-col overflow-hidden">
@@ -71,7 +65,10 @@ export function Sidebar() {
             <div className="flex items-center justify-center w-20 shrink-0">
               <Sparkles className="h-5 w-5 text-primary" />
             </div>
-            <div className="opacity-0 group-hover:opacity-100 transition-all duration-500 whitespace-nowrap overflow-hidden">
+            <div className={cn(
+              "opacity-0 group-hover:opacity-100 transition-all duration-500 whitespace-nowrap overflow-hidden",
+              isMobileOpen && "opacity-100"
+            )}>
               <h1 className="text-sm font-black tracking-[0.1em] text-foreground uppercase">
                 AI REELS
               </h1>
@@ -119,7 +116,8 @@ export function Sidebar() {
                   </div>
                   <span className={cn(
                     "opacity-0 group-hover:opacity-100 transition-all duration-500 font-bold text-[10px] uppercase tracking-[0.25em] whitespace-nowrap overflow-hidden ml-[-4px]",
-                    isActive ? "text-primary" : "text-muted-foreground group-hover/nav:text-foreground"
+                    isActive ? "text-primary" : "text-muted-foreground group-hover/nav:text-foreground",
+                    isMobileOpen && "opacity-100"
                   )}>
                     {item.name}
                   </span>
@@ -137,7 +135,10 @@ export function Sidebar() {
                   <User className="h-3.5 w-3.5 text-muted-foreground" />
                 </div>
               </div>
-              <div className="ml-1 opacity-0 group-hover:opacity-100 transition-all duration-500 whitespace-nowrap overflow-hidden min-w-0">
+              <div className={cn(
+                "ml-1 opacity-0 group-hover:opacity-100 transition-all duration-500 whitespace-nowrap overflow-hidden min-w-0",
+                isMobileOpen && "opacity-100"
+              )}>
                 <p className="text-[10px] font-black truncate text-foreground leading-tight uppercase tracking-tight">{user?.email?.split('@')[0]}</p>
                 <p className="text-[8px] text-muted-foreground font-black uppercase tracking-widest mt-0.5">Creator Pro</p>
               </div>
@@ -154,7 +155,10 @@ export function Sidebar() {
               <div className="flex items-center justify-center w-12 shrink-0">
                 <LogOut className="h-4 w-4 transition-transform group-hover/logout:-translate-x-0.5" />
               </div>
-              <span className="opacity-0 group-hover:opacity-100 transition-all duration-500 font-black text-[9px] uppercase tracking-[0.2em] whitespace-nowrap overflow-hidden">
+              <span className={cn(
+                "opacity-0 group-hover:opacity-100 transition-all duration-500 font-black text-[9px] uppercase tracking-[0.2em] whitespace-nowrap overflow-hidden",
+                isMobileOpen && "opacity-100"
+              )}>
                 Sign Out
               </span>
             </button>

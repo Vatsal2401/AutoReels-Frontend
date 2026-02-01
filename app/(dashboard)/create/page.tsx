@@ -40,7 +40,7 @@ export default function CreateVideoPage() {
 
   return (
     <DashboardLayout>
-      <div className="h-full flex flex-col overflow-hidden">
+      <div className="flex flex-col lg:h-full lg:overflow-hidden">
         <Suspense fallback={
           <div className="flex items-center justify-center h-full">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />

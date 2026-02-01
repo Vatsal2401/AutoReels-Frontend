@@ -11,11 +11,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, User, Settings, CreditCard, Sun, Moon, Laptop, Check } from "lucide-react";
+import { LogOut, User, Settings, CreditCard, Sun, Moon, Laptop, Check, Menu } from "lucide-react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useTheme } from "next-themes";
 
-export function TopBar() {
+interface TopBarProps {
+  onMenuClick?: () => void;
+}
+
+export function TopBar({ onMenuClick }: TopBarProps) {
   const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
   const router = useRouter();
@@ -37,9 +41,17 @@ export function TopBar() {
 
   return (
     <header className="sticky top-0 z-30 glass-strong border-b border-border">
-      <div className="flex h-16 items-center justify-between px-6">
+      <div className="flex h-14 lg:h-16 items-center justify-between px-4 lg:px-6">
         <div className="flex items-center gap-2">
-          <h2 className="text-base font-semibold text-foreground leading-tight">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onMenuClick}
+            className="lg:hidden h-9 w-9 text-muted-foreground mr-1"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+          <h2 className="text-sm lg:text-base font-semibold text-foreground leading-tight truncate max-w-[120px] sm:max-w-none">
             {getPageTitle()}
           </h2>
         </div>
