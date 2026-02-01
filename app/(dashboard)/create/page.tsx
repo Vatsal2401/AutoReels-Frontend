@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
@@ -41,7 +41,13 @@ export default function CreateVideoPage() {
   return (
     <DashboardLayout>
       <div className="h-full flex flex-col overflow-hidden">
-        <CreateVideoForm />
+        <Suspense fallback={
+          <div className="flex items-center justify-center h-full">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        }>
+          <CreateVideoForm />
+        </Suspense>
       </div>
     </DashboardLayout>
   );

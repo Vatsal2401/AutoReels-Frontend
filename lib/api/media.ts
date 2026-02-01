@@ -82,4 +82,9 @@ export const mediaApi = {
         const response = await apiClient.post(`/media/${id}/retry`);
         return response.data;
     },
+
+    updateMedia: async (id: string, data: any): Promise<Media> => {
+        const response = await apiClient.patch(`/media/${id}`, data);
+        return response.data;
+    },
 };

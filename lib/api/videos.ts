@@ -99,4 +99,17 @@ export const videosApi = {
     const videos = await videosApi.getVideos();
     return videos.filter(v => v.topic.toLowerCase().includes(query.toLowerCase()));
   },
+
+  retryVideo: async (id: string): Promise<{ video_id: string; status: string; topic: string }> => {
+    const media = await mediaApi.retryMedia(id);
+    return {
+      video_id: media.id,
+      status: media.status,
+      topic: media.input_config?.topic || "",
+    };
+  },
+
+  updateVideo: async (id: string, data: Partial<CreateVideoDto>): Promise<void> => {
+    await mediaApi.updateMedia(id, data);
+  },
 };

@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useCallback, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { videosApi, CreateVideoDto } from "@/lib/api/videos";
+import { videosApi, CreateVideoDto, Video, VideoStatus } from "@/lib/api/videos";
 import { useCredits } from "@/lib/hooks/useCredits";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -50,7 +50,9 @@ const getProgressFromStatus = (status: string) => {
 
 export function CreateVideoForm() {
   const router = useRouter();
-  const [topic, setTopic] = useState("");
+  const searchParams = useSearchParams();
+  const retryVideoId = searchParams.get("videoId");
+  const [topic, setTopic] = useState(searchParams.get("topic") || "");
   const { credits, hasCredits, isLoading: creditsLoading } = useCredits();
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
 
@@ -70,6 +72,33 @@ export function CreateVideoForm() {
       }
   });
 
+  const { data: retryVideoData } = useQuery({
+    queryKey: ['video', retryVideoId],
+    queryFn: () => videosApi.getVideo(retryVideoId!),
+    enabled: !!retryVideoId,
+  });
+
+  useEffect(() => {
+    if (retryVideoData) {
+      if (retryVideoData.topic) setTopic(retryVideoData.topic);
+      
+      const meta = retryVideoData.metadata;
+      if (meta) {
+        setSettings(prev => ({
+          ...prev,
+          aspectRatio: (meta.imageAspectRatio as any) || prev.aspectRatio,
+          language: meta.language || prev.language,
+          duration: Object.keys(DURATION_MAPPING).find(key => (DURATION_MAPPING as any)[key] === meta.duration) as any || prev.duration,
+        }));
+      }
+      
+      // If the retry video is already processing, track it
+      if (retryVideoData.status !== 'failed' && retryVideoData.status !== 'completed') {
+          setActiveVideoId(retryVideoData.id);
+      }
+    }
+  }, [retryVideoData]);
+
   const handleUpdate = useCallback((updates: Partial<MediaSettings>) => {
       setSettings(prev => ({ ...prev, ...updates }));
   }, []);
@@ -79,6 +108,18 @@ export function CreateVideoForm() {
     onSuccess: (data) => {
       setActiveVideoId(data.video_id);
     },
+  });
+
+  const retryMutation = useMutation({
+    mutationFn: async (payload: CreateVideoDto) => {
+        if (!retryVideoId) return;
+        // Update first, then retry
+        await videosApi.updateVideo(retryVideoId, payload);
+        return videosApi.retryVideo(retryVideoId);
+    },
+    onSuccess: (data) => {
+       if (data) setActiveVideoId(data.video_id);
+    }
   });
 
   const { data: videoStatus } = useQuery({
@@ -91,9 +132,13 @@ export function CreateVideoForm() {
     }
   });
 
+  const wordCount = topic.trim().split(/\s+/).filter(word => word.length > 0).length;
+  const charCount = topic.length;
+  const isValidTopic = wordCount >= 8 && charCount >= 45;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!topic.trim()) return;
+    if (!isValidTopic) return;
     if (!hasCredits) return;
 
     setActiveVideoId(null);
@@ -108,10 +153,14 @@ export function CreateVideoForm() {
       imageProvider: 'gemini'
     };
 
-    createMutation.mutate(payload);
+    if (retryVideoId) {
+        retryMutation.mutate(payload);
+    } else {
+        createMutation.mutate(payload);
+    }
   };
 
-  const currentStatus = videoStatus?.status || (createMutation.isPending ? 'pending' : 'idle');
+  const currentStatus = (videoStatus?.status || (createMutation.isPending || retryMutation.isPending ? 'pending' : 'pending')) as VideoStatus;
   const isCompleted = currentStatus === 'completed';
   const isFailed = currentStatus === 'failed';
   const errorMessage = videoStatus?.error_message;
@@ -146,16 +195,28 @@ export function CreateVideoForm() {
                           required
                           disabled={createMutation.isPending || (!!activeVideoId && !isCompleted) || !hasCredits}
                         />
-                        
-                        <div className="flex items-center justify-between mt-auto pt-4 border-t border-border/50">
-                          <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-bold uppercase tracking-wider group-focus-within:text-primary transition-colors">
-                             <Sparkles className="w-3 h-3" />
-                             <span>AI SCRIPT GENERATION ACTIVE</span>
-                          </div>
-                          <span className={cn("text-[10px] font-mono transition-colors font-medium", topic.length > 450 ? "text-destructive" : "text-muted-foreground group-hover:text-foreground text-left")}>
-                            {topic.length}/500
-                          </span>
-                        </div>
+                                                <div className="flex items-center justify-between mt-auto pt-4 border-t border-border/50">
+                           <div className="flex flex-col gap-1">
+                             <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-bold uppercase tracking-wider group-focus-within:text-primary transition-colors">
+                                <Sparkles className="w-3 h-3" />
+                                <span>AI SCRIPT GENERATION ACTIVE</span>
+                             </div>
+                             {!isValidTopic && topic.length > 0 && (
+                               <div className="flex items-center gap-1.5 text-[9px] font-bold text-amber-600 dark:text-amber-500 animate-in fade-in slide-in-from-left-1">
+                                 <AlertCircle className="w-2.5 h-2.5" />
+                                 <span>MIN 8 WORDS & 45 CHARS REQUIRED</span>
+                               </div>
+                             )}
+                           </div>
+                           <div className="flex flex-col items-end gap-1">
+                              <span className={cn("text-[10px] font-mono transition-colors font-medium", topic.length > 450 ? "text-destructive" : "text-muted-foreground group-hover:text-foreground text-left")}>
+                                {topic.length}/500 chars
+                              </span>
+                              <span className={cn("text-[10px] font-mono transition-colors font-medium", wordCount < 8 ? "text-amber-600" : "text-muted-foreground group-hover:text-foreground text-left")}>
+                                {wordCount} words
+                              </span>
+                           </div>
+                         </div>
                       </div>
                   </div>
 
@@ -225,7 +286,7 @@ export function CreateVideoForm() {
                        </div>
                        <div className="flex items-center gap-1.5 font-bold text-amber-600 dark:text-amber-500">
                           <Zap className="w-3 h-3 fill-current" />
-                          <span>1 Credit Cost</span>
+                          <span>{settings.duration === 'Long' ? 3 : settings.duration === 'Medium' ? 2 : 1} Credit Cost</span>
                        </div>
                     </div>
 
@@ -242,15 +303,21 @@ export function CreateVideoForm() {
                         </Button>
                       )}
 
-                      <Button
+                       <Button
                         onClick={handleSubmit}
                         className={cn("flex-1 h-14 text-base font-semibold shadow-md hover:shadow-lg transition-all", (isCompleted || isFailed) ? "flex-1" : "w-full")}
                         size="lg"
-                        isLoading={createMutation.isPending || (!!activeVideoId && !isCompleted && !isFailed)}
-                        disabled={!topic.trim() || createMutation.isPending || (!!activeVideoId && !isCompleted && !isFailed) || !hasCredits || creditsLoading}
+                        isLoading={createMutation.isPending || retryMutation.isPending || (!!activeVideoId && !isCompleted && !isFailed)}
+                        disabled={!isValidTopic || createMutation.isPending || retryMutation.isPending || (!!activeVideoId && !isCompleted && !isFailed) || !hasCredits || creditsLoading}
                       >
-                        {!createMutation.isPending && (!activeVideoId || isCompleted || isFailed) && <Sparkles className="mr-2 h-5 w-5" />}
-                        {createMutation.isPending || (!!activeVideoId && !isCompleted && !isFailed) ? "Generating..." : isFailed ? "Try Again" : "Generate Reel"}
+                        {!(createMutation.isPending || retryMutation.isPending) && (!activeVideoId || isCompleted || isFailed) && <Sparkles className="mr-2 h-5 w-5" />}
+                        {createMutation.isPending || retryMutation.isPending || (!!activeVideoId && !isCompleted && !isFailed) 
+                          ? "Generating..." 
+                          : isFailed 
+                            ? "Try Again" 
+                            : retryVideoId 
+                              ? "Retry Generate Reel" 
+                              : "Generate Reel"}
                       </Button>
                     </div>
                 </div>

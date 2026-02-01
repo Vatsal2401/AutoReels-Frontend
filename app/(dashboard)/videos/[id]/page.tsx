@@ -28,6 +28,10 @@ import { useState } from "react";
 import { formatRelativeTime } from "@/lib/utils/format";
 import { cn } from "@/lib/utils/format";
 
+import { DownloadButton } from "@/components/video/DownloadButton";
+
+// ... existing component ...
+// Replacing the usage site (VideoDetailPage)
 export default function VideoDetailPage() {
   const router = useRouter();
   const params = useParams();
@@ -227,25 +231,16 @@ export default function VideoDetailPage() {
                     </div>
                     
                     <div className="flex items-center gap-3">
-                       <Button
-                        size="lg"
-                        variant="secondary"
-                        onClick={async () => {
-                          try {
-                            const response = await videosApi.getDownloadUrl(video.id);
-                            if (response?.url) {
-                              window.location.href = response.url;
-                            }
-                          } catch (error) {
-                            console.error("Failed to get download URL", error);
-                          }
-                        }}
-                        className="h-11 px-6 font-bold border border-border rounded-xl text-xs hover:bg-muted transition-colors"
-                      >
-                        <Download className="mr-2 h-4 w-4" />
-                        DOWNLOAD 4K
-                      </Button>
-                      <Link href="/create">
+                       <DownloadButton 
+                          videoId={video.id} 
+                          topic={video.topic || 'video'}
+                          variant="secondary"
+                          size="lg"
+                          className="h-11 px-6 font-bold border border-border rounded-xl text-xs hover:bg-muted transition-colors"
+                       >
+                         DOWNLOAD 4K
+                       </DownloadButton>
+                       <Link href="/create">
                         <Button className="h-11 px-6 font-bold shadow-lg shadow-primary/10 rounded-xl text-xs">
                           <Plus className="mr-2 h-4 w-4" />
                           CREATE NEW

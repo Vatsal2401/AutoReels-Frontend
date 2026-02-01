@@ -8,6 +8,7 @@ import { formatRelativeTime } from "@/lib/utils/format";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/format";
 import { Download, Play, AlertCircle, Loader2, Sparkles, RotateCcw, Clock, Eye, Maximize2, Layers } from "lucide-react";
+import { DownloadButton } from "@/components/video/DownloadButton";
 
 interface VideoCardProps {
   video: Video;
@@ -140,18 +141,15 @@ export function VideoCard({ video }: VideoCardProps) {
         <div className="flex items-center justify-between pt-2 mt-auto border-t border-border/40">
            {isCompleted ? (
              <div className="flex w-full items-center justify-between gap-2">
-               <Button 
-                 variant="ghost" 
-                 size="sm"
-                 className="h-7 text-[10px] font-medium text-muted-foreground hover:text-foreground px-0 hover:bg-transparent"
-                 onClick={(e) => {
-                    e.preventDefault();
-                    if (video.final_video_url) window.open(video.final_video_url, "_blank");
-                 }}
+               <DownloadButton 
+                  videoId={video.id} 
+                  topic={video.topic || 'video'}
+                  variant="ghost" 
+                  size="sm"
+                  className="h-7 text-[10px] font-medium text-muted-foreground hover:text-foreground px-0 hover:bg-transparent"
                >
-                 <Download className="w-3 h-3 mr-1.5" />
                  Download
-               </Button>
+               </DownloadButton>
                
                <Link href={`/videos/${video.id}`} className="flex-1 flex justify-end">
                   <span className="text-[10px] font-bold text-primary group-hover:underline underline-offset-4 decoration-primary/30">
@@ -161,7 +159,7 @@ export function VideoCard({ video }: VideoCardProps) {
              </div>
            ) : isFailed ? (
              <div className="flex w-full items-center justify-end">
-               <Link href={`/create?topic=${encodeURIComponent(video.topic)}`}>
+               <Link href={`/create?videoId=${video.id}&topic=${encodeURIComponent(video.topic)}`}>
                  <Button variant="outline" size="sm" className="h-7 border-destructive/20 text-destructive/80 hover:text-destructive hover:bg-destructive/5 hover:border-destructive/30 text-[10px] font-bold shadow-none">
                    <RotateCcw className="w-3 h-3 mr-1.5" />
                    Retry
