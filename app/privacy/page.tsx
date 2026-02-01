@@ -6,7 +6,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = generatePageMetadata({
   title: "Privacy Policy",
   description:
-    "Read AI Reels' Privacy Policy to understand how we collect, use, and protect your personal information when you use our video generation platform.",
+    "Read AutoReels' Privacy Policy to understand how we collect, use, and protect your personal information when you use our video generation platform.",
   path: "/privacy",
 });
 
@@ -34,7 +34,7 @@ export default function PrivacyPage() {
                   1. Introduction
                 </h2>
                 <p className="leading-relaxed">
-                  AI Reels ("we," "our," or "us") is committed to protecting your privacy. 
+                  AutoReels ("we," "our," or "us") is committed to protecting your privacy. 
                   This Privacy Policy explains how we collect, use, disclose, and safeguard 
                   your information when you use our video generation platform.
                 </p>
@@ -160,7 +160,7 @@ export default function PrivacyPage() {
                   If you have questions about this Privacy Policy, please contact us at:
                 </p>
                 <p className="mt-2">
-                  <strong>Email:</strong> privacy@aireels.com
+                  <strong>Email:</strong> privacy@autoreels.in
                 </p>
               </section>
             </div>

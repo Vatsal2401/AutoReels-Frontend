@@ -10,7 +10,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_CONFIG.url),
   title: {
-    default: SITE_CONFIG.name,
+    default: `${SITE_CONFIG.name} | Create AI-Powered Faceless Videos`,
     template: `%s | ${SITE_CONFIG.name}`,
   },
   description: SITE_CONFIG.description,
@@ -53,6 +53,11 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: SITE_CONFIG.url,
+  },
+  icons: {
+    icon: "/icon.png",
+    shortcut: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
   },
 };
 

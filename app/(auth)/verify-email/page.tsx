@@ -81,7 +81,7 @@ function VerifyEmailContent() {
             {status === "loading" && "Please wait while we confirm your email address."}
             {status === "success" && (
               <div className="space-y-2">
-                <p>{message || "Your email has been successfully verified. You can now use all features of AI Reels."}</p>
+                <p>{message || "Your email has been successfully verified. You can now use all features of AutoReels."}</p>
                 <p className="text-primary font-medium flex items-center justify-center">
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Redirecting to dashboard...

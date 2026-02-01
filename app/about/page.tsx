@@ -6,7 +6,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = generatePageMetadata({
   title: "About Us",
   description:
-    "Learn about AI Reels - the revolutionary platform that generates viral faceless reels in 60 seconds using AI. Discover our mission, vision, and commitment to empowering content creators.",
+    "Learn about AutoReels - the revolutionary platform that generates viral faceless reels in 60 seconds using AI. Discover our mission, vision, and commitment to empowering content creators.",
   path: "/about",
 });
 
@@ -17,10 +17,10 @@ export default function AboutPage() {
       <main className="flex-1">
         <section className="py-24 px-4">
           <div className="container mx-auto max-w-4xl">
-            <h1 className="mb-8 text-4xl font-bold leading-tight">About AI Reels</h1>
+            <h1 className="mb-8 text-4xl font-bold leading-tight">About AutoReels</h1>
             <div className="prose prose-invert max-w-none space-y-6 text-muted-foreground">
               <p className="text-lg leading-relaxed">
-                AI Reels is revolutionizing the way content creators produce video content. 
+                AutoReels is revolutionizing the way content creators produce video content. 
                 We believe that everyone should be able to create professional, engaging 
                 video reels without the need for expensive equipment, editing skills, or 
                 even appearing on camera.
@@ -35,7 +35,7 @@ export default function AboutPage() {
 
               <h2 className="mt-8 text-2xl font-semibold text-foreground">What We Do</h2>
               <p>
-                AI Reels uses advanced artificial intelligence to:
+                AutoReels uses advanced artificial intelligence to:
               </p>
               <ul className="list-disc space-y-2 pl-6">
                 <li>Generate engaging scripts based on your topic</li>
@@ -64,7 +64,7 @@ export default function AboutPage() {
               </p>
 
               <p className="mt-8 text-lg">
-                Join thousands of creators who are already using AI Reels to grow their 
+                Join thousands of creators who are already using AutoReels to grow their 
                 audience and create viral content. Start creating today - no credit card required.
               </p>
             </div>
