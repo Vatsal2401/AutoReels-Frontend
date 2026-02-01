@@ -68,8 +68,8 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider
             attribute="class"
-            defaultTheme="system"
-            enableSystem
+            defaultTheme="light"
+            enableSystem={false}
             disableTransitionOnChange
           >
           <Providers>
@@ -77,7 +77,7 @@ export default function RootLayout({
             <Toaster 
               richColors 
               position="top-right"
-              theme="system"
+              theme="light"
               toastOptions={{
                 style: {
                   borderRadius: '12px',
