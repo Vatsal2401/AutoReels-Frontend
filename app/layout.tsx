@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { SITE_CONFIG, generatePageMetadata } from "@/lib/seo";
+import { Toaster } from "sonner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -55,15 +56,40 @@ export const metadata: Metadata = {
   },
 };
 
+import { ThemeProvider } from "@/components/theme-provider";
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <Providers>{children}</Providers>
+        <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+          <Providers>
+            {children}
+            <Toaster 
+              richColors 
+              position="top-right"
+              theme="system"
+              toastOptions={{
+                style: {
+                  borderRadius: '12px',
+                  border: '1px solid hsl(var(--border))',
+                  background: 'hsl(var(--card))',
+                  color: 'hsl(var(--foreground))',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                },
+              }}
+            />
+          </Providers>
+        </ThemeProvider>
       </body>
     </html>
   );

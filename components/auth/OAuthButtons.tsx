@@ -63,8 +63,9 @@ export function OAuthButtons({ mode = "login" }: OAuthButtonsProps) {
           type="button"
           variant="outline"
           onClick={handleMicrosoftAuth}
-          className="w-full h-11 border-border/50 hover:bg-accent/50 transition-all"
+          className="w-full h-11 border-border/50 hover:bg-accent/50 transition-all opacity-50 cursor-not-allowed"
           aria-label="Sign in with Microsoft"
+          disabled={true}
         >
           <svg className="mr-2 h-5 w-5" viewBox="0 0 23 23" aria-hidden="true">
             <path fill="#f3f3f3" d="M0 0h11v11H0z" />

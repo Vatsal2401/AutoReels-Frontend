@@ -16,6 +16,7 @@ export interface AuthResponse {
     id: string;
     email: string;
     name: string;
+    email_verified: boolean;
   };
   access_token: string;
   refresh_token: string;
@@ -26,6 +27,7 @@ export interface User {
   email: string;
   credits_balance?: number;
   is_premium?: boolean;
+  email_verified?: boolean;
 }
 
 export const authApi = {
@@ -49,6 +51,19 @@ export const authApi = {
       "/auth/refresh",
       { refresh_token: refreshToken }
     );
+    return response.data;
+  },
+
+  verifyEmail: async (token: string, email?: string): Promise<AuthResponse & { message: string }> => {
+    const url = email
+      ? `/auth/verify-email?token=${token}&email=${encodeURIComponent(email)}`
+      : `/auth/verify-email?token=${token}`;
+    const response = await apiClient.get<AuthResponse & { message: string }>(url);
+    return response.data;
+  },
+
+  resendVerification: async (): Promise<{ message: string }> => {
+    const response = await apiClient.post<{ message: string }>("/auth/resend-verification");
     return response.data;
   },
 };

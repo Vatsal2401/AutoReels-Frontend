@@ -12,9 +12,9 @@ export function Header() {
   const { user, isAuthenticated, logout } = useAuth();
   const pathname = usePathname();
   
-  // Landing page should always show public header for SEO
-  const isLandingPage = pathname === "/";
-  const showPublicHeader = isLandingPage;
+  // Landing page and auth pages should always show public header
+  const publicPaths = ["/", "/login", "/signup", "/verify-email", "/verify-pending"];
+  const showPublicHeader = publicPaths.includes(pathname || "");
 
   return (
     <header className="sticky top-0 z-50 glass-strong border-b border-border">

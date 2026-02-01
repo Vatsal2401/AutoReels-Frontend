@@ -53,19 +53,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser({
       userId: response.user.id,
       email: response.user.email,
+      email_verified: response.user.email_verified,
     });
     router.push("/dashboard");
   };
 
   const signup = async (email: string, password: string, name: string) => {
     const response: AuthResponse = await authApi.signUp({ email, password, name });
+    
+    // Save tokens and set user to log in automatically
     tokenStorage.setAccessToken(response.access_token);
     tokenStorage.setRefreshToken(response.refresh_token);
-    // Map API response to User type
+    
     setUser({
       userId: response.user.id,
       email: response.user.email,
+      email_verified: response.user.email_verified,
     });
+
+    const { toast } = await import("sonner");
+    toast.success("Account created! Please check your email to verify your account.", {
+      duration: 5000,
+    });
+    
     router.push("/dashboard");
   };
 

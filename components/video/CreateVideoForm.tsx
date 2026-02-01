@@ -1,256 +1,330 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useMutation } from "@tanstack/react-query";
-import { videosApi } from "@/lib/api/videos";
+import React, { useState, useCallback, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { videosApi, CreateVideoDto, Video, VideoStatus } from "@/lib/api/videos";
 import { useCredits } from "@/lib/hooks/useCredits";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { SelectEnhanced } from "@/components/ui/select-enhanced";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
-import { AlertCircle, Sparkles, Zap, Loader2, Globe, Film, CreditCard, Info } from "lucide-react";
+import { GenerationProgress } from "./GenerationProgress";
+import { VisualStyleSelector } from "../media-settings/VisualStyleSelector";
+import { FormatSelector } from "../media-settings/FormatSelector";
+import { NarrationSettings } from "../media-settings/NarrationSettings";
+import { DurationSelector } from "../media-settings/DurationSelector";
+import { MediaSettings } from "../media-settings/types";
+import { getFullPrompt } from "../media-settings/styles";
+import { AlertCircle, Sparkles, Zap, CreditCard, Info, Eye, CheckCircle2, Loader2, FileText } from "lucide-react";
 import { cn } from "@/lib/utils/format";
 
-const LANGUAGE_OPTIONS = [
-  { value: "english", label: "English" },
-  { value: "spanish", label: "Spanish" },
-  { value: "french", label: "French" },
-  { value: "german", label: "German" },
-  { value: "italian", label: "Italian" },
-  { value: "portuguese", label: "Portuguese" },
-  { value: "hindi", label: "Hindi" },
-  { value: "japanese", label: "Japanese" },
-];
+const DURATION_MAPPING = {
+  'Short': '30-60',
+  'Medium': '60-90',
+  'Long': '90-120'
+};
 
-const STYLE_OPTIONS = [
-  { value: "modern", label: "Modern" },
-  { value: "minimalist", label: "Minimalist" },
-  { value: "energetic", label: "Energetic" },
-  { value: "professional", label: "Professional" },
-  { value: "cinematic", label: "Cinematic" },
-  { value: "playful", label: "Playful" },
-];
+const getStepFromStatus = (status: string) => {
+  switch (status) {
+    case 'pending': return 'start';
+    case 'script_generating': return 'script';
+    case 'script_complete': return 'audio';
+    case 'processing': return 'assets';
+    case 'rendering': return 'render';
+    case 'completed': return 'done';
+    default: return 'start';
+  }
+};
+
+const getProgressFromStatus = (status: string) => {
+  switch (status) {
+    case 'pending': return 5;
+    case 'script_generating': return 25;
+    case 'script_complete': return 45;
+    case 'processing': return 70;
+    case 'rendering': return 90;
+    case 'completed': return 100;
+    default: return 0;
+  }
+};
 
 export function CreateVideoForm() {
   const router = useRouter();
-  const [topic, setTopic] = useState("");
-  const [language, setLanguage] = useState("english");
-  const [style, setStyle] = useState("modern");
+  const searchParams = useSearchParams();
+  const retryVideoId = searchParams.get("videoId");
+  const [topic, setTopic] = useState(searchParams.get("topic") || "");
   const { credits, hasCredits, isLoading: creditsLoading } = useCredits();
+  const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
+
+  const [settings, setSettings] = useState<MediaSettings>({
+      visualStyleId: 'cinematic',
+      aspectRatio: '9:16',
+      voiceId: '21m00Tcm4TlvDq8ikWAM', // Rachel
+      voiceLabel: 'Rachel',
+      language: 'English (US)',
+      duration: 'Short',
+      imageProvider: 'gemini',
+      advancedOptions: {
+        styleStrength: 'medium',
+        lighting: 'none',
+        colorTone: 'none',
+        cameraFraming: 'none'
+      }
+  });
+
+  const { data: retryVideoData } = useQuery({
+    queryKey: ['video', retryVideoId],
+    queryFn: () => videosApi.getVideo(retryVideoId!),
+    enabled: !!retryVideoId,
+  });
+
+  useEffect(() => {
+    if (retryVideoData) {
+      if (retryVideoData.topic) setTopic(retryVideoData.topic);
+      
+      const meta = retryVideoData.metadata;
+      if (meta) {
+        setSettings(prev => ({
+          ...prev,
+          aspectRatio: (meta.imageAspectRatio as any) || prev.aspectRatio,
+          language: meta.language || prev.language,
+          duration: Object.keys(DURATION_MAPPING).find(key => (DURATION_MAPPING as any)[key] === meta.duration) as any || prev.duration,
+        }));
+      }
+      
+      // If the retry video is already processing, track it
+      if (retryVideoData.status !== 'failed' && retryVideoData.status !== 'completed') {
+          setActiveVideoId(retryVideoData.id);
+      }
+    }
+  }, [retryVideoData]);
+
+  const handleUpdate = useCallback((updates: Partial<MediaSettings>) => {
+      setSettings(prev => ({ ...prev, ...updates }));
+  }, []);
 
   const createMutation = useMutation({
     mutationFn: videosApi.createVideo,
     onSuccess: (data) => {
-      router.push(`/videos/${data.video_id}`);
+      setActiveVideoId(data.video_id);
     },
   });
 
+  const retryMutation = useMutation({
+    mutationFn: async (payload: CreateVideoDto) => {
+        if (!retryVideoId) return;
+        // Update first, then retry
+        await videosApi.updateVideo(retryVideoId, payload);
+        return videosApi.retryVideo(retryVideoId);
+    },
+    onSuccess: (data) => {
+       if (data) setActiveVideoId(data.video_id);
+    }
+  });
+
+  const { data: videoStatus } = useQuery({
+    queryKey: ['video-status', activeVideoId],
+    queryFn: () => videosApi.getVideo(activeVideoId!),
+    enabled: !!activeVideoId && activeVideoId !== '',
+    refetchInterval: (query) => {
+      const status = query.state.data?.status;
+      return status === 'completed' || status === 'failed' ? false : 2000;
+    }
+  });
+
+  const wordCount = topic.trim().split(/\s+/).filter(word => word.length > 0).length;
+  const charCount = topic.length;
+  const isValidTopic = wordCount >= 8 && charCount >= 45;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!topic.trim()) return;
-    if (!hasCredits) {
-      return;
+    if (!isValidTopic) return;
+    if (!hasCredits) return;
+
+    setActiveVideoId(null);
+
+    const payload: CreateVideoDto = {
+      topic: topic.trim(),
+      language: settings.language,
+      duration: DURATION_MAPPING[settings.duration],
+      imageStyle: getFullPrompt(settings.visualStyleId, settings.advancedOptions),
+      imageAspectRatio: settings.aspectRatio,
+      voiceId: settings.voiceId,
+      imageProvider: 'gemini'
+    };
+
+    if (retryVideoId) {
+        retryMutation.mutate(payload);
+    } else {
+        createMutation.mutate(payload);
     }
-    createMutation.mutate({ topic: topic.trim() });
   };
 
+  const currentStatus = (videoStatus?.status || (createMutation.isPending || retryMutation.isPending ? 'pending' : 'pending')) as VideoStatus;
+  const isCompleted = currentStatus === 'completed';
+  const isFailed = currentStatus === 'failed';
+  const errorMessage = videoStatus?.error_message;
+
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-6">
-      {/* Header Section */}
-      <div className="space-y-2">
-        <h1 className="text-4xl font-bold tracking-tight leading-tight">Create New Reel</h1>
-        <p className="text-lg text-muted-foreground leading-relaxed">
-          Generate viral faceless reels in 60 seconds with AI
-        </p>
-      </div>
+    <div className="flex flex-col h-full bg-background rounded-xl border border-border overflow-hidden shadow-sm">
+      <div className="flex flex-1 h-full overflow-hidden">
+          
+          {/* LEFT: Composition Studio */}
+          <div className="flex-1 min-w-0 h-full overflow-y-auto scrollbar-saas bg-zinc-50/20 dark:bg-zinc-950/20">
+              <div className="flex flex-col min-h-full py-12 px-8 space-y-16 w-full max-w-4xl mx-auto">
+                  
+                  {/* 1. Header & Creative Intent (Hero) */}
+                  <div className="w-full space-y-8 text-center pb-12 border-b border-border/40">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-full border border-primary/20 scale-90">
+                        <Sparkles className="w-3 h-3 text-primary" />
+                        <span className="text-[10px] font-bold text-primary uppercase tracking-tighter">AI Synthesis Engine</span>
+                      </div>
+                      <h2 className="text-5xl font-black text-foreground tracking-tight max-w-[600px] mx-auto leading-tight italic">
+                        Transform your <span className="text-primary italic">vision</span> into cinematic reality.
+                      </h2>
+                      <div className="group relative bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[32px] p-8 transition-all duration-500 hover:border-primary/40 hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] focus-within:ring-2 focus-within:ring-primary/10 focus-within:border-primary h-auto min-h-[220px] flex flex-col">
+                        <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 mb-4 px-1 text-left">Creative Intent</label>
+                        <Textarea
+                          id="topic"
+                          value={topic}
+                          onChange={(e) => setTopic(e.target.value)}
+                          placeholder="Tell the AI what story you want to narrate..."
+                          rows={3}
+                          maxLength={500}
+                          className="w-full resize-none text-xl font-medium leading-relaxed bg-transparent border-none p-0 placeholder:text-muted-foreground/40 focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[100px] text-foreground"
+                          required
+                          disabled={createMutation.isPending || (!!activeVideoId && !isCompleted) || !hasCredits}
+                        />
+                                                <div className="flex items-center justify-between mt-auto pt-4 border-t border-border/50">
+                           <div className="flex flex-col gap-1">
+                             <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-bold uppercase tracking-wider group-focus-within:text-primary transition-colors">
+                                <Sparkles className="w-3 h-3" />
+                                <span>AI SCRIPT GENERATION ACTIVE</span>
+                             </div>
+                             {!isValidTopic && topic.length > 0 && (
+                               <div className="flex items-center gap-1.5 text-[9px] font-bold text-amber-600 dark:text-amber-500 animate-in fade-in slide-in-from-left-1">
+                                 <AlertCircle className="w-2.5 h-2.5" />
+                                 <span>MIN 8 WORDS & 45 CHARS REQUIRED</span>
+                               </div>
+                             )}
+                           </div>
+                           <div className="flex flex-col items-end gap-1">
+                              <span className={cn("text-[10px] font-mono transition-colors font-medium", topic.length > 450 ? "text-destructive" : "text-muted-foreground group-hover:text-foreground text-left")}>
+                                {topic.length}/500 chars
+                              </span>
+                              <span className={cn("text-[10px] font-mono transition-colors font-medium", wordCount < 8 ? "text-amber-600" : "text-muted-foreground group-hover:text-foreground text-left")}>
+                                {wordCount} words
+                              </span>
+                           </div>
+                         </div>
+                      </div>
+                  </div>
 
-      {/* Credits Card */}
-      {!creditsLoading && (
-        <div className="relative overflow-hidden rounded-lg border border-border/50 bg-gradient-to-br from-card/50 to-card/30 backdrop-blur-sm">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-50" />
-          <div className="relative flex items-center justify-between p-6">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 via-primary/15 to-primary/10 border border-primary/30 shadow-lg shrink-0">
-                <CreditCard className="h-7 w-7 text-primary" />
+                  {/* 2. Visual Style (Dominant) */}
+                  <div className="w-full space-y-8">
+                     <div className="flex items-center gap-3 px-1 border-b border-border/40 pb-3">
+                        <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                        <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">Cinematic Universe</h3>
+                     </div>
+                     <VisualStyleSelector settings={settings} onUpdate={handleUpdate} />
+                  </div>
+
+                  {/* 3. Configuration Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-12 pt-8 pb-12">
+                     <div className="space-y-6">
+                        <div className="flex items-center gap-3 pb-3 border-b border-border/40 px-1">
+                           <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">Format</span>
+                           <Info className="w-3 h-3 text-muted-foreground/30" />
+                        </div>
+                        <FormatSelector settings={settings} onUpdate={handleUpdate} />
+                     </div>
+
+                     <div className="space-y-6">
+                        <div className="flex items-center gap-3 pb-3 border-b border-border/40 px-1">
+                           <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">Voice Narration</span>
+                        </div>
+                        <NarrationSettings settings={settings} onUpdate={handleUpdate} />
+                     </div>
+                        
+                     <div className="space-y-6">
+                        <div className="flex items-center gap-3 pb-3 border-b border-border/40 px-1">
+                           <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">Video Length</span>
+                        </div>
+                        <DurationSelector settings={settings} onUpdate={handleUpdate} />
+                     </div>
+                  </div>
               </div>
-              <div className="flex flex-col justify-center gap-1">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  Available Credits
-                </p>
-                <div className="flex items-baseline gap-2.5">
-                  <span className="text-3xl font-bold text-foreground leading-none tracking-tight">
-                    {credits ?? 0}
-                  </span>
-                  <span className="text-sm font-medium text-muted-foreground leading-tight">
-                    {hasCredits ? "credits remaining" : "insufficient credits"}
-                  </span>
-                </div>
-              </div>
-            </div>
-            {!hasCredits && (
-              <Link href="/dashboard?purchase=credits">
-                <Button variant="outline" size="sm" className="shrink-0">
-                  <CreditCard className="mr-2 h-4 w-4" />
-                  Purchase Credits
-                </Button>
-              </Link>
-            )}
           </div>
-        </div>
-      )}
 
-      {/* Main Form Card */}
-      <Card className="glass-strong border-border/50 shadow-xl">
-        <CardContent className="p-8">
-          {!creditsLoading && !hasCredits && (
-            <div className="mb-6 rounded-lg border border-destructive/50 bg-destructive/10 p-4 flex items-start gap-3 animate-fade-in">
-              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-destructive/20 border border-destructive/30 shrink-0">
-                <AlertCircle className="h-4 w-4 text-destructive" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-destructive mb-1">
-                  Insufficient Credits
-                </p>
-                <p className="text-sm text-destructive/80 leading-relaxed">
-                  You need at least 1 credit to create a video. Purchase credits to continue.
-                </p>
-              </div>
-            </div>
-          )}
+          {/* RIGHT: Live Preview / Status Panel */}
+          <div className="w-[480px] shrink-0 border-l border-border bg-secondary relative h-full overflow-hidden">
+             <div className="absolute inset-0 overflow-y-auto scrollbar-saas pb-48">
+               <div className="p-8">
+                 <GenerationProgress 
+                    status={activeVideoId ? (isFailed ? 'error' : isCompleted ? 'completed' : 'generating') : 'idle'} 
+                    progress={activeVideoId ? getProgressFromStatus(currentStatus) : 0}
+                    currentStep={activeVideoId ? getStepFromStatus(currentStatus) : 'start'}
+                    settings={settings}
+                 />
+                 
+                 {isFailed && errorMessage && (
+                   <div className="mt-4 p-4 rounded-lg bg-destructive/10 border border-destructive/20">
+                     <p className="text-sm text-destructive font-medium">Generation Failed</p>
+                     <p className="text-xs text-destructive/70 mt-1">{errorMessage}</p>
+                   </div>
+                 )}
+               </div>
+             </div>
+ 
+             {/* Action Bar */}
+             <div className="absolute bottom-0 left-0 right-0 p-8 border-t border-border bg-card z-10 transition-all duration-300 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
+                <div className="space-y-5">
+                    <div className="flex items-center justify-between text-xs">
+                       <div className="flex items-center gap-2 text-muted-foreground font-medium">
+                           <CreditCard className="w-3.5 h-3.5 text-primary" />
+                           <span>Available: <strong className="text-foreground">{credits ?? 0}</strong></span>
+                       </div>
+                       <div className="flex items-center gap-1.5 font-bold text-amber-600 dark:text-amber-500">
+                          <Zap className="w-3 h-3 fill-current" />
+                          <span>{settings.duration === 'Long' ? 3 : settings.duration === 'Medium' ? 2 : 1} Credit Cost</span>
+                       </div>
+                    </div>
 
-          <form onSubmit={handleSubmit} className="space-y-8 pt-6">
-            {/* Topic Input Section */}
-            <div className="space-y-3">
-              <label
-                htmlFor="topic"
-                className="flex items-baseline gap-2.5 text-base font-semibold text-foreground mb-1.5"
-              >
-                <Zap className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                <span className="leading-tight">Video Topic</span>
-                <span className="text-destructive text-base font-bold leading-none ml-0.5">*</span>
-              </label>
-              <Textarea
-                id="topic"
-                value={topic}
-                onChange={(e) => setTopic(e.target.value)}
-                placeholder="Describe what your reel should be about...
+                    <div className="flex gap-3">
+                      {isCompleted && (
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          onClick={() => router.push(`/videos/${activeVideoId}`)}
+                          className="flex-1 h-14 text-base font-semibold shadow-sm border border-border"
+                        >
+                          <Eye className="mr-2 h-5 w-5" />
+                          View Reel
+                        </Button>
+                      )}
 
-Examples:
-  • How to start a successful startup
-  • Top 5 productivity tips for remote workers
-  • Why meditation changes your life
-  • The future of artificial intelligence"
-                rows={6}
-                maxLength={500}
-                className="resize-none text-base leading-relaxed placeholder:leading-relaxed placeholder:tracking-normal"
-                required
-                disabled={createMutation.isPending || !hasCredits}
-              />
-              <div className="flex justify-between items-center pt-1">
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Info className="h-3.5 w-3.5 shrink-0" />
-                  <span className="leading-tight">Be specific and detailed for better results</span>
+                       <Button
+                        onClick={handleSubmit}
+                        className={cn("flex-1 h-14 text-base font-semibold shadow-md hover:shadow-lg transition-all", (isCompleted || isFailed) ? "flex-1" : "w-full")}
+                        size="lg"
+                        isLoading={createMutation.isPending || retryMutation.isPending || (!!activeVideoId && !isCompleted && !isFailed)}
+                        disabled={!isValidTopic || createMutation.isPending || retryMutation.isPending || (!!activeVideoId && !isCompleted && !isFailed) || !hasCredits || creditsLoading}
+                      >
+                        {!(createMutation.isPending || retryMutation.isPending) && (!activeVideoId || isCompleted || isFailed) && <Sparkles className="mr-2 h-5 w-5" />}
+                        {createMutation.isPending || retryMutation.isPending || (!!activeVideoId && !isCompleted && !isFailed) 
+                          ? "Generating..." 
+                          : isFailed 
+                            ? "Try Again" 
+                            : retryVideoId 
+                              ? "Retry Generate Reel" 
+                              : "Generate Reel"}
+                      </Button>
+                    </div>
                 </div>
-                <p
-                  className={cn(
-                    "text-xs font-medium leading-tight",
-                    topic.length > 450 ? "text-destructive" : "text-muted-foreground"
-                  )}
-                >
-                  {topic.length}/500
-                </p>
-              </div>
-            </div>
-
-            {/* Settings Section */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 pb-2.5 border-b border-border/50">
-                <Film className="h-4 w-4 text-muted-foreground shrink-0" />
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide leading-tight">
-                  Video Settings
-                </h3>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Language Select */}
-                <div className="space-y-3">
-                  <label
-                    htmlFor="language"
-                    className="flex items-center gap-2 text-sm font-semibold text-foreground mb-1"
-                  >
-                    <Globe className="h-4 w-4 text-muted-foreground shrink-0" />
-                    <span className="leading-tight">Language</span>
-                  </label>
-                  <SelectEnhanced
-                    id="language"
-                    value={language}
-                    onChange={setLanguage}
-                    options={LANGUAGE_OPTIONS}
-                    placeholder="Select language"
-                    disabled={createMutation.isPending || !hasCredits}
-                  />
-                </div>
-
-                {/* Style Select */}
-                <div className="space-y-3">
-                  <label
-                    htmlFor="style"
-                    className="flex items-center gap-2 text-sm font-semibold text-foreground mb-1"
-                  >
-                    <Film className="h-4 w-4 text-muted-foreground shrink-0" />
-                    <span className="leading-tight">Video Style</span>
-                  </label>
-                  <SelectEnhanced
-                    id="style"
-                    value={style}
-                    onChange={setStyle}
-                    options={STYLE_OPTIONS}
-                    placeholder="Select style"
-                    disabled={createMutation.isPending || !hasCredits}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <div className="space-y-4 pt-4">
-              <Button
-                type="submit"
-                className="w-full h-12 text-base font-semibold"
-                size="lg"
-                isLoading={createMutation.isPending}
-                disabled={!topic.trim() || createMutation.isPending || !hasCredits || creditsLoading}
-              >
-                {!createMutation.isPending && <Sparkles className="mr-2 h-5 w-5" />}
-                {createMutation.isPending ? "Generating your reel..." : "Generate Reel"}
-              </Button>
-
-              <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-                <Info className="h-3.5 w-3.5 shrink-0" />
-                <span className="leading-tight text-center">Generation typically takes 30-60 seconds. You'll be redirected to see progress.</span>
-              </div>
-            </div>
-
-            {/* Error Message */}
-            {createMutation.isError && (
-              <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 flex items-start gap-3 animate-fade-in">
-                <AlertCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-semibold text-destructive mb-1">Generation Failed</p>
-                  <p className="text-sm text-destructive/80">
-                    {createMutation.error instanceof Error
-                      ? createMutation.error.message
-                      : "Something went wrong. Please try again."}
-                  </p>
-                </div>
-              </div>
-            )}
-          </form>
-        </CardContent>
-      </Card>
+             </div>
+          </div>
+          
+      </div>
     </div>
   );
 }
