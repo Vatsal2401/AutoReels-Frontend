@@ -31,7 +31,7 @@ export function StatsCard({
         className
       )}
     >
-      <CardContent className="px-8 pb-8 pt-8">
+      <CardContent className="px-6 py-6 sm:px-8 sm:py-8">
         <div className="flex items-center justify-between gap-6">
           <div className="flex-1 min-w-0">
             <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/70 mb-3">
@@ -39,7 +39,7 @@ export function StatsCard({
             </p>
             <div className="flex items-baseline gap-3">
               <h3 className={cn(
-                "text-3xl font-bold tracking-tight transition-colors duration-300",
+                "text-2xl sm:text-3xl font-bold tracking-tight transition-colors duration-300",
                 isLow ? "text-amber-500" : "text-foreground"
               )}>
                 {value}
@@ -65,7 +65,7 @@ export function StatsCard({
           </div>
           
           <div className={cn(
-            "flex items-center justify-center w-12 h-12 rounded-[18px] transition-all duration-500 shrink-0",
+            "flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-[14px] sm:rounded-[18px] transition-all duration-500 shrink-0",
             "bg-secondary/50 border border-border shadow-inner",
             isLow ? "border-amber-500/20 bg-amber-500/10" : "group-hover:border-primary/20 group-hover:bg-primary/10"
           )}>

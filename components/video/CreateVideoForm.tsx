@@ -166,23 +166,22 @@ export function CreateVideoForm() {
   const errorMessage = videoStatus?.error_message;
 
   return (
-    <div className="flex flex-col h-full bg-background rounded-xl border border-border overflow-hidden shadow-sm">
-      <div className="flex flex-1 h-full overflow-hidden">
+    <div className="flex flex-col lg:h-full bg-background lg:rounded-xl lg:border lg:border-border lg:overflow-hidden lg:shadow-sm">
+      <div className="flex flex-col lg:flex-row lg:flex-1 lg:h-full lg:overflow-hidden">
           
           {/* LEFT: Composition Studio */}
-          <div className="flex-1 min-w-0 h-full overflow-y-auto scrollbar-saas bg-zinc-50/20 dark:bg-zinc-950/20">
-              <div className="flex flex-col min-h-full py-12 px-8 space-y-16 w-full max-w-4xl mx-auto">
+          <div className="w-full lg:flex-1 min-w-0 h-auto lg:h-full lg:overflow-y-auto scrollbar-saas bg-zinc-50/20 dark:bg-zinc-950/20">
+              <div className="flex flex-col pt-6 pb-12 lg:py-12 px-4 lg:px-8 space-y-8 lg:space-y-16 w-full max-w-4xl mx-auto">
                   
-                  {/* 1. Header & Creative Intent (Hero) */}
-                  <div className="w-full space-y-8 text-center pb-12 border-b border-border/40">
+                  <div className="w-full space-y-6 lg:space-y-8 text-center pb-8 lg:pb-12 border-b border-border/40">
                       <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-full border border-primary/20 scale-90">
                         <Sparkles className="w-3 h-3 text-primary" />
                         <span className="text-[10px] font-bold text-primary uppercase tracking-tighter">AI Synthesis Engine</span>
                       </div>
-                      <h2 className="text-5xl font-black text-foreground tracking-tight max-w-[600px] mx-auto leading-tight italic">
+                      <h2 className="text-2xl lg:text-5xl font-black text-foreground tracking-tight max-w-[600px] mx-auto leading-tight italic px-2">
                         Transform your <span className="text-primary italic">vision</span> into cinematic reality.
                       </h2>
-                      <div className="group relative bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[32px] p-8 transition-all duration-500 hover:border-primary/40 hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] focus-within:ring-2 focus-within:ring-primary/10 focus-within:border-primary h-auto min-h-[220px] flex flex-col">
+                      <div className="group relative bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl lg:rounded-[32px] p-6 lg:p-8 transition-all duration-500 hover:border-primary/40 hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] focus-within:ring-2 focus-within:ring-primary/10 focus-within:border-primary h-auto min-h-[180px] lg:min-h-[220px] flex flex-col">
                         <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 mb-4 px-1 text-left">Creative Intent</label>
                         <Textarea
                           id="topic"
@@ -191,7 +190,7 @@ export function CreateVideoForm() {
                           placeholder="Tell the AI what story you want to narrate..."
                           rows={3}
                           maxLength={500}
-                          className="w-full resize-none text-xl font-medium leading-relaxed bg-transparent border-none p-0 placeholder:text-muted-foreground/40 focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[100px] text-foreground"
+                          className="w-full resize-none text-base lg:text-xl font-medium leading-relaxed bg-transparent border-none p-0 placeholder:text-muted-foreground/40 focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[80px] lg:min-h-[100px] text-foreground"
                           required
                           disabled={createMutation.isPending || (!!activeVideoId && !isCompleted) || !hasCredits}
                         />
@@ -230,7 +229,7 @@ export function CreateVideoForm() {
                   </div>
 
                   {/* 3. Configuration Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-12 pt-8 pb-12">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 pt-4 lg:pt-8 pb-12 lg:pb-12">
                      <div className="space-y-6">
                         <div className="flex items-center gap-3 pb-3 border-b border-border/40 px-1">
                            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">Format</span>
@@ -257,9 +256,9 @@ export function CreateVideoForm() {
           </div>
 
           {/* RIGHT: Live Preview / Status Panel */}
-          <div className="w-[480px] shrink-0 border-l border-border bg-secondary relative h-full overflow-hidden">
-             <div className="absolute inset-0 overflow-y-auto scrollbar-saas pb-48">
-               <div className="p-8">
+          <div className="w-full lg:w-[480px] shrink-0 border-t lg:border-t-0 lg:border-l border-border bg-secondary relative h-auto lg:h-full lg:overflow-hidden">
+             <div className="relative h-auto lg:absolute lg:inset-0 lg:overflow-y-auto scrollbar-saas pb-40 lg:pb-48">
+                <div className="p-4 lg:p-8">
                  <GenerationProgress 
                     status={activeVideoId ? (isFailed ? 'error' : isCompleted ? 'completed' : 'generating') : 'idle'} 
                     progress={activeVideoId ? getProgressFromStatus(currentStatus) : 0}
@@ -277,7 +276,7 @@ export function CreateVideoForm() {
              </div>
  
              {/* Action Bar */}
-             <div className="absolute bottom-0 left-0 right-0 p-8 border-t border-border bg-card z-10 transition-all duration-300 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
+             <div className="fixed lg:absolute bottom-0 left-0 right-0 p-6 lg:p-8 border-t border-border bg-card z-[60] lg:z-10 transition-all duration-300 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
                 <div className="space-y-5">
                     <div className="flex items-center justify-between text-xs">
                        <div className="flex items-center gap-2 text-muted-foreground font-medium">
