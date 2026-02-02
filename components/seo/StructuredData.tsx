@@ -1,4 +1,9 @@
-import { generateOrganizationSchema, generateWebApplicationSchema, generateFAQSchema, generateHowToSchema } from "@/lib/seo";
+import {
+  generateOrganizationSchema,
+  generateWebApplicationSchema,
+  generateFAQSchema,
+  generateHowToSchema,
+} from '@/lib/seo';
 
 export function StructuredData() {
   const organizationSchema = generateOrganizationSchema();

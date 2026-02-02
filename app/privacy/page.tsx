@@ -1,13 +1,13 @@
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
-import { generatePageMetadata } from "@/lib/seo";
-import type { Metadata } from "next";
+import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
+import { generatePageMetadata } from '@/lib/seo';
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = generatePageMetadata({
-  title: "Privacy Policy",
+  title: 'Privacy Policy',
   description:
     "Read AI Reels' Privacy Policy to understand how we collect, use, and protect your personal information when you use our video generation platform.",
-  path: "/privacy",
+  path: '/privacy',
 });
 
 export default function PrivacyPage() {
@@ -20,10 +20,11 @@ export default function PrivacyPage() {
             <div className="mb-10 space-y-2">
               <h1 className="text-4xl font-bold leading-tight">Privacy Policy</h1>
               <p className="text-sm text-muted-foreground leading-tight">
-                Last updated: {new Date().toLocaleDateString("en-US", { 
-                  year: "numeric", 
-                  month: "long", 
-                  day: "numeric" 
+                Last updated:{' '}
+                {new Date().toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
                 })}
               </p>
             </div>
@@ -34,9 +35,9 @@ export default function PrivacyPage() {
                   1. Introduction
                 </h2>
                 <p className="leading-relaxed">
-                  AI Reels ("we," "our," or "us") is committed to protecting your privacy. 
-                  This Privacy Policy explains how we collect, use, disclose, and safeguard 
-                  your information when you use our video generation platform.
+                  AI Reels ("we," "our," or "us") is committed to protecting your privacy. This
+                  Privacy Policy explains how we collect, use, disclose, and safeguard your
+                  information when you use our video generation platform.
                 </p>
               </section>
 
@@ -95,20 +96,16 @@ export default function PrivacyPage() {
               </section>
 
               <section>
-                <h2 className="mb-4 text-2xl font-semibold text-foreground">
-                  5. Data Security
-                </h2>
+                <h2 className="mb-4 text-2xl font-semibold text-foreground">5. Data Security</h2>
                 <p>
-                  We implement industry-standard security measures to protect your information, 
-                  including encryption, secure servers, and access controls. However, no method 
-                  of transmission over the internet is 100% secure.
+                  We implement industry-standard security measures to protect your information,
+                  including encryption, secure servers, and access controls. However, no method of
+                  transmission over the internet is 100% secure.
                 </p>
               </section>
 
               <section>
-                <h2 className="mb-4 text-2xl font-semibold text-foreground">
-                  6. Your Rights
-                </h2>
+                <h2 className="mb-4 text-2xl font-semibold text-foreground">6. Your Rights</h2>
                 <p>You have the right to:</p>
                 <ul className="list-disc space-y-2 pl-6">
                   <li>Access and receive a copy of your personal data</li>
@@ -125,9 +122,9 @@ export default function PrivacyPage() {
                   7. Cookies and Tracking
                 </h2>
                 <p>
-                  We use cookies and similar technologies to enhance your experience, analyze 
-                  usage, and assist in marketing efforts. You can control cookie preferences 
-                  through your browser settings.
+                  We use cookies and similar technologies to enhance your experience, analyze usage,
+                  and assist in marketing efforts. You can control cookie preferences through your
+                  browser settings.
                 </p>
               </section>
 
@@ -136,8 +133,8 @@ export default function PrivacyPage() {
                   8. Children's Privacy
                 </h2>
                 <p>
-                  Our services are not intended for users under the age of 13. We do not 
-                  knowingly collect personal information from children under 13.
+                  Our services are not intended for users under the age of 13. We do not knowingly
+                  collect personal information from children under 13.
                 </p>
               </section>
 
@@ -146,19 +143,15 @@ export default function PrivacyPage() {
                   9. Changes to This Policy
                 </h2>
                 <p>
-                  We may update this Privacy Policy from time to time. We will notify you 
-                  of any changes by posting the new policy on this page and updating the 
-                  "Last updated" date.
+                  We may update this Privacy Policy from time to time. We will notify you of any
+                  changes by posting the new policy on this page and updating the "Last updated"
+                  date.
                 </p>
               </section>
 
               <section>
-                <h2 className="mb-4 text-2xl font-semibold text-foreground">
-                  10. Contact Us
-                </h2>
-                <p>
-                  If you have questions about this Privacy Policy, please contact us at:
-                </p>
+                <h2 className="mb-4 text-2xl font-semibold text-foreground">10. Contact Us</h2>
+                <p>If you have questions about this Privacy Policy, please contact us at:</p>
                 <p className="mt-2">
                   <strong>Email:</strong> privacy@aireels.com
                 </p>

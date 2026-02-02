@@ -79,7 +79,11 @@
 
   /* Subtle gradient backgrounds */
   .gradient-ai {
-    background: linear-gradient(135deg, hsl(var(--primary) / 0.1) 0%, hsl(var(--primary) / 0.05) 100%);
+    background: linear-gradient(
+      135deg,
+      hsl(var(--primary) / 0.1) 0%,
+      hsl(var(--primary) / 0.05) 100%
+    );
   }
 
   /* Shimmer animation for loading states */

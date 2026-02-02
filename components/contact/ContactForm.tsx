@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 
 export function ContactForm() {
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    subject: "",
-    message: "",
+    name: '',
+    email: '',
+    subject: '',
+    message: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -21,23 +21,23 @@ export function ContactForm() {
     const newErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = "Name is required";
+      newErrors.name = 'Name is required';
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
+      newErrors.email = 'Email is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Invalid email format";
+      newErrors.email = 'Invalid email format';
     }
 
     if (!formData.subject.trim()) {
-      newErrors.subject = "Subject is required";
+      newErrors.subject = 'Subject is required';
     }
 
     if (!formData.message.trim()) {
-      newErrors.message = "Message is required";
+      newErrors.message = 'Message is required';
     } else if (formData.message.trim().length < 10) {
-      newErrors.message = "Message must be at least 10 characters";
+      newErrors.message = 'Message must be at least 10 characters';
     }
 
     setErrors(newErrors);
@@ -50,20 +50,20 @@ export function ContactForm() {
 
     setIsLoading(true);
     setIsSuccess(false);
-    
+
     try {
       // TODO: Implement actual API call when backend endpoint is ready
       // For now, simulate a successful submission
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      
+
       setIsSuccess(true);
-      setFormData({ name: "", email: "", subject: "", message: "" });
-      
+      setFormData({ name: '', email: '', subject: '', message: '' });
+
       // Reset success message after 5 seconds
       setTimeout(() => setIsSuccess(false), 5000);
     } catch (error: any) {
       setErrors({
-        general: "Failed to send message. Please try again later.",
+        general: 'Failed to send message. Please try again later.',
       });
     } finally {
       setIsLoading(false);
@@ -73,7 +73,7 @@ export function ContactForm() {
   return (
     <div className="rounded-lg border bg-card p-6">
       <h2 className="mb-6 text-2xl font-semibold">Send us a Message</h2>
-      
+
       {isSuccess && (
         <div className="mb-6 flex items-center gap-2 rounded-lg bg-green-500/10 border border-green-500/20 p-4 text-green-600">
           <CheckCircle2 className="h-5 w-5" />
@@ -102,8 +102,8 @@ export function ContactForm() {
             required
             className="bg-background"
             disabled={isLoading}
-            aria-invalid={errors.name ? "true" : "false"}
-            aria-describedby={errors.name ? "name-error" : undefined}
+            aria-invalid={errors.name ? 'true' : 'false'}
+            aria-describedby={errors.name ? 'name-error' : undefined}
           />
           {errors.name && (
             <p id="name-error" className="mt-1 text-sm text-destructive">
@@ -111,7 +111,7 @@ export function ContactForm() {
             </p>
           )}
         </div>
-        
+
         <div>
           <label htmlFor="email" className="mb-2 block text-sm font-medium">
             Email
@@ -125,8 +125,8 @@ export function ContactForm() {
             required
             className="bg-background"
             disabled={isLoading}
-            aria-invalid={errors.email ? "true" : "false"}
-            aria-describedby={errors.email ? "email-error" : undefined}
+            aria-invalid={errors.email ? 'true' : 'false'}
+            aria-describedby={errors.email ? 'email-error' : undefined}
           />
           {errors.email && (
             <p id="email-error" className="mt-1 text-sm text-destructive">
@@ -134,7 +134,7 @@ export function ContactForm() {
             </p>
           )}
         </div>
-        
+
         <div>
           <label htmlFor="subject" className="mb-2 block text-sm font-medium">
             Subject
@@ -148,8 +148,8 @@ export function ContactForm() {
             required
             className="bg-background"
             disabled={isLoading}
-            aria-invalid={errors.subject ? "true" : "false"}
-            aria-describedby={errors.subject ? "subject-error" : undefined}
+            aria-invalid={errors.subject ? 'true' : 'false'}
+            aria-describedby={errors.subject ? 'subject-error' : undefined}
           />
           {errors.subject && (
             <p id="subject-error" className="mt-1 text-sm text-destructive">
@@ -157,7 +157,7 @@ export function ContactForm() {
             </p>
           )}
         </div>
-        
+
         <div>
           <label htmlFor="message" className="mb-2 block text-sm font-medium">
             Message
@@ -171,8 +171,8 @@ export function ContactForm() {
             required
             className="bg-background"
             disabled={isLoading}
-            aria-invalid={errors.message ? "true" : "false"}
-            aria-describedby={errors.message ? "message-error" : undefined}
+            aria-invalid={errors.message ? 'true' : 'false'}
+            aria-describedby={errors.message ? 'message-error' : undefined}
           />
           {errors.message && (
             <p id="message-error" className="mt-1 text-sm text-destructive">
@@ -180,7 +180,7 @@ export function ContactForm() {
             </p>
           )}
         </div>
-        
+
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? (
             <>
@@ -188,7 +188,7 @@ export function ContactForm() {
               Sending...
             </>
           ) : (
-            "Send Message"
+            'Send Message'
           )}
         </Button>
       </form>

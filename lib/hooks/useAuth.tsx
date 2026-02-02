@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { authApi, AuthResponse, User } from "@/lib/api/auth";
-import { tokenStorage } from "@/lib/utils/token";
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import { authApi, AuthResponse, User } from '@/lib/api/auth';
+import { tokenStorage } from '@/lib/utils/token';
 
 interface AuthContextType {
   user: User | null;
@@ -54,7 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       userId: response.user.id,
       email: response.user.email,
     });
-    router.push("/dashboard");
+    router.push('/dashboard');
   };
 
   const signup = async (email: string, password: string, name: string) => {
@@ -66,13 +66,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       userId: response.user.id,
       email: response.user.email,
     });
-    router.push("/dashboard");
+    router.push('/dashboard');
   };
 
   const logout = () => {
     tokenStorage.clearTokens();
     setUser(null);
-    router.push("/");
+    router.push('/');
   };
 
   return (
@@ -95,7 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 }

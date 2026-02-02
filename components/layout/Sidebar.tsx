@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
-import { useAuth } from "@/lib/hooks/useAuth";
-import { cn } from "@/lib/utils/format";
+import Link from 'next/link';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { useAuth } from '@/lib/hooks/useAuth';
+import { cn } from '@/lib/utils/format';
 import {
   LayoutDashboard,
   Video,
@@ -14,15 +14,15 @@ import {
   Menu,
   X,
   Sparkles,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useState } from 'react';
 
 const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Create Reel", href: "/create", icon: Plus },
-  { name: "My Reels", href: "/dashboard", icon: Video },
-  { name: "Credits", href: "/dashboard?purchase=credits", icon: CreditCard },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Create Reel', href: '/create', icon: Plus },
+  { name: 'My Reels', href: '/dashboard', icon: Video },
+  { name: 'Credits', href: '/dashboard?purchase=credits', icon: CreditCard },
 ];
 
 export function Sidebar() {
@@ -41,11 +41,7 @@ export function Sidebar() {
           onClick={() => setIsMobileOpen(!isMobileOpen)}
           className="glass"
         >
-          {isMobileOpen ? (
-            <X className="h-5 w-5" />
-          ) : (
-            <Menu className="h-5 w-5" />
-          )}
+          {isMobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </Button>
       </div>
 
@@ -60,9 +56,9 @@ export function Sidebar() {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-0 h-full w-64 glass-strong border-r border-border z-40 transition-transform duration-300",
-          "lg:translate-x-0",
-          isMobileOpen ? "translate-x-0" : "-translate-x-full"
+          'fixed left-0 top-0 h-full w-64 glass-strong border-r border-border z-40 transition-transform duration-300',
+          'lg:translate-x-0',
+          isMobileOpen ? 'translate-x-0' : '-translate-x-full',
         )}
       >
         <div className="flex h-full flex-col">
@@ -83,27 +79,27 @@ export function Sidebar() {
           <nav className="flex-1 space-y-1 px-3 py-4">
             {navigation.map((item) => {
               let isActive = false;
-              const purchaseParam = searchParams?.get("purchase");
-              
-              if (item.href === "/create") {
-                isActive = pathname === "/create";
-              } else if (item.href === "/dashboard?purchase=credits") {
-                isActive = pathname === "/dashboard" && purchaseParam === "credits";
-              } else if (item.href === "/dashboard") {
+              const purchaseParam = searchParams?.get('purchase');
+
+              if (item.href === '/create') {
+                isActive = pathname === '/create';
+              } else if (item.href === '/dashboard?purchase=credits') {
+                isActive = pathname === '/dashboard' && purchaseParam === 'credits';
+              } else if (item.href === '/dashboard') {
                 // For "Dashboard" and "My Reels" which both point to /dashboard
-                isActive = pathname === "/dashboard" && !purchaseParam;
+                isActive = pathname === '/dashboard' && !purchaseParam;
               }
-              
+
               return (
                 <Link
                   key={item.name}
                   href={item.href}
                   onClick={() => setIsMobileOpen(false)}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                    'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
                     isActive
-                      ? "bg-primary/20 text-primary"
-                      : "text-muted-foreground hover:bg-accent/10 hover:text-foreground"
+                      ? 'bg-primary/20 text-primary'
+                      : 'text-muted-foreground hover:bg-accent/10 hover:text-foreground',
                   )}
                 >
                   <item.icon className="h-5 w-5" />

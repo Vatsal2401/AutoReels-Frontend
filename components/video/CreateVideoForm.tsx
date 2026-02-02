@@ -1,44 +1,44 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useMutation } from "@tanstack/react-query";
-import { videosApi } from "@/lib/api/videos";
-import { useCredits } from "@/lib/hooks/useCredits";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { SelectEnhanced } from "@/components/ui/select-enhanced";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
-import { AlertCircle, Sparkles, Zap, Loader2, Globe, Film, CreditCard, Info } from "lucide-react";
-import { cn } from "@/lib/utils/format";
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useMutation } from '@tanstack/react-query';
+import { videosApi } from '@/lib/api/videos';
+import { useCredits } from '@/lib/hooks/useCredits';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { SelectEnhanced } from '@/components/ui/select-enhanced';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
+import { AlertCircle, Sparkles, Zap, Loader2, Globe, Film, CreditCard, Info } from 'lucide-react';
+import { cn } from '@/lib/utils/format';
 
 const LANGUAGE_OPTIONS = [
-  { value: "english", label: "English" },
-  { value: "spanish", label: "Spanish" },
-  { value: "french", label: "French" },
-  { value: "german", label: "German" },
-  { value: "italian", label: "Italian" },
-  { value: "portuguese", label: "Portuguese" },
-  { value: "hindi", label: "Hindi" },
-  { value: "japanese", label: "Japanese" },
+  { value: 'english', label: 'English' },
+  { value: 'spanish', label: 'Spanish' },
+  { value: 'french', label: 'French' },
+  { value: 'german', label: 'German' },
+  { value: 'italian', label: 'Italian' },
+  { value: 'portuguese', label: 'Portuguese' },
+  { value: 'hindi', label: 'Hindi' },
+  { value: 'japanese', label: 'Japanese' },
 ];
 
 const STYLE_OPTIONS = [
-  { value: "modern", label: "Modern" },
-  { value: "minimalist", label: "Minimalist" },
-  { value: "energetic", label: "Energetic" },
-  { value: "professional", label: "Professional" },
-  { value: "cinematic", label: "Cinematic" },
-  { value: "playful", label: "Playful" },
+  { value: 'modern', label: 'Modern' },
+  { value: 'minimalist', label: 'Minimalist' },
+  { value: 'energetic', label: 'Energetic' },
+  { value: 'professional', label: 'Professional' },
+  { value: 'cinematic', label: 'Cinematic' },
+  { value: 'playful', label: 'Playful' },
 ];
 
 export function CreateVideoForm() {
   const router = useRouter();
-  const [topic, setTopic] = useState("");
-  const [language, setLanguage] = useState("english");
-  const [style, setStyle] = useState("modern");
+  const [topic, setTopic] = useState('');
+  const [language, setLanguage] = useState('english');
+  const [style, setStyle] = useState('modern');
   const { credits, hasCredits, isLoading: creditsLoading } = useCredits();
 
   const createMutation = useMutation({
@@ -85,7 +85,7 @@ export function CreateVideoForm() {
                     {credits ?? 0}
                   </span>
                   <span className="text-sm font-medium text-muted-foreground leading-tight">
-                    {hasCredits ? "credits remaining" : "insufficient credits"}
+                    {hasCredits ? 'credits remaining' : 'insufficient credits'}
                   </span>
                 </div>
               </div>
@@ -111,9 +111,7 @@ export function CreateVideoForm() {
                 <AlertCircle className="h-4 w-4 text-destructive" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-semibold text-destructive mb-1">
-                  Insufficient Credits
-                </p>
+                <p className="text-sm font-semibold text-destructive mb-1">Insufficient Credits</p>
                 <p className="text-sm text-destructive/80 leading-relaxed">
                   You need at least 1 credit to create a video. Purchase credits to continue.
                 </p>
@@ -156,8 +154,8 @@ Examples:
                 </div>
                 <p
                   className={cn(
-                    "text-xs font-medium leading-tight",
-                    topic.length > 450 ? "text-destructive" : "text-muted-foreground"
+                    'text-xs font-medium leading-tight',
+                    topic.length > 450 ? 'text-destructive' : 'text-muted-foreground',
                   )}
                 >
                   {topic.length}/500
@@ -222,15 +220,19 @@ Examples:
                 className="w-full h-12 text-base font-semibold"
                 size="lg"
                 isLoading={createMutation.isPending}
-                disabled={!topic.trim() || createMutation.isPending || !hasCredits || creditsLoading}
+                disabled={
+                  !topic.trim() || createMutation.isPending || !hasCredits || creditsLoading
+                }
               >
                 {!createMutation.isPending && <Sparkles className="mr-2 h-5 w-5" />}
-                {createMutation.isPending ? "Generating your reel..." : "Generate Reel"}
+                {createMutation.isPending ? 'Generating your reel...' : 'Generate Reel'}
               </Button>
 
               <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
                 <Info className="h-3.5 w-3.5 shrink-0" />
-                <span className="leading-tight text-center">Generation typically takes 30-60 seconds. You'll be redirected to see progress.</span>
+                <span className="leading-tight text-center">
+                  Generation typically takes 30-60 seconds. You'll be redirected to see progress.
+                </span>
               </div>
             </div>
 
@@ -243,7 +245,7 @@ Examples:
                   <p className="text-sm text-destructive/80">
                     {createMutation.error instanceof Error
                       ? createMutation.error.message
-                      : "Something went wrong. Please try again."}
+                      : 'Something went wrong. Please try again.'}
                   </p>
                 </div>
               </div>

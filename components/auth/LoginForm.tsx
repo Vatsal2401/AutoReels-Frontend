@@ -1,36 +1,36 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useAuth } from "@/lib/hooks/useAuth";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import Link from "next/link";
-import { Eye, EyeOff, LogIn, AlertCircle, Mail, Lock } from "lucide-react";
-import { OAuthButtons } from "./OAuthButtons";
+import { useState } from 'react';
+import { useAuth } from '@/lib/hooks/useAuth';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import Link from 'next/link';
+import { Eye, EyeOff, LogIn, AlertCircle, Mail, Lock } from 'lucide-react';
+import { OAuthButtons } from './OAuthButtons';
 
 export function LoginForm() {
   const { login } = useAuth();
   const [formData, setFormData] = useState({
-    email: "",
-    password: "",
+    email: '',
+    password: '',
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setError('');
     setIsLoading(true);
 
     try {
       await login(formData.email, formData.password);
     } catch (error: any) {
       if (error.response?.status === 401) {
-        setError("Invalid email or password. Please check your credentials and try again.");
+        setError('Invalid email or password. Please check your credentials and try again.');
       } else {
-        setError("An error occurred. Please try again later.");
+        setError('An error occurred. Please try again later.');
       }
     } finally {
       setIsLoading(false);
@@ -45,9 +45,7 @@ export function LoginForm() {
             <div className="flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/20 mb-2">
               <LogIn className="h-7 w-7 text-primary" />
             </div>
-            <CardTitle className="text-3xl font-bold tracking-tight">
-              Welcome back
-            </CardTitle>
+            <CardTitle className="text-3xl font-bold tracking-tight">Welcome back</CardTitle>
             <CardDescription className="text-base text-muted-foreground">
               Sign in to your account to continue
             </CardDescription>
@@ -97,7 +95,7 @@ export function LoginForm() {
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="password"
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword ? 'text' : 'password'}
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   placeholder="Enter your password"
@@ -109,7 +107,7 @@ export function LoginForm() {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                   disabled={isLoading}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -117,9 +115,9 @@ export function LoginForm() {
               </div>
             </div>
 
-            <Button 
-              type="submit" 
-              className="w-full h-11 text-base font-semibold" 
+            <Button
+              type="submit"
+              className="w-full h-11 text-base font-semibold"
               isLoading={isLoading}
               disabled={isLoading}
             >

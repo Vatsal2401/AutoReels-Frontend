@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { cn } from "@/lib/utils/format";
+import * as React from 'react';
+import { cn } from '@/lib/utils/format';
 
 interface DropdownMenuContextValue {
   open: boolean;
@@ -13,7 +13,7 @@ const DropdownMenuContext = React.createContext<DropdownMenuContextValue | undef
 function useDropdownMenu() {
   const context = React.useContext(DropdownMenuContext);
   if (!context) {
-    throw new Error("DropdownMenu components must be used within DropdownMenu");
+    throw new Error('DropdownMenu components must be used within DropdownMenu');
   }
   return context;
 }
@@ -30,8 +30,8 @@ const DropdownMenu = ({ children }: { children: React.ReactNode }) => {
     };
 
     if (open) {
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
     }
   }, [open]);
 
@@ -60,28 +60,22 @@ const DropdownMenuTrigger = React.forwardRef<
       ...props,
       ref,
       onClick: handleClick,
-      "aria-expanded": open,
+      'aria-expanded': open,
     } as any);
   }
 
   return (
-    <button
-      ref={ref}
-      className={className}
-      onClick={handleClick}
-      aria-expanded={open}
-      {...props}
-    >
+    <button ref={ref} className={className} onClick={handleClick} aria-expanded={open} {...props}>
       {children}
     </button>
   );
 });
-DropdownMenuTrigger.displayName = "DropdownMenuTrigger";
+DropdownMenuTrigger.displayName = 'DropdownMenuTrigger';
 
 const DropdownMenuContent = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & { align?: "start" | "end" }
->(({ className, align = "start", ...props }, ref) => {
+  React.HTMLAttributes<HTMLDivElement> & { align?: 'start' | 'end' }
+>(({ className, align = 'start', ...props }, ref) => {
   const { open } = useDropdownMenu();
 
   if (!open) return null;
@@ -90,64 +84,54 @@ const DropdownMenuContent = React.forwardRef<
     <div
       ref={ref}
       className={cn(
-        "absolute z-50 mt-2 min-w-[8rem] overflow-hidden rounded-lg border bg-popover p-1 text-popover-foreground shadow-lg animate-fade-in",
-        align === "end" ? "right-0" : "left-0",
-        className
+        'absolute z-50 mt-2 min-w-[8rem] overflow-hidden rounded-lg border bg-popover p-1 text-popover-foreground shadow-lg animate-fade-in',
+        align === 'end' ? 'right-0' : 'left-0',
+        className,
       )}
       {...props}
     />
   );
 });
-DropdownMenuContent.displayName = "DropdownMenuContent";
+DropdownMenuContent.displayName = 'DropdownMenuContent';
 
-const DropdownMenuItem = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, onClick, ...props }, ref) => {
-  const { setOpen } = useDropdownMenu();
+const DropdownMenuItem = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, onClick, ...props }, ref) => {
+    const { setOpen } = useDropdownMenu();
 
-  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    setOpen(false);
-    onClick?.(e);
-  };
+    const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+      setOpen(false);
+      onClick?.(e);
+    };
 
-  return (
-    <div
-      ref={ref}
-      className={cn(
-        "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-accent/50",
-        className
-      )}
-      onClick={handleClick}
-      {...props}
-    />
-  );
-});
-DropdownMenuItem.displayName = "DropdownMenuItem";
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          'relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-accent/50',
+          className,
+        )}
+        onClick={handleClick}
+        {...props}
+      />
+    );
+  },
+);
+DropdownMenuItem.displayName = 'DropdownMenuItem';
 
-const DropdownMenuLabel = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("px-2 py-1.5 text-sm font-semibold", className)}
-    {...props}
-  />
-));
-DropdownMenuLabel.displayName = "DropdownMenuLabel";
+const DropdownMenuLabel = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div ref={ref} className={cn('px-2 py-1.5 text-sm font-semibold', className)} {...props} />
+  ),
+);
+DropdownMenuLabel.displayName = 'DropdownMenuLabel';
 
 const DropdownMenuSeparator = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("-mx-1 my-1 h-px bg-border", className)}
-    {...props}
-  />
+  <div ref={ref} className={cn('-mx-1 my-1 h-px bg-border', className)} {...props} />
 ));
-DropdownMenuSeparator.displayName = "DropdownMenuSeparator";
+DropdownMenuSeparator.displayName = 'DropdownMenuSeparator';
 
 export {
   DropdownMenu,

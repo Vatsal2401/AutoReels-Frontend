@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import React from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertCircle, RefreshCw, Home } from "lucide-react";
-import Link from "next/link";
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { AlertCircle, RefreshCw, Home } from 'lucide-react';
+import Link from 'next/link';
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -16,10 +16,7 @@ interface ErrorBoundaryProps {
   fallback?: React.ComponentType<{ error: Error | null; resetError: () => void }>;
 }
 
-export class ErrorBoundary extends React.Component<
-  ErrorBoundaryProps,
-  ErrorBoundaryState
-> {
+export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, error: null };
@@ -31,8 +28,8 @@ export class ErrorBoundary extends React.Component<
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     // Log error to console in development
-    if (process.env.NODE_ENV === "development") {
-      console.error("ErrorBoundary caught an error:", error, errorInfo);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('ErrorBoundary caught an error:', error, errorInfo);
     }
     // TODO: Log to error reporting service in production
   }
@@ -61,9 +58,10 @@ export class ErrorBoundary extends React.Component<
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-center text-muted-foreground">
-                We encountered an unexpected error. Please try refreshing the page or return to the home page.
+                We encountered an unexpected error. Please try refreshing the page or return to the
+                home page.
               </p>
-              {process.env.NODE_ENV === "development" && this.state.error && (
+              {process.env.NODE_ENV === 'development' && this.state.error && (
                 <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-4">
                   <p className="text-xs font-mono text-destructive break-all">
                     {this.state.error.message}

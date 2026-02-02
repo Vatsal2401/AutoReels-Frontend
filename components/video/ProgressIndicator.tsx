@@ -1,35 +1,35 @@
-"use client";
+'use client';
 
-import { Video, VideoStatus } from "@/lib/api/videos";
-import { Loader2, CheckCircle2, Circle } from "lucide-react";
-import { cn } from "@/lib/utils/format";
+import { Video, VideoStatus } from '@/lib/api/videos';
+import { Loader2, CheckCircle2, Circle } from 'lucide-react';
+import { cn } from '@/lib/utils/format';
 
 interface ProgressIndicatorProps {
   video: Video;
 }
 
 const statusMessages: Record<VideoStatus, string> = {
-  pending: "Starting generation",
-  script_generating: "Generating script",
-  script_complete: "Creating audio",
-  processing: "Processing assets",
-  rendering: "Rendering video",
-  completed: "Your reel is ready!",
-  failed: "Generation failed",
+  pending: 'Starting generation',
+  script_generating: 'Generating script',
+  script_complete: 'Creating audio',
+  processing: 'Processing assets',
+  rendering: 'Rendering video',
+  completed: 'Your reel is ready!',
+  failed: 'Generation failed',
 };
 
 const statusSteps: VideoStatus[] = [
-  "pending",
-  "script_generating",
-  "script_complete",
-  "processing",
-  "rendering",
-  "completed",
+  'pending',
+  'script_generating',
+  'script_complete',
+  'processing',
+  'rendering',
+  'completed',
 ];
 
 export function ProgressIndicator({ video }: ProgressIndicatorProps) {
   const currentStepIndex = statusSteps.indexOf(video.status);
-  const isProcessing = !["completed", "failed"].includes(video.status);
+  const isProcessing = !['completed', 'failed'].includes(video.status);
   const totalSteps = statusSteps.length - 1; // Exclude completed
   const progressPercentage = (currentStepIndex / totalSteps) * 100;
 
@@ -38,14 +38,12 @@ export function ProgressIndicator({ video }: ProgressIndicatorProps) {
       {/* Progress Header */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-lg font-semibold text-foreground">
-            Generating Your Reel
-          </h3>
+          <h3 className="text-lg font-semibold text-foreground">Generating Your Reel</h3>
           <span className="text-sm font-medium text-primary">
             {Math.round(progressPercentage)}%
           </span>
         </div>
-        
+
         {/* Progress Bar */}
         <div className="relative h-2.5 w-full bg-muted rounded-full overflow-hidden">
           <div
@@ -74,12 +72,10 @@ export function ProgressIndicator({ video }: ProgressIndicatorProps) {
                 <div className="relative flex-shrink-0">
                   <div
                     className={cn(
-                      "h-10 w-10 rounded-full flex items-center justify-center border-2 transition-all duration-300",
-                      isCompleted &&
-                        "bg-primary border-primary shadow-lg shadow-primary/20",
-                      isCurrent &&
-                        "bg-primary/10 border-primary shadow-md shadow-primary/10",
-                      isPending && "bg-background border-muted-foreground/30"
+                      'h-10 w-10 rounded-full flex items-center justify-center border-2 transition-all duration-300',
+                      isCompleted && 'bg-primary border-primary shadow-lg shadow-primary/20',
+                      isCurrent && 'bg-primary/10 border-primary shadow-md shadow-primary/10',
+                      isPending && 'bg-background border-muted-foreground/30',
                     )}
                   >
                     {isCompleted ? (
@@ -90,15 +86,13 @@ export function ProgressIndicator({ video }: ProgressIndicatorProps) {
                       <Circle className="h-5 w-5 text-muted-foreground fill-background" />
                     )}
                   </div>
-                  
+
                   {/* Connecting Line */}
                   {index < statusSteps.length - 2 && (
                     <div
                       className={cn(
-                        "absolute top-10 left-1/2 -translate-x-1/2 w-0.5 transition-all duration-500",
-                        isCompleted
-                          ? "bg-primary h-12"
-                          : "bg-muted-foreground/20 h-12"
+                        'absolute top-10 left-1/2 -translate-x-1/2 w-0.5 transition-all duration-500',
+                        isCompleted ? 'bg-primary h-12' : 'bg-muted-foreground/20 h-12',
                       )}
                     />
                   )}
@@ -110,10 +104,10 @@ export function ProgressIndicator({ video }: ProgressIndicatorProps) {
                     <div className="flex-1">
                       <p
                         className={cn(
-                          "text-base font-medium transition-colors duration-200",
-                          isCompleted && "text-foreground",
-                          isCurrent && "text-primary",
-                          isPending && "text-muted-foreground"
+                          'text-base font-medium transition-colors duration-200',
+                          isCompleted && 'text-foreground',
+                          isCurrent && 'text-primary',
+                          isPending && 'text-muted-foreground',
                         )}
                       >
                         {statusMessages[step]}
@@ -124,19 +118,15 @@ export function ProgressIndicator({ video }: ProgressIndicatorProps) {
                         </p>
                       )}
                       {isCompleted && (
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Completed
-                        </p>
+                        <p className="text-sm text-muted-foreground mt-1">Completed</p>
                       )}
                     </div>
-                    
+
                     {/* Status Badge */}
                     {isCurrent && (
                       <div className="flex-shrink-0">
                         <div className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
-                          <span className="text-xs font-medium text-primary">
-                            Active
-                          </span>
+                          <span className="text-xs font-medium text-primary">Active</span>
                         </div>
                       </div>
                     )}

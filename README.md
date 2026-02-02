@@ -21,21 +21,25 @@ Next.js frontend for the AI faceless reels generator platform.
 ### Installation
 
 1. Install dependencies:
+
 ```bash
 npm install
 ```
 
 2. Create `.env.local` file:
+
 ```bash
 cp .env.local.example .env.local
 ```
 
 3. Update `.env.local` with your backend API URL:
+
 ```
 NEXT_PUBLIC_API_URL=http://localhost:3000
 ```
 
 4. Run the development server:
+
 ```bash
 npm run dev
 ```
@@ -81,12 +85,14 @@ frontend/
 The frontend expects the following backend endpoints:
 
 ### Auth
+
 - `POST /auth/signup` - User registration
 - `POST /auth/signin` - User login
 - `POST /auth/refresh` - Refresh access token
 - `GET /auth/me` - Get current user
 
 ### Videos
+
 - `POST /videos` - Create new video (protected)
 - `GET /videos/:id` - Get video details
 - `GET /videos` - List user's videos (needs backend implementation)

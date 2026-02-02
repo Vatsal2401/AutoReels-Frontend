@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Loader2 } from "lucide-react";
+import { useState } from 'react';
+import { Loader2 } from 'lucide-react';
 
 interface VideoPlayerProps {
   videoUrl: string;
@@ -16,7 +16,7 @@ export function VideoPlayer({ videoUrl, title }: VideoPlayerProps) {
     <div className="w-full">
       <div className="relative aspect-video bg-black rounded-lg overflow-hidden">
         {isLoading && !hasError && (
-          <div 
+          <div
             className="absolute inset-0 flex items-center justify-center"
             role="status"
             aria-label="Loading video"
@@ -25,7 +25,7 @@ export function VideoPlayer({ videoUrl, title }: VideoPlayerProps) {
           </div>
         )}
         {hasError ? (
-          <div 
+          <div
             className="absolute inset-0 flex items-center justify-center bg-destructive/10"
             role="alert"
             aria-label="Video failed to load"
@@ -42,7 +42,7 @@ export function VideoPlayer({ videoUrl, title }: VideoPlayerProps) {
               setIsLoading(false);
               setHasError(true);
             }}
-            aria-label={title || "Video player"}
+            aria-label={title || 'Video player'}
           >
             Your browser does not support the video tag.
           </video>

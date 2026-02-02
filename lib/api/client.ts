@@ -1,10 +1,10 @@
-import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
-import { tokenStorage } from "@/lib/utils/token";
+import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
+import { tokenStorage } from '@/lib/utils/token';
 
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000",
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000',
   headers: {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
   },
 });
 
@@ -36,7 +36,7 @@ apiClient.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 // Response interceptor - handle 401 and refresh token
@@ -76,8 +76,8 @@ apiClient.interceptors.response.use(
 
       try {
         const response = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}/auth/refresh`,
-          { refresh_token: refreshToken }
+          `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/auth/refresh`,
+          { refresh_token: refreshToken },
         );
 
         const { access_token, refresh_token } = response.data;
@@ -104,7 +104,7 @@ apiClient.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export default apiClient;

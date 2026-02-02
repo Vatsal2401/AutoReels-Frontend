@@ -1,15 +1,15 @@
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
-import { ContactForm } from "@/components/contact/ContactForm";
-import { generatePageMetadata } from "@/lib/seo";
-import type { Metadata } from "next";
-import { Mail, MessageSquare } from "lucide-react";
+import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
+import { ContactForm } from '@/components/contact/ContactForm';
+import { generatePageMetadata } from '@/lib/seo';
+import type { Metadata } from 'next';
+import { Mail, MessageSquare } from 'lucide-react';
 
 export const metadata: Metadata = generatePageMetadata({
-  title: "Contact Us",
+  title: 'Contact Us',
   description:
     "Get in touch with AI Reels. Have questions, feedback, or need support? Contact our team and we'll get back to you as soon as possible.",
-  path: "/contact",
+  path: '/contact',
 });
 
 export default function ContactPage() {
@@ -22,8 +22,8 @@ export default function ContactPage() {
             <div className="mb-12 space-y-3">
               <h1 className="text-4xl font-bold leading-tight">Contact Us</h1>
               <p className="text-lg text-muted-foreground leading-relaxed">
-                Have questions or feedback? We'd love to hear from you. Get in touch 
-                and we'll respond as soon as possible.
+                Have questions or feedback? We'd love to hear from you. Get in touch and we'll
+                respond as soon as possible.
               </p>
             </div>
 

@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 
 interface OAuthButtonsProps {
-  mode?: "login" | "signup";
+  mode?: 'login' | 'signup';
 }
 
-export function OAuthButtons({ mode = "login" }: OAuthButtonsProps) {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+export function OAuthButtons({ mode = 'login' }: OAuthButtonsProps) {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
   const handleGoogleAuth = () => {
     window.location.href = `${apiUrl}/auth/google`;

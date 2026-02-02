@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
-import { useAuth } from "@/lib/hooks/useAuth";
-import { useVideoProgress } from "@/lib/hooks/useVideoProgress";
-import { videosApi } from "@/lib/api/videos";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { ProgressIndicator } from "@/components/video/ProgressIndicator";
-import { VideoPlayer } from "@/components/video/VideoPlayer";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
+import { useEffect } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import { useAuth } from '@/lib/hooks/useAuth';
+import { useVideoProgress } from '@/lib/hooks/useVideoProgress';
+import { videosApi } from '@/lib/api/videos';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { ProgressIndicator } from '@/components/video/ProgressIndicator';
+import { VideoPlayer } from '@/components/video/VideoPlayer';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
 import {
   ArrowLeft,
   Download,
@@ -23,10 +23,10 @@ import {
   FileText,
   Calendar,
   CheckCircle2,
-} from "lucide-react";
-import { useState } from "react";
-import { formatRelativeTime } from "@/lib/utils/format";
-import { cn } from "@/lib/utils/format";
+} from 'lucide-react';
+import { useState } from 'react';
+import { formatRelativeTime } from '@/lib/utils/format';
+import { cn } from '@/lib/utils/format';
 
 export default function VideoDetailPage() {
   const router = useRouter();
@@ -38,7 +38,7 @@ export default function VideoDetailPage() {
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
-      router.push("/login");
+      router.push('/login');
     }
   }, [isAuthenticated, authLoading, router]);
 
@@ -90,9 +90,9 @@ export default function VideoDetailPage() {
     );
   }
 
-  const isProcessing = !["completed", "failed"].includes(video.status);
-  const isCompleted = video.status === "completed";
-  const isFailed = video.status === "failed";
+  const isProcessing = !['completed', 'failed'].includes(video.status);
+  const isCompleted = video.status === 'completed';
+  const isFailed = video.status === 'failed';
 
   return (
     <DashboardLayout>
@@ -111,21 +111,27 @@ export default function VideoDetailPage() {
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             {video.completed_at ? (
               <div className="flex items-center gap-1.5 text-primary">
-                 <CheckCircle2 className="h-4 w-4 shrink-0" />
-                 <span className="leading-tight font-medium">Completed {formatRelativeTime(video.completed_at)}</span>
+                <CheckCircle2 className="h-4 w-4 shrink-0" />
+                <span className="leading-tight font-medium">
+                  Completed {formatRelativeTime(video.completed_at)}
+                </span>
               </div>
             ) : (
-               <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5">
                 <Calendar className="h-4 w-4 shrink-0" />
-                <span className="leading-tight">Created {formatRelativeTime(video.created_at)}</span>
+                <span className="leading-tight">
+                  Created {formatRelativeTime(video.created_at)}
+                </span>
               </div>
             )}
-            
+
             {video.completed_at && (
-               <div className="flex items-center gap-1.5 text-muted-foreground">
-                 <span className="leading-tight">•</span>
-                 <span className="leading-tight">Started {formatRelativeTime(video.created_at)}</span>
-               </div>
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <span className="leading-tight">•</span>
+                <span className="leading-tight">
+                  Started {formatRelativeTime(video.created_at)}
+                </span>
+              </div>
             )}
           </div>
         </div>
@@ -175,7 +181,10 @@ export default function VideoDetailPage() {
               <CardContent className="p-0">
                 <div className="bg-gradient-ai p-1">
                   <div className="bg-card rounded-lg">
-                    <VideoPlayer videoUrl={video.final_video_url} title={video.topic.substring(0, 50) + "..."} />
+                    <VideoPlayer
+                      videoUrl={video.final_video_url}
+                      title={video.topic.substring(0, 50) + '...'}
+                    />
                   </div>
                 </div>
               </CardContent>
@@ -199,14 +208,14 @@ export default function VideoDetailPage() {
                   <div className="flex gap-4">
                     <div className="flex-1">
                       <p className="text-sm font-medium mb-1 text-muted-foreground">Status</p>
-                        <Badge variant="success">
-                        Completed
-                        </Badge>
+                      <Badge variant="success">Completed</Badge>
                     </div>
-                     <div className="flex-1">
-                        <p className="text-sm font-medium mb-1 text-muted-foreground">Generated</p>
-                        <p className="text-sm">{formatRelativeTime(video.completed_at || video.created_at)}</p>
-                     </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium mb-1 text-muted-foreground">Generated</p>
+                      <p className="text-sm">
+                        {formatRelativeTime(video.completed_at || video.created_at)}
+                      </p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -262,7 +271,7 @@ export default function VideoDetailPage() {
                       window.location.href = response.url;
                     }
                   } catch (error) {
-                    console.error("Failed to get download URL", error);
+                    console.error('Failed to get download URL', error);
                   }
                 }}
                 className="flex-1"
@@ -288,9 +297,7 @@ export default function VideoDetailPage() {
                       Upgrade to remove watermark and get unlimited videos
                     </p>
                   </div>
-                  <Button variant="outline">
-                    Upgrade
-                  </Button>
+                  <Button variant="outline">Upgrade</Button>
                 </div>
               </CardContent>
             </Card>

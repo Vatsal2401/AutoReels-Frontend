@@ -71,6 +71,7 @@ git push origin master
 ```
 
 The GitHub Actions workflow will automatically:
+
 1. Run linting and type checking
 2. Build and deploy to Vercel production
 

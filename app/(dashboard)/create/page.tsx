@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/lib/hooks/useAuth";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { CreateVideoForm } from "@/components/video/CreateVideoForm";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/hooks/useAuth';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { CreateVideoForm } from '@/components/video/CreateVideoForm';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 
 export default function CreateVideoPage() {
   const router = useRouter();
@@ -15,7 +15,7 @@ export default function CreateVideoPage() {
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
-      router.push("/login");
+      router.push('/login');
     }
   }, [isAuthenticated, authLoading, router]);
 

@@ -1,26 +1,19 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "@/lib/hooks/useAuth";
-import { useCredits } from "@/lib/hooks/useCredits";
-import { videosApi } from "@/lib/api/videos";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { VideoCard } from "@/components/video/VideoCard";
-import { CreditPurchase } from "@/components/credits/CreditPurchase";
-import { StatsCard } from "@/components/dashboard/StatsCard";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import Link from "next/link";
-import {
-  Plus,
-  Loader2,
-  CreditCard,
-  Video,
-  Sparkles,
-  TrendingUp,
-} from "lucide-react";
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
+import { useAuth } from '@/lib/hooks/useAuth';
+import { useCredits } from '@/lib/hooks/useCredits';
+import { videosApi } from '@/lib/api/videos';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { VideoCard } from '@/components/video/VideoCard';
+import { CreditPurchase } from '@/components/credits/CreditPurchase';
+import { StatsCard } from '@/components/dashboard/StatsCard';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import Link from 'next/link';
+import { Plus, Loader2, CreditCard, Video, Sparkles, TrendingUp } from 'lucide-react';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -29,9 +22,9 @@ export default function DashboardPage() {
   const { credits, hasCredits, isLoading: creditsLoading } = useCredits();
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
-      setShowPurchase(params.get("purchase") === "credits");
+      setShowPurchase(params.get('purchase') === 'credits');
     }
   }, []);
 
@@ -40,14 +33,14 @@ export default function DashboardPage() {
     isLoading: videosLoading,
     error,
   } = useQuery({
-    queryKey: ["videos"],
+    queryKey: ['videos'],
     queryFn: videosApi.getVideos,
     enabled: isAuthenticated,
   });
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
-      router.push("/login");
+      router.push('/login');
     }
   }, [isAuthenticated, authLoading, router]);
 
@@ -63,11 +56,11 @@ export default function DashboardPage() {
     return null;
   }
 
-  const completedVideos = videos.filter((v) => v.status === "completed").length;
+  const completedVideos = videos.filter((v) => v.status === 'completed').length;
   const processingVideos = videos.filter((v) =>
-    ["pending", "script_generating", "script_complete", "processing", "rendering"].includes(
-      v.status
-    )
+    ['pending', 'script_generating', 'script_complete', 'processing', 'rendering'].includes(
+      v.status,
+    ),
   ).length;
 
   return (
@@ -78,7 +71,7 @@ export default function DashboardPage() {
             <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               Purchase Credits
             </h1>
-            <Button variant="outline" onClick={() => router.push("/dashboard")}>
+            <Button variant="outline" onClick={() => router.push('/dashboard')}>
               Back to Dashboard
             </Button>
           </div>
@@ -88,26 +81,10 @@ export default function DashboardPage() {
         <div className="space-y-8">
           {/* Stats Cards */}
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            <StatsCard
-              title="Total Reels"
-              value={videos.length}
-              icon={Video}
-            />
-            <StatsCard
-              title="Completed"
-              value={completedVideos}
-              icon={Sparkles}
-            />
-            <StatsCard
-              title="Processing"
-              value={processingVideos}
-              icon={TrendingUp}
-            />
-            <StatsCard
-              title="Credits"
-              value={credits ?? 0}
-              icon={CreditCard}
-            />
+            <StatsCard title="Total Reels" value={videos.length} icon={Video} />
+            <StatsCard title="Completed" value={completedVideos} icon={Sparkles} />
+            <StatsCard title="Processing" value={processingVideos} icon={TrendingUp} />
+            <StatsCard title="Credits" value={credits ?? 0} icon={CreditCard} />
           </div>
 
           {/* Header Section */}
@@ -169,8 +146,8 @@ export default function DashboardPage() {
                   <div>
                     <h2 className="text-2xl font-semibold mb-2">No reels yet</h2>
                     <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                      Create your first AI-generated reel to get started. It only takes a
-                      few seconds!
+                      Create your first AI-generated reel to get started. It only takes a few
+                      seconds!
                     </p>
                   </div>
                   <Link href="/create">

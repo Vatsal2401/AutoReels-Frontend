@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { Suspense } from "react";
-import { Sidebar } from "./Sidebar";
-import { TopBar } from "./TopBar";
+import { Suspense } from 'react';
+import { Sidebar } from './Sidebar';
+import { TopBar } from './TopBar';
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (

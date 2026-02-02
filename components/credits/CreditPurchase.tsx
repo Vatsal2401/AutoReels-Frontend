@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useCredits } from "@/lib/hooks/useCredits";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Check } from "lucide-react";
+import { useState } from 'react';
+import { useCredits } from '@/lib/hooks/useCredits';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Check } from 'lucide-react';
 
 const CREDIT_PACKAGES = [
   { amount: 10, price: 9, bonus: 0 },
@@ -17,7 +17,7 @@ const CREDIT_PACKAGES = [
 
 export function CreditPurchase() {
   const { credits, purchaseCredits, isPurchasing } = useCredits();
-  const [customAmount, setCustomAmount] = useState("");
+  const [customAmount, setCustomAmount] = useState('');
   const [selectedPackage, setSelectedPackage] = useState<number | null>(null);
   const [purchaseSuccess, setPurchaseSuccess] = useState(false);
 
@@ -26,16 +26,16 @@ export function CreditPurchase() {
       await purchaseCredits({ amount });
       setPurchaseSuccess(true);
       setSelectedPackage(null);
-      setCustomAmount("");
+      setCustomAmount('');
       setTimeout(() => setPurchaseSuccess(false), 3000);
     } catch (error) {
-      console.error("Purchase failed:", error);
+      console.error('Purchase failed:', error);
     }
   };
 
   const handlePackageSelect = (amount: number) => {
     setSelectedPackage(amount);
-    setCustomAmount("");
+    setCustomAmount('');
   };
 
   const handleCustomPurchase = () => {
@@ -69,17 +69,15 @@ export function CreditPurchase() {
             key={pkg.amount}
             className={`cursor-pointer transition-all ${
               selectedPackage === pkg.amount
-                ? "border-primary ring-2 ring-primary"
-                : "hover:border-primary/50"
+                ? 'border-primary ring-2 ring-primary'
+                : 'hover:border-primary/50'
             }`}
             onClick={() => handlePackageSelect(pkg.amount)}
           >
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-xl">{pkg.amount} Credits</CardTitle>
-                {pkg.bonus > 0 && (
-                  <Badge variant="secondary">+{pkg.bonus} bonus</Badge>
-                )}
+                {pkg.bonus > 0 && <Badge variant="secondary">+{pkg.bonus} bonus</Badge>}
               </div>
               <CardDescription>
                 ${pkg.price} • ${(pkg.price / (pkg.amount + pkg.bonus)).toFixed(2)} per credit

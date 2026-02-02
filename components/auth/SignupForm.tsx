@@ -1,20 +1,20 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useAuth } from "@/lib/hooks/useAuth";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import Link from "next/link";
-import { Eye, EyeOff, UserPlus, AlertCircle, Mail, Lock, User } from "lucide-react";
-import { OAuthButtons } from "./OAuthButtons";
+import { useState } from 'react';
+import { useAuth } from '@/lib/hooks/useAuth';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import Link from 'next/link';
+import { Eye, EyeOff, UserPlus, AlertCircle, Mail, Lock, User } from 'lucide-react';
+import { OAuthButtons } from './OAuthButtons';
 
 export function SignupForm() {
   const { signup } = useAuth();
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
+    name: '',
+    email: '',
+    password: '',
   });
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -24,21 +24,21 @@ export function SignupForm() {
     const newErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = "Name is required";
+      newErrors.name = 'Name is required';
     } else if (formData.name.trim().length < 2) {
-      newErrors.name = "Name must be at least 2 characters";
+      newErrors.name = 'Name must be at least 2 characters';
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
+      newErrors.email = 'Email is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address";
+      newErrors.email = 'Please enter a valid email address';
     }
 
     if (!formData.password) {
-      newErrors.password = "Password is required";
+      newErrors.password = 'Password is required';
     } else if (formData.password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters";
+      newErrors.password = 'Password must be at least 8 characters';
     }
 
     setErrors(newErrors);
@@ -55,9 +55,9 @@ export function SignupForm() {
       await signup(formData.email, formData.password, formData.name);
     } catch (error: any) {
       if (error.response?.status === 409) {
-        setErrors({ email: "This email is already registered. Please sign in instead." });
+        setErrors({ email: 'This email is already registered. Please sign in instead.' });
       } else {
-        setErrors({ general: "An error occurred. Please try again later." });
+        setErrors({ general: 'An error occurred. Please try again later.' });
       }
     } finally {
       setIsLoading(false);
@@ -72,9 +72,7 @@ export function SignupForm() {
             <div className="flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/20 mb-2">
               <UserPlus className="h-7 w-7 text-primary" />
             </div>
-            <CardTitle className="text-3xl font-bold tracking-tight">
-              Create your account
-            </CardTitle>
+            <CardTitle className="text-3xl font-bold tracking-tight">Create your account</CardTitle>
             <CardDescription className="text-base text-muted-foreground">
               Start creating viral faceless reels in seconds
             </CardDescription>
@@ -104,12 +102,10 @@ export function SignupForm() {
                   required
                   className="pl-10 h-11"
                   disabled={isLoading}
-                  aria-invalid={errors.name ? "true" : "false"}
+                  aria-invalid={errors.name ? 'true' : 'false'}
                 />
               </div>
-              {errors.name && (
-                <p className="text-sm text-destructive mt-1">{errors.name}</p>
-              )}
+              {errors.name && <p className="text-sm text-destructive mt-1">{errors.name}</p>}
             </div>
 
             <div className="space-y-2">
@@ -127,12 +123,10 @@ export function SignupForm() {
                   required
                   className="pl-10 h-11"
                   disabled={isLoading}
-                  aria-invalid={errors.email ? "true" : "false"}
+                  aria-invalid={errors.email ? 'true' : 'false'}
                 />
               </div>
-              {errors.email && (
-                <p className="text-sm text-destructive mt-1">{errors.email}</p>
-              )}
+              {errors.email && <p className="text-sm text-destructive mt-1">{errors.email}</p>}
             </div>
 
             <div className="space-y-2">
@@ -143,20 +137,20 @@ export function SignupForm() {
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="password"
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword ? 'text' : 'password'}
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   placeholder="At least 8 characters"
                   required
                   className="pl-10 pr-10 h-11"
                   disabled={isLoading}
-                  aria-invalid={errors.password ? "true" : "false"}
+                  aria-invalid={errors.password ? 'true' : 'false'}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                   disabled={isLoading}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -170,9 +164,9 @@ export function SignupForm() {
               </p>
             </div>
 
-            <Button 
-              type="submit" 
-              className="w-full h-11 text-base font-semibold" 
+            <Button
+              type="submit"
+              className="w-full h-11 text-base font-semibold"
               isLoading={isLoading}
               disabled={isLoading}
             >
@@ -182,11 +176,11 @@ export function SignupForm() {
           </form>
 
           <div className="text-xs text-center text-muted-foreground leading-relaxed">
-            By creating an account, you agree to our{" "}
+            By creating an account, you agree to our{' '}
             <Link href="/terms" className="underline hover:text-foreground transition-colors">
               Terms of Service
-            </Link>{" "}
-            and{" "}
+            </Link>{' '}
+            and{' '}
             <Link href="/privacy" className="underline hover:text-foreground transition-colors">
               Privacy Policy
             </Link>

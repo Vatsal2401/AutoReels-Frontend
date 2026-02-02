@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { videosApi, Video, VideoStatus } from "@/lib/api/videos";
+import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { videosApi, Video, VideoStatus } from '@/lib/api/videos';
 
-const TERMINAL_STATUSES: VideoStatus[] = ["completed", "failed"];
+const TERMINAL_STATUSES: VideoStatus[] = ['completed', 'failed'];
 
 export function useVideoProgress(videoId: string | null) {
   const [shouldPoll, setShouldPoll] = useState(true);
@@ -15,9 +15,9 @@ export function useVideoProgress(videoId: string | null) {
     error,
     refetch,
   } = useQuery({
-    queryKey: ["video", videoId],
+    queryKey: ['video', videoId],
     queryFn: () => {
-      if (!videoId) throw new Error("Video ID is required");
+      if (!videoId) throw new Error('Video ID is required');
       return videosApi.getVideo(videoId);
     },
     enabled: !!videoId && shouldPoll,

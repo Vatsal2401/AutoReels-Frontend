@@ -1,13 +1,13 @@
-import apiClient from "./client";
+import apiClient from './client';
 
 export type VideoStatus =
-  | "pending"
-  | "script_generating"
-  | "script_complete"
-  | "processing"
-  | "rendering"
-  | "completed"
-  | "failed";
+  | 'pending'
+  | 'script_generating'
+  | 'script_complete'
+  | 'processing'
+  | 'rendering'
+  | 'completed'
+  | 'failed';
 
 export interface Video {
   id: string;
@@ -32,7 +32,7 @@ export interface CreateVideoResponse {
 
 export const videosApi = {
   createVideo: async (data: CreateVideoDto): Promise<CreateVideoResponse> => {
-    const response = await apiClient.post<CreateVideoResponse>("/videos", data);
+    const response = await apiClient.post<CreateVideoResponse>('/videos', data);
     return response.data;
   },
 
@@ -43,7 +43,7 @@ export const videosApi = {
 
   // Note: This endpoint needs to be added to backend
   getVideos: async (): Promise<Video[]> => {
-    const response = await apiClient.get<Video[]>("/videos");
+    const response = await apiClient.get<Video[]>('/videos');
     return response.data;
   },
 

@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { creditsApi } from "@/lib/api/credits";
-import { useAuth } from "./useAuth";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { creditsApi } from '@/lib/api/credits';
+import { useAuth } from './useAuth';
 
 export function useCredits() {
   const { isAuthenticated } = useAuth();
@@ -13,7 +13,7 @@ export function useCredits() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["credits"],
+    queryKey: ['credits'],
     queryFn: creditsApi.getCreditInfo,
     enabled: isAuthenticated,
     staleTime: 30 * 1000, // 30 seconds
@@ -22,7 +22,7 @@ export function useCredits() {
   const purchaseMutation = useMutation({
     mutationFn: creditsApi.purchaseCredits,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["credits"] });
+      queryClient.invalidateQueries({ queryKey: ['credits'] });
     },
   });
 

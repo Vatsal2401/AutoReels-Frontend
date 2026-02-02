@@ -5,7 +5,7 @@ const nextConfig = {
   trailingSlash: false,
   // Optimize images for SEO
   images: {
-    formats: ["image/avif", "image/webp"],
+    formats: ['image/avif', 'image/webp'],
   },
 };
 
