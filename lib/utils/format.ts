@@ -1,3 +1,6 @@
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+
 export function formatRelativeTime(date: Date | string): string {
   const now = new Date();
   const then = typeof date === "string" ? new Date(date) : date;
@@ -31,6 +34,6 @@ export function formatRelativeTime(date: Date | string): string {
   return `${diffInMonths} ${diffInMonths === 1 ? "month" : "months"} ago`;
 }
 
-export function cn(...inputs: (string | undefined | null | false)[]): string {
-  return inputs.filter(Boolean).join(" ");
+export function cn(...inputs: ClassValue[]): string {
+  return twMerge(clsx(inputs));
 }
