@@ -16,6 +16,18 @@ export interface MediaSettings {
     language: string;
     duration: Duration;
     imageProvider: 'gemini' | 'replicate' | 'dalle' | 'mock';
+    captions: {
+        enabled: boolean;
+        preset: 'bold-stroke' | 'red-highlight' | 'sleek' | 'karaoke-card' | 'majestic' | 'beast' | 'elegant';
+        position: 'top' | 'bottom' | 'center';
+        timing: 'sentence' | 'word';
+    };
+    music?: {
+        id?: string;
+        url?: string;
+        name?: string;
+        volume?: number;
+    };
     advancedOptions: AdvancedOptions;
 }
 

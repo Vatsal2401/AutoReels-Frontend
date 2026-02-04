@@ -60,6 +60,18 @@ export interface CreateMediaDto {
     imageAspectRatio?: string;
     voiceId?: string;
     imageProvider?: string;
+    captions?: {
+        enabled: boolean;
+        preset: string;
+        position: 'top' | 'bottom' | 'center';
+        timing: 'sentence' | 'word';
+    };
+    music?: {
+        id?: string;
+        url?: string;
+        name?: string;
+        volume?: number;
+    };
 }
 
 export const mediaApi = {
