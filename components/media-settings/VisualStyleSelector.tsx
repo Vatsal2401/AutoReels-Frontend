@@ -44,7 +44,7 @@ export const VisualStyleSelector: React.FC<MediaSettingsProps> = ({ settings, on
               <ChevronRight className="w-3 h-3 transition-transform group-hover:translate-x-0.5" />
             </button>
           </DialogTrigger>
-          <DialogContent className="w-full max-w-2xl overflow-y-auto scrollbar-saas bg-background/95 backdrop-blur-xl border border-border shadow-2xl duration-200 z-[100] p-5 rounded-xl gap-0">
+          <DialogContent className="fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] w-full max-w-2xl max-h-[85vh] overflow-y-auto scrollbar-saas bg-background/95 backdrop-blur-xl border border-border shadow-2xl duration-200 z-[100] p-5 rounded-xl gap-0">
             <DialogHeader className="pb-4">
               <DialogTitle className="text-lg font-bold tracking-tight text-foreground">
                 Visual Style Library
