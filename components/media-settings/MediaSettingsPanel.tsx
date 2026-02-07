@@ -32,6 +32,9 @@ export const MediaSettingsPanel: React.FC = () => {
       position: 'bottom',
       timing: 'word',
     },
+    music: {
+      volume: 0.5,
+    },
   });
 
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);

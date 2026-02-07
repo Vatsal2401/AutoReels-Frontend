@@ -102,6 +102,9 @@ export function CreateVideoForm() {
       position: 'bottom',
       timing: 'word',
     },
+    music: {
+      volume: 0.5,
+    },
   });
 
   const { data: retryVideoData } = useQuery({
