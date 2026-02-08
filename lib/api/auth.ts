@@ -4,6 +4,7 @@ export interface SignUpDto {
   email: string;
   password: string;
   name: string;
+  country: string;
 }
 
 export interface SignInDto {
@@ -28,6 +29,7 @@ export interface User {
   credits_balance?: number;
   is_premium?: boolean;
   email_verified?: boolean;
+  country?: string;
 }
 
 export const authApi = {

@@ -1,8 +1,18 @@
 import apiClient from "./client";
 
 export interface CreateOrderDto {
-    amount: number;
+    planId: string;
+}
+
+export interface CreditPlan {
+    id: string;
+    name: string;
     credits: number;
+    price: number;
+    displayPrice: number;
+    currency: string;
+    symbol: string;
+    tag?: string;
 }
 
 export interface RazorpayOrder {
@@ -30,6 +40,16 @@ export interface VerifyPaymentResponse {
 }
 
 export const paymentApi = {
+    getPlans: async (): Promise<CreditPlan[]> => {
+        const response = await apiClient.get<CreditPlan[]>("/payment/plans");
+        return response.data;
+    },
+
+    getPublicPlans: async (): Promise<CreditPlan[]> => {
+        const response = await apiClient.get<CreditPlan[]>("/payment/plans/public");
+        return response.data;
+    },
+
     createOrder: async (dto: CreateOrderDto): Promise<RazorpayOrder> => {
         const response = await apiClient.post<RazorpayOrder>("/payment/create-order", dto);
         return response.data;

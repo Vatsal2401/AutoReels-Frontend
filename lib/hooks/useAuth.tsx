@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { authApi, AuthResponse, User } from "@/lib/api/auth";
-import { tokenStorage } from "@/lib/utils/token";
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import { authApi, AuthResponse, User } from '@/lib/api/auth';
+import { tokenStorage } from '@/lib/utils/token';
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string, name: string) => Promise<void>;
+  signup: (email: string, password: string, name: string, country: string) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
 }
@@ -55,34 +55,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email: response.user.email,
       email_verified: response.user.email_verified,
     });
-    router.push("/dashboard");
+    router.push('/dashboard');
   };
 
-  const signup = async (email: string, password: string, name: string) => {
-    const response: AuthResponse = await authApi.signUp({ email, password, name });
-    
+  const signup = async (email: string, password: string, name: string, country: string) => {
+    const response: AuthResponse = await authApi.signUp({ email, password, name, country });
+
     // Save tokens and set user to log in automatically
     tokenStorage.setAccessToken(response.access_token);
     tokenStorage.setRefreshToken(response.refresh_token);
-    
+
     setUser({
       userId: response.user.id,
       email: response.user.email,
       email_verified: response.user.email_verified,
     });
 
-    const { toast } = await import("sonner");
-    toast.success("Account created! Please check your email to verify your account.", {
+    const { toast } = await import('sonner');
+    toast.success('Account created! Please check your email to verify your account.', {
       duration: 5000,
     });
-    
-    router.push("/dashboard");
+
+    router.push('/dashboard');
   };
 
   const logout = () => {
     tokenStorage.clearTokens();
     setUser(null);
-    router.push("/");
+    router.push('/');
   };
 
   return (
@@ -105,7 +105,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 }
