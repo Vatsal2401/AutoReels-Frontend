@@ -3,8 +3,8 @@ import apiClient from "./client";
 export interface SignUpDto {
   email: string;
   password: string;
-  name: string;
-  country: string;
+  name?: string;
+  country?: string;
 }
 
 export interface SignInDto {
