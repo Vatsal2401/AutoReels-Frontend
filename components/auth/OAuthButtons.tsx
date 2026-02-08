@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 
 interface OAuthButtonsProps {
-  mode?: "login" | "signup";
+  mode?: 'login' | 'signup';
 }
 
-export function OAuthButtons({ mode = "login" }: OAuthButtonsProps) {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+export function OAuthButtons({ mode = 'login' }: OAuthButtonsProps) {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
   const handleGoogleAuth = () => {
     window.location.href = `${apiUrl}/auth/google`;
@@ -35,7 +35,7 @@ export function OAuthButtons({ mode = "login" }: OAuthButtonsProps) {
           type="button"
           variant="outline"
           onClick={handleGoogleAuth}
-          className="w-full h-11 border-border/50 hover:bg-accent/50 transition-all"
+          className="w-full h-11 border-border/50 hover:bg-accent/50 transition-all font-semibold"
           aria-label="Sign in with Google"
         >
           <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
@@ -56,14 +56,14 @@ export function OAuthButtons({ mode = "login" }: OAuthButtonsProps) {
               fill="#EA4335"
             />
           </svg>
-          <span className="font-medium">Google</span>
+          Google
         </Button>
 
         <Button
           type="button"
           variant="outline"
           onClick={handleMicrosoftAuth}
-          className="w-full h-11 border-border/50 hover:bg-accent/50 transition-all opacity-50 cursor-not-allowed"
+          className="w-full h-11 border-border/50 hover:bg-accent/50 transition-all font-semibold opacity-50 cursor-not-allowed"
           aria-label="Sign in with Microsoft"
           disabled={true}
         >
@@ -73,7 +73,7 @@ export function OAuthButtons({ mode = "login" }: OAuthButtonsProps) {
             <path fill="#81bc06" d="M0 12h11v11H0z" />
             <path fill="#05a6f0" d="M12 12h11v11H12z" />
           </svg>
-          <span className="font-medium">Microsoft</span>
+          Microsoft
         </Button>
       </div>
     </div>

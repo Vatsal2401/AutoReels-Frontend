@@ -10,7 +10,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string, name: string, country: string) => Promise<void>;
+  signup: (email: string, password: string, name?: string, country?: string) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
 }
@@ -58,7 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.push('/dashboard');
   };
 
-  const signup = async (email: string, password: string, name: string, country: string) => {
+  const signup = async (email: string, password: string, name?: string, country?: string) => {
     const response: AuthResponse = await authApi.signUp({ email, password, name, country });
 
     // Save tokens and set user to log in automatically
