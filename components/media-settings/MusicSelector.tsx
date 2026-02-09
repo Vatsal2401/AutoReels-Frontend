@@ -23,8 +23,7 @@ interface BackgroundMusic {
 }
 
 export const MusicSelector: React.FC<MediaSettingsProps> = ({ settings, onUpdate }) => {
-  const [systemMusic, setSystemMusic] = useState<BackgroundMusic[]>([]);
-  const [userMusic, setUserMusic] = useState<BackgroundMusic[]>([]);
+  const [musicTracks, setMusicTracks] = useState<BackgroundMusic[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [playingId, setPlayingId] = useState<string | null>(null);
@@ -49,12 +48,8 @@ export const MusicSelector: React.FC<MediaSettingsProps> = ({ settings, onUpdate
   const fetchMusic = async () => {
     try {
       setLoading(true);
-      const [systemRes, userRes] = await Promise.all([
-        apiClient.get('/music/system'),
-        apiClient.get('/music/user').catch(() => ({ data: [] })),
-      ]);
-      setSystemMusic(systemRes.data);
-      setUserMusic(userRes.data);
+      const res = await apiClient.get('/music/system');
+      setMusicTracks(res.data);
     } catch (error) {
       console.error('Failed to fetch music:', error);
     } finally {
@@ -102,7 +97,7 @@ export const MusicSelector: React.FC<MediaSettingsProps> = ({ settings, onUpdate
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      setUserMusic((prev) => [res.data, ...prev]);
+      setMusicTracks((prev) => [res.data, ...prev]);
       handleSelect(res.data);
     } catch (error) {
       console.error('Upload failed:', error);
@@ -115,8 +110,7 @@ export const MusicSelector: React.FC<MediaSettingsProps> = ({ settings, onUpdate
     if (settings.music) {
       onUpdate({ music: undefined });
     } else {
-      const allTracks = [...systemMusic, ...userMusic];
-      const trackToSelect = allTracks.find((t) => t.id === lastActiveId) || allTracks[0];
+      const trackToSelect = musicTracks.find((t) => t.id === lastActiveId) || musicTracks[0];
       if (trackToSelect) {
         handleSelect(trackToSelect);
       }
@@ -196,7 +190,7 @@ export const MusicSelector: React.FC<MediaSettingsProps> = ({ settings, onUpdate
                       className="shrink-0 w-28 h-24 rounded-2xl bg-muted animate-pulse"
                     />
                   ))
-                : [...systemMusic, ...userMusic].map((track) => (
+                : musicTracks.map((track) => (
                     <div key={track.id} className="relative shrink-0 snap-start">
                       <button
                         onClick={() => handleSelect(track)}
