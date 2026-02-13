@@ -1,6 +1,10 @@
 import { MetadataRoute } from "next";
 import { SITE_CONFIG } from "@/lib/seo";
 
+/**
+ * Sitemap URLs must return 200 OK when crawled (no redirect).
+ * baseUrl is canonical: HTTPS, non-www, no trailing slash (see lib/seo.ts).
+ */
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = SITE_CONFIG.url;
   const currentDate = new Date().toISOString();

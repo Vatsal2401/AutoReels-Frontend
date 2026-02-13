@@ -1,10 +1,39 @@
 import { Metadata } from "next";
 
+/**
+ * SEO config and helpers. Follows production SEO guide:
+ * - One URL shape: trailingSlash: false (next.config.js) — no trailing slash in canonicals, OG, sitemap, links.
+ * - Title template in layout adds " | Site Name"; page titles should be short (e.g. "About", "Privacy Policy").
+ * - Only reference assets that exist (favicon, icon, logo, OG image).
+ * - Schema: real logo/screenshot URLs or omit; sameAs only real social URLs.
+ */
+
+/**
+ * Canonical site URL: HTTPS, non-www, no trailing slash.
+ * Prevents "Page with redirect" in GSC: sitemap and canonicals must match the final URL (no redirect).
+ */
+function getCanonicalSiteUrl(): string {
+  const raw = process.env.NEXT_PUBLIC_SITE_URL || "https://autoreels.in";
+  const withHttps = raw.replace(/^http:\/\//i, "https://");
+  const noWww = withHttps.replace(/^https:\/\/www\./i, "https://");
+  const noTrailing = noWww.replace(/\/+$/, "");
+  return noTrailing || "https://autoreels.in";
+}
+
+const SITE_URL = getCanonicalSiteUrl();
+
 export const SITE_CONFIG = {
-  url: process.env.NEXT_PUBLIC_SITE_URL || "https://autoreels.in",
+  url: SITE_URL,
   name: "AutoReels",
   description:
     "Generate viral faceless reels in 60 seconds with AI. No editing. No camera. Just AI magic. Create professional content for Instagram, TikTok, and YouTube Shorts.",
+  /** OG/Twitter share card: title */
+  ogTitle: "AI Video Generator for Reels, Shorts & TikTok",
+  /** OG/Twitter share card: description */
+  ogDescription:
+    "Turn ideas → scripts → visuals → voiceover → ready-to-post videos in minutes. No editing. No filming.",
+  /** OG/Twitter image: absolute HTTPS URL. Must be 1200x630, publicly accessible, <300KB. */
+  ogImageUrl: `${SITE_URL}/og-preview.jpg`,
   keywords: [
     "AI video generator",
     "faceless reels",
@@ -39,12 +68,12 @@ export function generatePageMetadata({
   image?: string;
   keywords?: string[];
 }): Metadata {
-  // Canonical must be absolute and consistent (no trailing slash as per next.config.js)
-  const canonicalUrl = `${SITE_CONFIG.url}${path === "/" ? "" : path.replace(/\/$/, "")}`;
-  const ogImage = image || `${SITE_CONFIG.url}/og-image.png`;
+  // Canonical: absolute URL, no trailing slash (match next.config.js trailingSlash: false)
+  const canonicalUrl = path === "/" ? SITE_CONFIG.url : `${SITE_CONFIG.url}/${path.replace(/^\/|\/$/g, "")}`;
+  const ogImage = image || SITE_CONFIG.ogImageUrl;
 
   return {
-    title, // Let the layout template handle the suffix if applicable
+    title, // Short title; layout template adds " | AutoReels"
     description,
     keywords: keywords || SITE_CONFIG.keywords,
     authors: [{ name: SITE_CONFIG.author }],
@@ -54,11 +83,7 @@ export function generatePageMetadata({
     alternates: {
       canonical: canonicalUrl,
     },
-    icons: {
-      icon: "/icon.png",
-      shortcut: "/favicon.ico",
-      apple: "/apple-touch-icon.png",
-    },
+    // Only reference icons that exist in public/ (add favicon.ico, apple-touch-icon.png as needed)
     openGraph: {
       type: "website",
       locale: "en_US",
@@ -91,7 +116,7 @@ export function generateOrganizationSchema() {
     "@type": "Organization",
     name: SITE_CONFIG.name,
     url: SITE_CONFIG.url,
-    logo: `${SITE_CONFIG.url}/logo.png`,
+    logo: SITE_CONFIG.ogImageUrl,
     description: SITE_CONFIG.description,
     brand: {
       "@type": "Brand",
@@ -134,7 +159,7 @@ export function generateWebApplicationSchema() {
       bestRating: "5",
     },
     featureList: "AI Scriptwriting, VoiceCloning, Automated Captions, Stock Media Integration",
-    screenshot: `${SITE_CONFIG.url}/dashboard-preview.png`,
+    screenshot: SITE_CONFIG.ogImageUrl,
     description: SITE_CONFIG.description,
   };
 }

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { Providers } from './providers';
-import { SITE_CONFIG, generatePageMetadata } from '@/lib/seo';
+import { SITE_CONFIG } from '@/lib/seo';
 import { Toaster } from 'sonner';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -34,31 +34,27 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: SITE_CONFIG.url,
     siteName: SITE_CONFIG.name,
-    title: SITE_CONFIG.name,
-    description: SITE_CONFIG.description,
+    title: SITE_CONFIG.ogTitle,
+    description: SITE_CONFIG.ogDescription,
     images: [
       {
-        url: `${SITE_CONFIG.url}/og-image.png`,
+        url: SITE_CONFIG.ogImageUrl,
         width: 1200,
         height: 630,
-        alt: SITE_CONFIG.description,
+        alt: SITE_CONFIG.ogDescription,
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: SITE_CONFIG.name,
-    description: SITE_CONFIG.description,
-    images: [`${SITE_CONFIG.url}/og-image.png`],
+    title: SITE_CONFIG.ogTitle,
+    description: SITE_CONFIG.ogDescription,
+    images: [SITE_CONFIG.ogImageUrl],
   },
   alternates: {
     canonical: SITE_CONFIG.url,
   },
-  icons: {
-    // icon: "/icon.png",
-    shortcut: '/favicon.ico',
-    apple: '/apple-touch-icon.png',
-  },
+  // Add favicon.ico and apple-touch-icon.png to public/ when available; omit until then to avoid 404s
 };
 
 import { ThemeProvider } from '@/components/theme-provider';
