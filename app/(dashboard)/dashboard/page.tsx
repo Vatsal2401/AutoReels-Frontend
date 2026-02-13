@@ -71,20 +71,24 @@ function DashboardContent() {
   return (
     <DashboardLayout>
       {showPurchase ? (
-        <div className="h-full overflow-y-auto custom-scrollbar p-8 lg:p-12">
-          <div className="max-w-4xl mx-auto space-y-12">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1.5">
-                <h1 className="text-3xl font-bold tracking-tight text-foreground">
-                  Credits & Billing
+        <div className="h-full overflow-y-auto custom-scrollbar p-2 lg:p-4 bg-background/50">
+          <div className="max-w-6xl mx-auto space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-4">
+              <div className="space-y-1 text-center sm:text-left">
+                <h1 className="text-xl lg:text-2xl font-black tracking-tight text-foreground uppercase italic leading-none">
+                  Credits & <span className="text-primary italic">Billing</span>
                 </h1>
-                <p className="text-muted-foreground font-medium">Manage your generation credits and usage</p>
+                <p className="text-muted-foreground font-bold text-[8px] uppercase tracking-[0.2em] leading-none mt-1.5">Manage production fuel</p>
               </div>
-              <Button variant="outline" onClick={() => router.push("/dashboard")} className="h-10 border-border text-muted-foreground hover:text-foreground">
-                Back to Dashboard
+              <Button 
+                variant="outline" 
+                onClick={() => router.push("/dashboard")} 
+                className="h-8 border-border/50 text-muted-foreground hover:text-foreground bg-card/10 backdrop-blur-sm rounded-lg px-4 font-bold uppercase text-[8px] tracking-[0.1em]"
+              >
+                Exit
               </Button>
             </div>
-            <div className="bg-card/40 rounded-[32px] border border-border p-2 shadow-2xl">
+            <div className="animate-in fade-in slide-in-from-bottom-2 duration-700">
               <CreditPurchase />
             </div>
           </div>
