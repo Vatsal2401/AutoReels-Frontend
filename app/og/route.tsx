@@ -2,9 +2,25 @@ import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
 
-const size = { width: 1200, height: 630 };
+const WIDTH = 1200;
+const HEIGHT = 630;
+const DEFAULT_TITLE = "AI Video Generator for Reels, Shorts & TikTok";
+const DEFAULT_DESCRIPTION =
+  "Turn ideas → scripts → visuals → voiceover → ready-to-post videos in minutes. No editing. No filming.";
+const SITE_LABEL = "autoreels.in";
 
-export async function GET() {
+function truncate(str: string, maxLen: number): string {
+  if (str.length <= maxLen) return str;
+  return str.slice(0, maxLen - 3).trim() + "...";
+}
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const title = searchParams.get("title") || DEFAULT_TITLE;
+  const description = searchParams.get("description") || DEFAULT_DESCRIPTION;
+  const titleClean = truncate(title, 80);
+  const descClean = truncate(description, 120);
+
   return new ImageResponse(
     (
       <div
@@ -40,7 +56,7 @@ export async function GET() {
               letterSpacing: "-0.02em",
             }}
           >
-            AI Video Generator for Reels, Shorts & TikTok
+            {titleClean}
           </div>
           <div
             style={{
@@ -50,15 +66,7 @@ export async function GET() {
               marginBottom: 40,
             }}
           >
-            Turn ideas → scripts → visuals → voiceover → ready-to-post videos in minutes.
-          </div>
-          <div
-            style={{
-              fontSize: 26,
-              color: "rgba(255,255,255,0.75)",
-            }}
-          >
-            No editing. No filming.
+            {descClean}
           </div>
         </div>
         <div
@@ -71,12 +79,13 @@ export async function GET() {
             color: "rgba(255,255,255,0.6)",
           }}
         >
-          autoreels.in
+          {SITE_LABEL}
         </div>
       </div>
     ),
     {
-      ...size,
+      width: WIDTH,
+      height: HEIGHT,
       headers: {
         "Cache-Control": "public, max-age=86400, s-maxage=86400",
       },

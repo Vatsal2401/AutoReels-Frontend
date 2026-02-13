@@ -34,6 +34,8 @@ export const SITE_CONFIG = {
     "Turn ideas → scripts → visuals → voiceover → ready-to-post videos in minutes. No editing. No filming.",
   /** OG/Twitter image: absolute HTTPS URL. Must be 1200x630, publicly accessible, <300KB. */
   ogImageUrl: `${SITE_URL}/og-preview.jpg`,
+  /** Base URL for dynamic OG image generator (append ?title=...&description=...). */
+  ogImageBaseUrl: `${SITE_URL}/og`,
   keywords: [
     "AI video generator",
     "faceless reels",
@@ -55,6 +57,17 @@ export const SITE_CONFIG = {
   company: "AutoReels",
 };
 
+/**
+ * Build URL for dynamic OG image. Use this so each page gets an OG image with its title and description.
+ * Route: GET /og?title=...&description=...
+ */
+export function getDynamicOgImageUrl(title: string, description: string): string {
+  const params = new URLSearchParams();
+  params.set("title", title.slice(0, 80));
+  params.set("description", description.slice(0, 120));
+  return `${SITE_CONFIG.ogImageBaseUrl}?${params.toString()}`;
+}
+
 export function generatePageMetadata({
   title,
   description,
@@ -70,7 +83,12 @@ export function generatePageMetadata({
 }): Metadata {
   // Canonical: absolute URL, no trailing slash (match next.config.js trailingSlash: false)
   const canonicalUrl = path === "/" ? SITE_CONFIG.url : `${SITE_CONFIG.url}/${path.replace(/^\/|\/$/g, "")}`;
-  const ogImage = image || SITE_CONFIG.ogImageUrl;
+  const ogImage =
+    image ||
+    getDynamicOgImageUrl(
+      `${title} | ${SITE_CONFIG.name}`,
+      description
+    );
 
   return {
     title, // Short title; layout template adds " | AutoReels"
