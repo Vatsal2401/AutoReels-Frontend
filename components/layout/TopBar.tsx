@@ -29,6 +29,8 @@ export function TopBar({ onMenuClick }: TopBarProps) {
   // Get page title based on pathname
   const getPageTitle = () => {
     if (pathname === "/create") return "Create Reel";
+    if (pathname === "/reels") return "My Reels";
+    if (pathname?.startsWith("/editor/")) return "Editor";
     if (pathname?.startsWith("/videos/")) return "Video Details";
     if (pathname === "/dashboard") {
       if (searchParams?.get("purchase") === "credits") {

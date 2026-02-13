@@ -48,6 +48,21 @@ export interface Media {
     // Legacy compatibility fields if needed during transition
     final_url?: string;
     assets_by_type?: Record<string, any[]>;
+    /** First image asset URL for card thumbnail */
+    thumbnail_url?: string | null;
+}
+
+export interface EditorProjectDto {
+    id: string;
+    title: string;
+    duration: string;
+    script: string | null;
+    audioUrl: string | null;
+    captionUrl: string | null;
+    imageUrls: string[];
+    inputConfig: Record<string, any> | null;
+    status: string;
+    final_url?: string;
 }
 
 export interface CreateMediaDto {
@@ -85,9 +100,36 @@ export const mediaApi = {
         return response.data;
     },
 
+    getReelsPage: async (params: {
+        limit?: number;
+        cursor?: string | null;
+    }): Promise<{ items: Media[]; nextCursor: string | null }> => {
+        const searchParams = new URLSearchParams();
+        if (params.limit != null) searchParams.set("limit", String(params.limit));
+        if (params.cursor) searchParams.set("cursor", params.cursor);
+        const response = await apiClient.get(
+            `/media/user/me/list?${searchParams.toString()}`
+        );
+        return response.data;
+    },
+
     getMedia: async (id: string): Promise<Media> => {
         const response = await apiClient.get(`/media/${id}`);
         return response.data;
+    },
+
+    getEditorProject: async (id: string): Promise<EditorProjectDto> => {
+        const response = await apiClient.get(`/media/${id}/editor`);
+        return response.data;
+    },
+
+    duplicateReel: async (id: string): Promise<Media> => {
+        const response = await apiClient.post(`/media/${id}/duplicate`);
+        return response.data;
+    },
+
+    deleteReel: async (id: string): Promise<void> => {
+        await apiClient.delete(`/media/${id}`);
     },
 
     retryMedia: async (id: string): Promise<Media> => {
@@ -97,6 +139,28 @@ export const mediaApi = {
 
     updateMedia: async (id: string, data: any): Promise<Media> => {
         const response = await apiClient.patch(`/media/${id}`, data);
+        return response.data;
+    },
+
+    /**
+     * Rerender: produce a new video from current or updated assets.
+     * Use fromStep: "script" when script/topic changed; "render" when only options changed.
+     * Backend returns 409 if media is currently processing.
+     */
+    rerenderMedia: async (
+        id: string,
+        options?: { fromStep?: "render" | "script" }
+    ): Promise<Media> => {
+        const response = await apiClient.post(`/media/${id}/rerender`, options ?? {});
+        return response.data;
+    },
+
+    /**
+     * Export as new version: creates a new media row (versioned), copies config/script, runs pipeline.
+     * Returns the new media. Use for "Export video" in editor so each export is a new version.
+     */
+    exportAsVersion: async (id: string): Promise<Media> => {
+        const response = await apiClient.post(`/media/${id}/export`);
         return response.data;
     },
 };

@@ -21,7 +21,7 @@ import { useState } from "react";
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Create Reel", href: "/create", icon: Plus },
-  { name: "My Reels", href: "/dashboard", icon: Video },
+  { name: "My Reels", href: "/reels", icon: Video },
   { name: "Credits", href: "/dashboard?purchase=credits", icon: CreditCard },
 ];
 
