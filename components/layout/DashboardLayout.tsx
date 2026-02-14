@@ -20,7 +20,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
              <TopBar onMenuClick={() => setIsMobileOpen(true)} />
            </Suspense>
         </div>
-        <main className="flex-1 overflow-y-auto scrollbar-saas relative">{children}</main>
+        <main className="flex-1 min-h-0 overflow-y-auto scrollbar-saas relative">{children}</main>
       </div>
     </div>
   );

@@ -1,12 +1,6 @@
 import type { EditorProjectDto } from "@/lib/api/media";
 import type { Project, EditorScene, ProjectMeta, ProjectAudio } from "./types";
-import {
-  REEL_FPS,
-  REEL_HEIGHT,
-  REEL_WIDTH,
-  durationToSeconds,
-  type SceneAnimation,
-} from "./types";
+import { REEL_FPS, durationToSeconds, type SceneAnimation } from "./types";
 
 function generateId(): string {
   return `scene-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
@@ -77,11 +71,24 @@ export function mapEditorPayloadToProject(dto: EditorProjectDto): Project {
       }
     : undefined;
 
+  const musicConfig = dto.inputConfig?.music;
+  const musicUrl =
+    musicConfig?.url && typeof musicConfig.url === "string"
+      ? musicConfig.url
+      : null;
+  const musicVolume =
+    typeof musicConfig?.volume === "number"
+      ? Math.max(0, Math.min(1, musicConfig.volume))
+      : 0.45;
+
   return {
     id: dto.id,
     meta,
     scenes,
     audio,
+    captionUrl: dto.captionUrl ?? null,
+    musicUrl: musicUrl ?? null,
+    musicVolume,
   };
 }
 

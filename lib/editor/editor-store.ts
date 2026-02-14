@@ -4,7 +4,7 @@ import { create } from "zustand";
 import type { Project, EditorScene, ProjectMeta, ProjectAudio } from "./types";
 import type { EditorProjectDto } from "@/lib/api/media";
 import { mapEditorPayloadToProject } from "./mapApiToProject";
-import { REEL_FPS } from "./types";
+import { REEL_FPS, getProjectDurationFrames } from "./types";
 import { generateId } from "./mapApiToProject";
 
 interface EditorState {
@@ -18,6 +18,10 @@ interface EditorState {
   selectedSceneId: string | null;
   /** Last saved at (for "Saved just now" etc.). */
   lastSavedAt: Date | null;
+  /** Playhead frame (synced with timeline and Remotion preview). */
+  currentFrame: number;
+  /** When set, preview should seek to this frame (then clear). Used for timeline ruler click. */
+  seekToFrame: number | null;
 }
 
 interface EditorActions {
@@ -41,10 +45,18 @@ interface EditorActions {
   updateMeta: (patch: Partial<ProjectMeta>) => void;
   /** Update or set audio. */
   updateAudio: (audio: ProjectAudio | null) => void;
+  /** Update background music volume (0–1). */
+  updateMusicVolume: (volume: number) => void;
   /** Set selected scene for inspector. */
   setSelectedSceneId: (id: string | null) => void;
   /** Mark as just saved. */
   setLastSavedAt: (date: Date | null) => void;
+  /** Set playhead frame (timeline scrubbing / preview sync). Clamps to project duration. */
+  setCurrentFrame: (frame: number) => void;
+  /** Request preview to seek to this frame (cleared after seek). Use with setCurrentFrame for timeline seek. */
+  setSeekToFrame: (frame: number | null) => void;
+  /** Update scene start and duration (timeline drag/resize). Clamps to project duration. */
+  updateSceneFrames: (sceneId: string, startFrame: number, durationInFrames: number) => void;
   /** Reset store (e.g. on route change). */
   reset: () => void;
 }
@@ -55,6 +67,8 @@ const initialState: EditorState = {
   status: "",
   selectedSceneId: null,
   lastSavedAt: null,
+  currentFrame: 0,
+  seekToFrame: null,
 };
 
 function recalcSceneFrames(scenes: EditorScene[], totalDurationSec: number): EditorScene[] {
@@ -79,6 +93,7 @@ export const useEditorStore = create<EditorState & EditorActions>((set, get) => 
       mediaId: dto.id,
       status: dto.status ?? "",
       selectedSceneId: project.scenes[0]?.id ?? null,
+      currentFrame: 0,
     });
   },
 
@@ -159,9 +174,42 @@ export const useEditorStore = create<EditorState & EditorActions>((set, get) => 
 
   updateAudio: (audio) => set({ project: get().project ? { ...get().project!, audio: audio ?? undefined } : null }),
 
+  updateMusicVolume: (volume) => {
+    const { project } = get();
+    if (!project) return;
+    const v = Math.max(0, Math.min(1, Number(volume)));
+    set({ project: { ...project, musicVolume: v } });
+  },
+
   setSelectedSceneId: (id) => set({ selectedSceneId: id }),
 
   setLastSavedAt: (date) => set({ lastSavedAt: date }),
+
+  setCurrentFrame: (frame) => {
+    const { project } = get();
+    const f = Math.max(0, Math.floor(frame));
+    const maxFrame = project ? getProjectDurationFrames(project) - 1 : 0;
+    set({ currentFrame: Math.min(f, maxFrame) });
+  },
+  setSeekToFrame: (frame) => set({ seekToFrame: frame }),
+
+  updateSceneFrames: (sceneId, startFrame, durationInFrames) => {
+    const { project } = get();
+    if (!project) return;
+    const totalFrames = Math.round(project.meta.duration * REEL_FPS);
+    const clampedStart = Math.max(0, Math.min(Math.floor(startFrame), totalFrames - 1));
+    const clampedDuration = Math.max(REEL_FPS, Math.min(Math.floor(durationInFrames), totalFrames - clampedStart));
+    set({
+      project: {
+        ...project,
+        scenes: project.scenes.map((s) =>
+          s.id === sceneId
+            ? { ...s, startFrame: clampedStart, durationInFrames: clampedDuration }
+            : s
+        ),
+      },
+    });
+  },
 
   reset: () => set(initialState),
 }));

@@ -134,6 +134,10 @@ const config: Config = {
   					opacity: '0.7',
   					boxShadow: '0 0 10px hsl(var(--primary) / 0.2)'
   				}
+  			},
+  			'playhead-pulse': {
+  				'0%, 100%': { opacity: '1' },
+  				'50%': { opacity: '0.88' }
   			}
   		},
   		animation: {
@@ -143,7 +147,8 @@ const config: Config = {
   			'fade-in': 'fade-in 0.3s ease-out',
   			'slide-in': 'slide-in 0.3s ease-out',
   			'scanner': 'scanner 3s linear infinite',
-  			'pulse-glow': 'pulse-glow 2s ease-in-out infinite'
+  			'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
+  			'playhead-pulse': 'playhead-pulse 1.5s ease-in-out infinite'
   		}
   	}
   },

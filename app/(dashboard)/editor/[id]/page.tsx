@@ -1,27 +1,25 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
+import { useShallow } from "zustand/react/shallow";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useEditorProject } from "@/lib/hooks/useEditorProject";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
+import { EditorTopBar } from "@/components/editor/EditorTopBar";
 import { useEditorStore } from "@/lib/editor/editor-store";
-import { canRerenderReel, isReelProcessing } from "@/lib/constants/reel-status";
+import { canRerenderReel, isReelProcessing, getReelStatusConfig } from "@/lib/constants/reel-status";
 import { mediaApi } from "@/lib/api/media";
 import { projectToPatchPayload } from "@/lib/editor/mapApiToProject";
+import { getProjectDurationFrames, getPreviewMaxWidth } from "@/lib/editor/types";
+import type { PlayerRef } from "@remotion/player";
 import { SceneList } from "@/components/editor/SceneList";
 import { RemotionPreview } from "@/components/editor/RemotionPreview";
+import { EditorPreviewHoverControls } from "@/components/editor/EditorPreviewHoverControls";
 import { InspectorPanel } from "@/components/editor/InspectorPanel";
-import {
-  ArrowLeft,
-  Loader2,
-  Save,
-  Film,
-  AlertCircle,
-  Pencil,
-} from "lucide-react";
+import { Timeline } from "@/components/editor/Timeline";
+import { Loader2, Save, Film, AlertCircle } from "lucide-react";
 
 export default function EditorPage() {
   const router = useRouter();
@@ -33,12 +31,17 @@ export default function EditorPage() {
     !!isAuthenticated
   );
 
+  // Select everything except currentFrame so playhead updates don't re-render this page (avoids audio glitches)
   const {
     project,
     mediaId: storeMediaId,
     status,
     selectedSceneId,
     lastSavedAt,
+    currentFrame,
+    setCurrentFrame,
+    seekToFrame,
+    setSeekToFrame,
     initFromPayload,
     setMedia,
     setSelectedSceneId,
@@ -47,9 +50,78 @@ export default function EditorPage() {
     removeScene,
     updateMeta,
     updateAudio,
+    updateMusicVolume,
     setLastSavedAt,
     reset,
-  } = useEditorStore();
+    updateSceneFrames,
+    reorderScenes,
+  } = useEditorStore(
+    useShallow((s) => ({
+      project: s.project,
+      mediaId: s.mediaId,
+      status: s.status,
+      selectedSceneId: s.selectedSceneId,
+      lastSavedAt: s.lastSavedAt,
+      currentFrame: s.currentFrame,
+      setCurrentFrame: s.setCurrentFrame,
+      seekToFrame: s.seekToFrame,
+      setSeekToFrame: s.setSeekToFrame,
+      initFromPayload: s.initFromPayload,
+      setMedia: s.setMedia,
+      setSelectedSceneId: s.setSelectedSceneId,
+      updateScene: s.updateScene,
+      addScene: s.addScene,
+      removeScene: s.removeScene,
+      updateMeta: s.updateMeta,
+      updateAudio: s.updateAudio,
+      updateMusicVolume: s.updateMusicVolume,
+      setLastSavedAt: s.setLastSavedAt,
+      reset: s.reset,
+      updateSceneFrames: s.updateSceneFrames,
+      reorderScenes: s.reorderScenes,
+    }))
+  );
+
+  const playerRef = useRef<PlayerRef>(null);
+  const previewWrapperRef = useRef<HTMLDivElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [playbackRate, setPlaybackRate] = useState(1);
+  const [loop, setLoop] = useState(true);
+  const [previewFit, setPreviewFit] = useState<"contain" | "cover">("contain");
+  const [showSafeArea, setShowSafeArea] = useState(false);
+
+  const durationFrames = useMemo(
+    () => (project ? getProjectDurationFrames(project) : 0),
+    [project]
+  );
+
+  const handlePlay = useCallback((e: React.MouseEvent) => {
+    const player = playerRef.current;
+    if (player && typeof player.play === "function") {
+      // Pass native event for Safari audio; cast for Remotion types
+      player.play(e.nativeEvent as unknown as React.SyntheticEvent);
+      setIsPlaying(true);
+    }
+  }, []);
+
+  const handlePause = useCallback(() => {
+    const player = playerRef.current;
+    if (player && typeof player.pause === "function") {
+      player.pause();
+      setIsPlaying(false);
+    }
+  }, []);
+
+  const handleStepFrame = useCallback(
+    (delta: number) => {
+      const player = playerRef.current;
+      if (!player || typeof player.seekTo !== "function") return;
+      const next = Math.max(0, Math.min(durationFrames - 1, currentFrame + delta));
+      player.seekTo(next);
+      setCurrentFrame(next);
+    },
+    [currentFrame, durationFrames, setCurrentFrame]
+  );
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -107,14 +179,13 @@ export default function EditorPage() {
     () => project?.scenes.find((s) => s.id === selectedSceneId) ?? null,
     [project, selectedSceneId]
   );
+  const statusConfig = getReelStatusConfig(status);
 
   if (authLoading) {
     return (
-      <DashboardLayout>
-        <div className="flex min-h-screen items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      </DashboardLayout>
+      <div className="h-screen w-full flex items-center justify-center bg-[#f6f7f9] overflow-hidden">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
     );
   }
 
@@ -122,131 +193,152 @@ export default function EditorPage() {
 
   if (projectLoading || !apiProject) {
     return (
-      <DashboardLayout>
-        <div className="flex min-h-[60vh] items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      </DashboardLayout>
+      <div className="h-screen w-full flex items-center justify-center bg-[#f6f7f9] overflow-hidden">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
     );
   }
 
   if (error) {
     return (
-      <DashboardLayout>
-        <div className="max-w-md mx-auto py-12 px-4">
-          <div className="rounded-lg border border-border bg-card p-8 text-center">
-            <AlertCircle className="h-12 w-12 text-destructive mx-auto" />
-            <p className="text-muted-foreground mt-4">
-              Reel not found or you don&apos;t have access.
-            </p>
-            <Link href="/reels">
-              <Button variant="outline" className="mt-4">
-                Back to Reels
-              </Button>
-            </Link>
-          </div>
+      <div className="h-screen w-full flex items-center justify-center bg-[#f6f7f9] overflow-hidden p-4">
+        <div className="rounded-lg border border-border bg-card p-8 text-center max-w-md">
+          <AlertCircle className="h-12 w-12 text-destructive mx-auto" />
+          <p className="text-muted-foreground mt-4">
+            Reel not found or you don&apos;t have access.
+          </p>
+          <Link href="/reels">
+            <Button variant="outline" className="mt-4">
+              Back to Reels
+            </Button>
+          </Link>
         </div>
-      </DashboardLayout>
+      </div>
     );
   }
 
   if (!project) {
     return (
-      <DashboardLayout>
-        <div className="flex min-h-[60vh] items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      </DashboardLayout>
+      <div className="h-screen w-full flex items-center justify-center bg-[#f6f7f9] overflow-hidden">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
     );
   }
 
+  const statusDisplay = statusConfig.displayStatus;
+
+  const rootClassName = "flex flex-col overflow-hidden min-h-0 h-screen w-full";
+  const rootStyle = { height: "100vh" as const, display: "flex", flexDirection: "column" as const, background: "#F8F9FB" };
+  const previewMaxWidth = getPreviewMaxWidth(project.meta.ratio);
+
   return (
-    <DashboardLayout>
-      <div className="flex flex-col h-[calc(100vh-4rem)] bg-background">
-        {/* Top bar: breadcrumb, title, actions */}
-        <header className="shrink-0 flex items-center justify-between gap-4 px-4 py-2 border-b border-border bg-card">
-          <div className="flex items-center gap-3 min-w-0">
-            <Link href="/reels">
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="h-4 w-4 mr-1" />
-                My Reels
-              </Button>
-            </Link>
-            <span className="text-muted-foreground">Editor</span>
-            <span className="text-sm font-medium truncate flex items-center gap-1">
-              {project.meta.title || "Untitled"}
-              <Pencil className="h-3 w-3 text-muted-foreground" />
-            </span>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            {lastSavedAt && (
-              <span className="text-xs text-muted-foreground">
-                Saved just now
-              </span>
-            )}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleSaveDraft}
-              disabled={processing || saving}
+    <div className={rootClassName} style={rootStyle}>
+      <EditorTopBar
+        backHref="/reels"
+        backLabel="My Reels"
+        title={project.meta.title || "Untitled"}
+        onTitleChange={(t) => updateMeta({ ...project.meta, title: t })}
+        statusLabel={statusConfig.label}
+        statusDisplay={statusDisplay}
+        lastSavedAt={lastSavedAt}
+        onSave={handleSaveDraft}
+        saving={saving}
+        onExport={handleRenderExport}
+        exporting={rendering}
+        showExport={showRender}
+      />
+
+      {/* MainContent: flex 1, overflow hidden; only panels scroll */}
+      <div className="flex-1 flex min-h-0 overflow-hidden min-w-0">
+        <aside className="w-[248px] shrink-0 flex flex-col min-h-0 overflow-y-auto bg-white border-r border-[#E5E7EB]">
+          <SceneList
+            scenes={project.scenes}
+            selectedSceneId={selectedSceneId}
+            onSelectScene={setSelectedSceneId}
+            onAddScene={addScene}
+            onRemoveScene={removeScene}
+            canRemove={project.scenes.length > 1}
+          />
+        </aside>
+
+        <main className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden bg-[#F8F9FB]">
+          {/* Preview section: video + hover overlay controls inside one wrapper */}
+          <section
+            className="flex-1 min-h-0 flex justify-center items-center overflow-visible"
+            style={{ background: "#F3F4F6" }}
+            aria-label="Preview"
+          >
+            <div
+              className="h-full w-full flex justify-center items-center p-4 overflow-visible"
+              style={{ maxWidth: previewMaxWidth, margin: "0 auto" }}
             >
-              {saving ? (
-                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-              ) : (
-                <Save className="h-4 w-4 mr-1" />
-              )}
-              Save Draft
-            </Button>
-            {showRender && (
-              <Button
-                size="sm"
-                onClick={handleRenderExport}
-                disabled={processing || rendering}
+              <div
+                ref={previewWrapperRef}
+                className="group relative flex justify-center items-center flex-shrink-0 w-full overflow-visible"
+                style={{ maxWidth: previewMaxWidth }}
               >
-                {rendering ? (
-                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                ) : (
-                  <Film className="h-4 w-4 mr-1" />
-                )}
-                Render & Export
-              </Button>
-            )}
-          </div>
-        </header>
-
-        {/* 3-column layout */}
-        <div className="flex-1 flex min-h-0">
-          {/* Left: Scene list */}
-          <aside className="w-64 shrink-0 flex flex-col border-r border-border">
-            <SceneList
-              scenes={project.scenes}
-              selectedSceneId={selectedSceneId}
-              onSelectScene={setSelectedSceneId}
-              onAddScene={addScene}
-              onRemoveScene={removeScene}
-              canRemove={project.scenes.length > 1}
-            />
-          </aside>
-
-          {/* Center: Remotion preview */}
-          <main className="flex-1 flex items-center justify-center p-4 min-w-0 bg-muted/20">
-            <div className="w-full max-w-md">
-              <RemotionPreview project={project} />
+                <RemotionPreview
+                  project={project}
+                  playerRef={playerRef}
+                  onPlayingChange={setIsPlaying}
+                  onFrameUpdate={setCurrentFrame}
+                  seekToFrame={seekToFrame}
+                  onClearSeek={() => setSeekToFrame(null)}
+                  playbackRate={playbackRate}
+                  loop={loop}
+                  previewFit={previewFit}
+                  showSafeArea={showSafeArea}
+                />
+                <EditorPreviewHoverControls
+                  isPlaying={isPlaying}
+                  onPlay={handlePlay}
+                  onPause={handlePause}
+                  onStepFrame={handleStepFrame}
+                  currentFrame={currentFrame}
+                  durationFrames={durationFrames}
+                  playbackRate={playbackRate}
+                  onPlaybackRateChange={setPlaybackRate}
+                  loop={loop}
+                  onLoopChange={setLoop}
+                  showSafeArea={showSafeArea}
+                  onShowSafeAreaChange={setShowSafeArea}
+                  containerRef={previewWrapperRef}
+                />
+              </div>
             </div>
-          </main>
+          </section>
+        </main>
 
-          {/* Right: Inspector */}
-          <aside className="w-72 shrink-0 flex flex-col">
-            <InspectorPanel
-              project={project}
-              selectedScene={selectedScene}
-              onUpdateScene={updateScene}
-              onUpdateMeta={updateMeta}
-              onUpdateAudio={updateAudio}
-            />
-          </aside>
-        </div>
+        <aside className="w-[300px] shrink-0 flex flex-col min-h-0 overflow-y-auto bg-white border-l border-[#E5E7EB]">
+          <InspectorPanel
+            project={project}
+            selectedScene={selectedScene}
+            onUpdateScene={updateScene}
+            onUpdateMeta={updateMeta}
+            onUpdateAudio={updateAudio}
+            onUpdateMusicVolume={updateMusicVolume}
+          />
+        </aside>
       </div>
-    </DashboardLayout>
+
+      {/* Timeline: fixed 240px, no page scroll; only timeline scrolls horizontally */}
+      <section
+        className="shrink-0 flex flex-col overflow-x-auto overflow-y-hidden border-t border-[#E5E7EB]"
+        style={{ height: 240, background: "#F9FAFB" }}
+        aria-label="Timeline"
+      >
+        <Timeline
+          project={project}
+          onSeek={(frame) => {
+            setCurrentFrame(frame);
+            setSeekToFrame(frame);
+          }}
+          selectedSceneId={selectedSceneId}
+          onSelectScene={setSelectedSceneId}
+          onUpdateSceneFrames={updateSceneFrames}
+          onReorderScenes={reorderScenes}
+        />
+      </section>
+    </div>
   );
 }
