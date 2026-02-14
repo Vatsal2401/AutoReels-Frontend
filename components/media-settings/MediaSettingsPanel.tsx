@@ -16,7 +16,8 @@ export const MediaSettingsPanel: React.FC = () => {
   const [settings, setSettings] = useState<MediaSettings>({
     visualStyleId: 'cinematic',
     aspectRatio: '9:16',
-    voiceId: '21m00Tcm4TlvDq8ikWAM', // Rachel
+    voiceId: 'aMSt68OGf4xUZAnLpTU8', // Grounded And Professional (English)
+    voiceLabel: 'Grounded And Professional',
     language: 'English (US)',
     duration: 'Short',
     imageProvider: 'gemini',

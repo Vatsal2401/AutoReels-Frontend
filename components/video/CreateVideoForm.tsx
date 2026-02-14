@@ -85,8 +85,8 @@ export function CreateVideoForm() {
   const [settings, setSettings] = useState<MediaSettings>({
     visualStyleId: 'cinematic',
     aspectRatio: '9:16',
-    voiceId: '21m00Tcm4TlvDq8ikWAM', // Rachel
-    voiceLabel: 'Rachel',
+    voiceId: 'aMSt68OGf4xUZAnLpTU8', // Grounded And Professional (English)
+    voiceLabel: 'Grounded And Professional',
     language: 'English (US)',
     duration: 'Short',
     imageProvider: 'gemini',
@@ -191,6 +191,7 @@ export function CreateVideoForm() {
       imageStyle: getFullPrompt(settings.visualStyleId, settings.advancedOptions),
       imageAspectRatio: settings.aspectRatio,
       voiceId: settings.voiceId,
+      voiceLabel: settings.voiceLabel,
       imageProvider: 'gemini',
       captions: settings.captions,
       music: settings.music,

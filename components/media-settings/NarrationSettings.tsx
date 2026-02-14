@@ -42,19 +42,22 @@ export const NarrationSettings: React.FC<MediaSettingsProps> = ({
   useEffect(() => {
     if (isLoadingVoices || voices.length === 0 || initialLoadDone.current) return;
 
-    const currentVoice = voices.find(v => v.value === settings.voiceId);
-    
+    const languageMeta = settings.language === 'Hindi' ? 'Hindi' : 'English';
+    const forLang = voices.filter((v) => v.meta === languageMeta);
+    const opts = forLang.length > 0 ? forLang : voices;
+    const currentVoice = opts.find((v) => v.value === settings.voiceId);
+
     if (!currentVoice) {
-      onUpdate({ 
-        voiceId: voices[0].value,
-        voiceLabel: voices[0].label 
+      onUpdate({
+        voiceId: opts[0].value,
+        voiceLabel: opts[0].label,
       });
     } else if (!settings.voiceLabel) {
       onUpdate({ voiceLabel: currentVoice.label });
     }
-    
+
     initialLoadDone.current = true;
-  }, [voices, isLoadingVoices, settings.voiceId, settings.voiceLabel, onUpdate]);
+  }, [voices, isLoadingVoices, settings.voiceId, settings.voiceLabel, settings.language, onUpdate]);
 
   const handlePreview = async () => {
     if (previewingId && audioRef.current) {
@@ -109,15 +112,31 @@ export const NarrationSettings: React.FC<MediaSettingsProps> = ({
     }
   };
 
-  const selectedVoice = voices.find((v) => v.value === settings.voiceId);
+  const selectedVoice = voiceOptions.find((v) => v.value === settings.voiceId);
+  // When language changes, if current voice not in filtered list, switch to first for that language
+  useEffect(() => {
+    if (voices.length === 0 || !settings.voiceId) return;
+    const meta = settings.language === 'Hindi' ? 'Hindi' : 'English';
+    const forLang = voices.filter((v) => v.meta === meta);
+    const opts = forLang.length > 0 ? forLang : voices;
+    if (!opts.some((v) => v.value === settings.voiceId)) {
+      onUpdate({ voiceId: opts[0].value, voiceLabel: opts[0].label });
+    }
+  }, [settings.language, settings.voiceId, voices, onUpdate]);
 
   const LANGUAGES = [
     { value: 'English (US)', label: 'English (US) 🇺🇸' },
+    { value: 'Hindi', label: 'Hindi 🇮🇳' },
     { value: 'Spanish', label: 'Spanish 🇪🇸' },
     { value: 'French', label: 'French 🇫🇷' },
     { value: 'German', label: 'German 🇩🇪' },
     { value: 'Japanese', label: 'Japanese 🇯🇵' },
   ];
+
+  // Backend returns voices with meta "English" or "Hindi". Filter by selected language.
+  const languageMeta = settings.language === 'Hindi' ? 'Hindi' : 'English';
+  const voicesForLanguage = voices.filter((v) => v.meta === languageMeta);
+  const voiceOptions = voicesForLanguage.length > 0 ? voicesForLanguage : voices;
 
   return (
     <div className="space-y-4">
@@ -166,7 +185,7 @@ export const NarrationSettings: React.FC<MediaSettingsProps> = ({
                 const opt = voices.find(x => x.value === v);
                 onUpdate({ voiceId: v, voiceLabel: opt?.label });
               }}
-              options={voices}
+              options={voiceOptions}
               placeholder={isLoadingVoices ? "Loading..." : "Select a voice"}
               disabled={isLoadingVoices}
               className="z-50"
