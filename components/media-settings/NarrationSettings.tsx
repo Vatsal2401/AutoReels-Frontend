@@ -112,18 +112,6 @@ export const NarrationSettings: React.FC<MediaSettingsProps> = ({
     }
   };
 
-  const selectedVoice = voiceOptions.find((v) => v.value === settings.voiceId);
-  // When language changes, if current voice not in filtered list, switch to first for that language
-  useEffect(() => {
-    if (voices.length === 0 || !settings.voiceId) return;
-    const meta = settings.language === 'Hindi' ? 'Hindi' : 'English';
-    const forLang = voices.filter((v) => v.meta === meta);
-    const opts = forLang.length > 0 ? forLang : voices;
-    if (!opts.some((v) => v.value === settings.voiceId)) {
-      onUpdate({ voiceId: opts[0].value, voiceLabel: opts[0].label });
-    }
-  }, [settings.language, settings.voiceId, voices, onUpdate]);
-
   const LANGUAGES = [
     { value: 'English (US)', label: 'English (US) 🇺🇸' },
     { value: 'Hindi', label: 'Hindi 🇮🇳' },
@@ -137,6 +125,18 @@ export const NarrationSettings: React.FC<MediaSettingsProps> = ({
   const languageMeta = settings.language === 'Hindi' ? 'Hindi' : 'English';
   const voicesForLanguage = voices.filter((v) => v.meta === languageMeta);
   const voiceOptions = voicesForLanguage.length > 0 ? voicesForLanguage : voices;
+  const selectedVoice = voiceOptions.find((v) => v.value === settings.voiceId);
+
+  // When language changes, if current voice not in filtered list, switch to first for that language
+  useEffect(() => {
+    if (voices.length === 0 || !settings.voiceId) return;
+    const meta = settings.language === 'Hindi' ? 'Hindi' : 'English';
+    const forLang = voices.filter((v) => v.meta === meta);
+    const opts = forLang.length > 0 ? forLang : voices;
+    if (!opts.some((v) => v.value === settings.voiceId)) {
+      onUpdate({ voiceId: opts[0].value, voiceLabel: opts[0].label });
+    }
+  }, [settings.language, settings.voiceId, voices, onUpdate]);
 
   return (
     <div className="space-y-4">

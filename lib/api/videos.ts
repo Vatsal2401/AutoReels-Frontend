@@ -17,6 +17,7 @@ export interface CreateVideoDto {
   imageStyle?: string;
   imageAspectRatio?: string;
   voiceId?: string;
+  voiceLabel?: string;
   imageProvider?: string;
   captions?: {
     enabled: boolean;
