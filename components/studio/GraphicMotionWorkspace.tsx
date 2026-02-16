@@ -135,8 +135,7 @@ export function GraphicMotionWorkspace() {
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const runGenerate = () => {
     if (!script.trim() || !hasCredits) return;
     const highlights = highlightWords
       .split(/[\s,]+/)
@@ -156,6 +155,11 @@ export function GraphicMotionWorkspace() {
     };
     createMutation.mutate(dto);
     setProjectId(null);
+  };
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Only allow submit via explicit "Generate video" button click, not Enter key in inputs
   };
 
   const isProcessing =
@@ -215,7 +219,7 @@ export function GraphicMotionWorkspace() {
           </div>
           <form
             id="graphic-motion-form"
-            onSubmit={handleSubmit}
+            onSubmit={handleFormSubmit}
             className="flex-1 min-h-0 flex flex-col min-w-0 overflow-hidden"
           >
             <div className="flex-1 min-h-0 overflow-y-auto scrollbar-saas px-4 lg:px-8 py-6 pb-4">
@@ -420,7 +424,7 @@ export function GraphicMotionWorkspace() {
                   </span>
                 </div>
                 <Button
-                  type="submit"
+                  type="button"
                   size="lg"
                   disabled={
                     createMutation.isPending ||
@@ -429,6 +433,7 @@ export function GraphicMotionWorkspace() {
                     !hasCredits ||
                     creditsLoading
                   }
+                  onClick={runGenerate}
                   className="w-full sm:w-auto min-w-[200px] gap-2"
                 >
                   {createMutation.isPending || isProcessing ? (
