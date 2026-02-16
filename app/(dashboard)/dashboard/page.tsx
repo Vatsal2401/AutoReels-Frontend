@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useCredits } from "@/lib/hooks/useCredits";
 import { projectsApi } from "@/lib/api/projects";
+import { showcaseApi } from "@/lib/api/showcase";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { CreditPurchase } from "@/components/credits/CreditPurchase";
 import { StatsCard } from "@/components/dashboard/StatsCard";
@@ -35,6 +36,12 @@ function DashboardContent() {
   const { data: projects = [] } = useQuery({
     queryKey: ["projects"],
     queryFn: projectsApi.getProjects,
+    enabled: isAuthenticated,
+  });
+
+  const { data: showcase } = useQuery({
+    queryKey: ["showcase"],
+    queryFn: showcaseApi.getShowcase,
     enabled: isAuthenticated,
   });
 
@@ -193,8 +200,19 @@ function DashboardContent() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                   <div className="rounded-2xl border border-border bg-card overflow-hidden group cursor-pointer transition-all hover:border-primary/30" onClick={() => window.location.href = "/studio/reel"}>
-                    <div className="aspect-[9/16] bg-muted/50 flex items-center justify-center border-b border-border">
-                      <Video className="h-10 w-10 text-muted-foreground group-hover:text-primary transition-colors" />
+                    <div className="aspect-[9/16] bg-muted/50 flex items-center justify-center border-b border-border overflow-hidden">
+                      {showcase?.reel?.url ? (
+                        <video
+                          src={showcase.reel.url}
+                          className="w-full h-full object-cover"
+                          muted
+                          loop
+                          playsInline
+                          preload="metadata"
+                        />
+                      ) : (
+                        <Video className="h-10 w-10 text-muted-foreground group-hover:text-primary transition-colors" />
+                      )}
                     </div>
                     <div className="p-4">
                       <p className="font-bold text-sm text-foreground">Reel Generator</p>
@@ -202,8 +220,19 @@ function DashboardContent() {
                     </div>
                   </div>
                   <div className="rounded-2xl border border-border bg-card overflow-hidden group cursor-pointer transition-all hover:border-primary/30" onClick={() => window.location.href = "/studio/graphic-motion"}>
-                    <div className="aspect-[9/16] bg-muted/50 flex items-center justify-center border-b border-border">
-                      <Type className="h-10 w-10 text-muted-foreground group-hover:text-primary transition-colors" />
+                    <div className="aspect-[9/16] bg-muted/50 flex items-center justify-center border-b border-border overflow-hidden">
+                      {showcase?.graphicMotion?.url ? (
+                        <video
+                          src={showcase.graphicMotion.url}
+                          className="w-full h-full object-cover"
+                          muted
+                          loop
+                          playsInline
+                          preload="metadata"
+                        />
+                      ) : (
+                        <Type className="h-10 w-10 text-muted-foreground group-hover:text-primary transition-colors" />
+                      )}
                     </div>
                     <div className="p-4">
                       <p className="font-bold text-sm text-foreground">Graphic Motion</p>
@@ -211,8 +240,17 @@ function DashboardContent() {
                     </div>
                   </div>
                   <div className="rounded-2xl border border-border bg-card overflow-hidden group cursor-pointer transition-all hover:border-primary/30 opacity-75" onClick={() => window.location.href = "/studio"}>
-                    <div className="aspect-[9/16] bg-muted/50 flex items-center justify-center border-b border-border">
-                      <ImageIcon className="h-10 w-10 text-muted-foreground group-hover:text-primary transition-colors" />
+                    <div className="aspect-[9/16] bg-muted/50 flex items-center justify-center border-b border-border overflow-hidden">
+                      {showcase?.textToImage?.url ? (
+                        // eslint-disable-next-line @next/next/no-img-element -- showcase URL can be external/dynamic
+                        <img
+                          src={showcase.textToImage.url}
+                          alt="Text to Image showcase"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <ImageIcon className="h-10 w-10 text-muted-foreground group-hover:text-primary transition-colors" />
+                      )}
                     </div>
                     <div className="p-4">
                       <p className="font-bold text-sm text-foreground">Text to Image</p>
