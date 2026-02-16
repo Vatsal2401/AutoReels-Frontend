@@ -5,22 +5,23 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useCredits } from "@/lib/hooks/useCredits";
-import { videosApi } from "@/lib/api/videos";
+import { projectsApi } from "@/lib/api/projects";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { VideoCard } from "@/components/video/VideoCard";
 import { CreditPurchase } from "@/components/credits/CreditPurchase";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import {
-  Plus,
   Loader2,
   CreditCard,
   Video,
-  Sparkles,
+  Type,
+  Image as ImageIcon,
+  Palette,
   TrendingUp,
   AlertCircle,
+  Heart,
 } from "lucide-react";
 import { Suspense } from "react";
 
@@ -31,13 +32,9 @@ function DashboardContent() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const { credits, hasCredits, isLoading: creditsLoading } = useCredits();
 
-  const {
-    data: videos = [],
-    isLoading: videosLoading,
-    error,
-  } = useQuery({
-    queryKey: ["videos"],
-    queryFn: videosApi.getVideos,
+  const { data: projects = [] } = useQuery({
+    queryKey: ["projects"],
+    queryFn: projectsApi.getProjects,
     enabled: isAuthenticated,
   });
 
@@ -59,12 +56,11 @@ function DashboardContent() {
     return null;
   }
 
-  const completedVideos = videos.filter((v) => v.status === "completed").length;
-  const processingVideos = videos.filter((v) =>
-    ["pending", "script_generating", "script_complete", "processing", "rendering"].includes(
-      v.status
-    )
+  const activeCount = projects.filter((p) =>
+    ["pending", "processing", "rendering"].includes(p.status)
   ).length;
+  const completedCount = projects.filter((p) => p.status === "completed").length;
+  const engagementValue = completedCount > 0 ? `${completedCount} delivered` : "—";
 
   const showLowCreditWarning = credits !== null && credits <= 3;
 
@@ -119,32 +115,31 @@ function DashboardContent() {
                 </div>
               )}
 
-              {/* Hero Section - Utilitarian Workspace Header */}
+              {/* Hero - tool-agnostic, primary CTA: Open Studio */}
               <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10">
                 <div className="space-y-6 max-w-2xl">
                   <div className="space-y-2">
                     <div className="flex items-center gap-2.5 text-muted-foreground/80 mb-1">
-                       <span className="text-[11px] font-black uppercase tracking-[0.25em]">Workspace</span>
-                       <div className="w-1 h-1 rounded-full bg-foreground/20" />
-                       <span className="text-[11px] font-bold text-muted-foreground">Growth Plan</span>
+                      <span className="text-[11px] font-black uppercase tracking-[0.25em]">Workspace</span>
+                      <div className="w-1 h-1 rounded-full bg-foreground/20" />
+                      <span className="text-[11px] font-bold text-muted-foreground">Growth Plan</span>
                     </div>
                     <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-foreground">
                       Studio Dashboard
                     </h1>
                     <p className="text-muted-foreground max-w-md leading-relaxed text-[13px] font-medium tracking-tight">
-                      Orchestrate your creative pipeline. {processingVideos > 0 ? (
-                        <span className="text-primary/70">Currently producing {processingVideos} assets.</span>
+                      {activeCount > 0 ? (
+                        <span className="text-primary/70">{activeCount} project{activeCount === 1 ? "" : "s"} in progress.</span>
                       ) : (
-                        <span>Ready for your next production.</span>
+                        <span>Choose a tool and start creating.</span>
                       )}
                     </p>
                   </div>
-                  
                   <div className="flex flex-col sm:flex-row items-center gap-3">
-                    <Link href="/create" className="w-full sm:w-auto">
-                      <Button size="lg" disabled={!hasCredits && !creditsLoading} className="w-full sm:w-auto h-12 lg:h-14 px-8 font-black uppercase tracking-widest bg-primary hover:bg-primary/90 text-primary-foreground shadow-xl transition-all duration-300 hover:scale-[1.02] active:scale-95 rounded-xl text-xs sm:text-base">
-                        <Plus className="mr-2.5 h-4 w-4" />
-                        Generate Reel
+                    <Link href="/studio" className="w-full sm:w-auto">
+                      <Button size="lg" className="w-full sm:w-auto h-12 lg:h-14 px-8 font-black uppercase tracking-widest bg-primary hover:bg-primary/90 text-primary-foreground shadow-xl transition-all duration-300 hover:scale-[1.02] active:scale-95 rounded-xl text-xs sm:text-base">
+                        <Palette className="mr-2.5 h-4 w-4" />
+                        Open Studio
                       </Button>
                     </Link>
                     <Link href="/dashboard?purchase=credits" className="w-full sm:w-auto">
@@ -154,9 +149,16 @@ function DashboardContent() {
                     </Link>
                   </div>
                 </div>
-
-                {/* Right Side - Subtle Meta Info */}
-                <div className="hidden lg:flex flex-col items-end gap-2.5 text-right pb-1">
+                <div className="hidden lg:flex flex-col items-end gap-3 text-right pb-1">
+                  <div className="px-4 py-3 rounded-xl bg-card border border-border flex items-center gap-3 min-w-[140px]">
+                    <div className="w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                      <Heart className="h-4 w-4 text-primary" />
+                    </div>
+                    <div className="text-right min-w-0">
+                      <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Engagement</p>
+                      <p className="text-lg font-bold tracking-tight text-foreground">{engagementValue}</p>
+                    </div>
+                  </div>
                   <div className="px-3.5 py-1.5 rounded-xl bg-card border border-border flex items-center gap-2">
                     <div className="w-1 h-1 rounded-full bg-emerald-500/40 animate-pulse" />
                     <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Global Sync Active</span>
@@ -165,18 +167,14 @@ function DashboardContent() {
                 </div>
               </div>
 
-              {/* Stats Section */}
-              <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
+              {/* Stats - tool-agnostic (single row) */}
+              <div className="grid grid-cols-3 gap-4 sm:gap-8">
+                <StatsCard title="Total Projects" value={projects.length} icon={Video} />
                 <StatsCard
-                  title="Total Assets"
-                  value={videos.length}
-                  icon={Video}
-                />
-                <StatsCard
-                  title="Active Leads"
-                  value={processingVideos}
+                  title="Active"
+                  value={activeCount}
                   icon={TrendingUp}
-                  className={processingVideos > 0 ? "border-primary/20 bg-primary/[0.02]" : "border-border/50"}
+                  className={activeCount > 0 ? "border-primary/20 bg-primary/[0.02]" : "border-border/50"}
                 />
                 <StatsCard
                   title="Production Fuel"
@@ -186,40 +184,49 @@ function DashboardContent() {
                 />
               </div>
 
-              {/* Content Gallery */}
-              <div className="space-y-10">
-                <div className="flex items-center justify-between border-b border-border pb-6">
-                  <h2 className="text-[11px] font-black uppercase tracking-[0.35em] text-muted-foreground">Master Pipeline</h2>
-                  <div className="flex items-center gap-2.5 text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/40 animate-pulse" />
-                    Live Sync
-                  </div>
+              {/* Showcase: What you can create - 2–3 sample outputs + CTA */}
+              <div className="space-y-8">
+                <div className="flex items-center justify-between border-b border-border pb-4">
+                  <h2 className="text-[11px] font-black uppercase tracking-[0.35em] text-muted-foreground">
+                    What you can create
+                  </h2>
                 </div>
-
-                {videosLoading ? (
-                  <div className="flex flex-col items-center justify-center py-40 space-y-6 opacity-30">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                    <p className="text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground">Syncing studio...</p>
-                  </div>
-                ) : videos.length === 0 ? (
-                  <div className="py-24 text-center border-2 border-dashed border-border rounded-[40px] bg-muted/20">
-                    <div className="max-w-xs mx-auto space-y-8">
-                      <div className="mx-auto w-16 h-16 rounded-[24px] bg-card flex items-center justify-center border border-border shadow-inner">
-                        <Sparkles className="h-7 w-7 text-muted-foreground" />
-                      </div>
-                      <p className="text-muted-foreground text-sm font-medium italic tracking-tight leading-relaxed px-4">"The best way to predict the future is to create it."</p>
-                      <Link href="/create">
-                        <Button variant="outline" className="h-12 px-10 rounded-full border-border text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-all font-bold">Start production</Button>
-                      </Link>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+                  <div className="rounded-2xl border border-border bg-card overflow-hidden group cursor-pointer transition-all hover:border-primary/30" onClick={() => window.location.href = "/studio/reel"}>
+                    <div className="aspect-[9/16] bg-muted/50 flex items-center justify-center border-b border-border">
+                      <Video className="h-10 w-10 text-muted-foreground group-hover:text-primary transition-colors" />
+                    </div>
+                    <div className="p-4">
+                      <p className="font-bold text-sm text-foreground">Reel Generator</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">AI short-form video from a topic</p>
                     </div>
                   </div>
-                ) : (
-                  <div className="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 animate-in fade-in slide-in-from-bottom-6 duration-1000">
-                    {videos.map((video) => (
-                      <VideoCard key={video.id} video={video} />
-                    ))}
+                  <div className="rounded-2xl border border-border bg-card overflow-hidden group cursor-pointer transition-all hover:border-primary/30" onClick={() => window.location.href = "/studio/graphic-motion"}>
+                    <div className="aspect-[9/16] bg-muted/50 flex items-center justify-center border-b border-border">
+                      <Type className="h-10 w-10 text-muted-foreground group-hover:text-primary transition-colors" />
+                    </div>
+                    <div className="p-4">
+                      <p className="font-bold text-sm text-foreground">Graphic Motion</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">Animate text & headlines with AI-driven scenes</p>
+                    </div>
                   </div>
-                )}
+                  <div className="rounded-2xl border border-border bg-card overflow-hidden group cursor-pointer transition-all hover:border-primary/30 opacity-75" onClick={() => window.location.href = "/studio"}>
+                    <div className="aspect-[9/16] bg-muted/50 flex items-center justify-center border-b border-border">
+                      <ImageIcon className="h-10 w-10 text-muted-foreground group-hover:text-primary transition-colors" />
+                    </div>
+                    <div className="p-4">
+                      <p className="font-bold text-sm text-foreground">Text to Image</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">Generate images from text — coming soon</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-center">
+                  <Link href="/studio">
+                    <Button variant="outline" size="lg" className="rounded-full font-bold">
+                      Open Studio to create
+                    </Button>
+                  </Link>
+                </div>
               </div>
             </div>
 
@@ -251,7 +258,7 @@ function DashboardContent() {
                   <div className="space-y-3 relative z-10">
                     <div className="flex justify-between text-[10px] font-black text-muted-foreground uppercase tracking-tighter">
                       <span>Monthly quota</span>
-                      <span className="text-muted-foreground/60">{completedVideos} / ∞</span>
+                      <span className="text-muted-foreground/60">{completedCount} / ∞</span>
                     </div>
                     <div className="h-1 w-full bg-secondary rounded-full overflow-hidden">
                       <div className="h-full bg-primary/60 w-[15%] transition-all duration-1000" />

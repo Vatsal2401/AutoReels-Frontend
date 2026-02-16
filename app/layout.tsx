@@ -54,7 +54,10 @@ export const metadata: Metadata = {
   alternates: {
     canonical: SITE_CONFIG.url,
   },
-  // Add favicon.ico and apple-touch-icon.png to public/ when available; omit until then to avoid 404s
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/apple-icon.png',
+  },
 };
 
 import { ThemeProvider } from '@/components/theme-provider';

@@ -7,17 +7,17 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/", "/_next/", "/dashboard", "/create", "/videos/", "/auth/callback", "/404", "/500"],
+        disallow: ["/api/", "/_next/", "/dashboard", "/studio/reel", "/videos/", "/auth/callback", "/404", "/500"],
       },
       {
         userAgent: "Googlebot",
         allow: "/",
-        disallow: ["/api/", "/_next/", "/dashboard", "/create", "/videos/", "/auth/callback", "/404", "/500"],
+        disallow: ["/api/", "/_next/", "/dashboard", "/studio/reel", "/videos/", "/auth/callback", "/404", "/500"],
       },
       {
         userAgent: "Bingbot",
         allow: "/",
-        disallow: ["/api/", "/_next/", "/dashboard", "/create", "/videos/", "/auth/callback", "/404", "/500"],
+        disallow: ["/api/", "/_next/", "/dashboard", "/studio/reel", "/videos/", "/auth/callback", "/404", "/500"],
       },
     ],
     sitemap: `${SITE_CONFIG.url}/sitemap.xml`,

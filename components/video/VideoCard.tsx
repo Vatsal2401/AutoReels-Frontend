@@ -159,7 +159,7 @@ export function VideoCard({ video }: VideoCardProps) {
              </div>
            ) : isFailed ? (
              <div className="flex w-full items-center justify-end">
-               <Link href={`/create?videoId=${video.id}&topic=${encodeURIComponent(video.topic)}`}>
+               <Link href={`/studio/reel?videoId=${video.id}&topic=${encodeURIComponent(video.topic)}`}>
                  <Button variant="outline" size="sm" className="h-7 border-destructive/20 text-destructive/80 hover:text-destructive hover:bg-destructive/5 hover:border-destructive/30 text-[10px] font-bold shadow-none">
                    <RotateCcw className="w-3 h-3 mr-1.5" />
                    Retry

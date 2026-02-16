@@ -265,7 +265,7 @@ export function generateHowToSchema() {
         position: 1,
         name: "Enter Your Topic",
         text: "Go to the create page and enter a topic for your reel. Be specific about what you want the video to cover. For example: 'Top 5 productivity tips for remote workers' or 'How to start a successful startup'.",
-        url: `${SITE_CONFIG.url}/create`,
+        url: `${SITE_CONFIG.url}/studio/reel`,
       },
       {
         "@type": "HowToStep",

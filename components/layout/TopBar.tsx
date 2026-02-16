@@ -26,34 +26,60 @@ export function TopBar({ onMenuClick }: TopBarProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  // Get page title based on pathname
-  const getPageTitle = () => {
-    if (pathname === "/create") return "Create Reel";
+  // Page header: label (small), title, subtitle — so TopBar shows section context instead of always "Dashboard"
+  const getPageLabel = (): string | null => {
+    if (pathname === "/projects") return "Your creations";
+    if (pathname === "/studio") return "Tools";
+    return null;
+  };
+  const getPageTitle = (): string => {
+    if (pathname === "/studio/reel") return "Create Reel";
     if (pathname?.startsWith("/videos/")) return "Video Details";
+    if (pathname === "/projects") return "Projects";
+    if (pathname === "/studio") return "AI Creative Studio";
     if (pathname === "/dashboard") {
-      if (searchParams?.get("purchase") === "credits") {
-        return "Purchase Credits";
-      }
+      if (searchParams?.get("purchase") === "credits") return "Purchase Credits";
       return "Dashboard";
     }
     return "Dashboard";
   };
+  const getPageSubtitle = (): string | null => {
+    if (pathname === "/projects") return "All your generated reels and other outputs in one place.";
+    if (pathname === "/studio") return "Choose a tool below to start creating. Each tool uses credits from your balance.";
+    return null;
+  };
+
+  const label = getPageLabel();
+  const title = getPageTitle();
+  const subtitle = getPageSubtitle();
 
   return (
     <header className="sticky top-0 z-30 glass-strong border-b border-border">
-      <div className="flex h-14 lg:h-16 items-center justify-between px-4 lg:px-6">
-        <div className="flex items-center gap-2">
+      <div className="flex min-h-14 lg:min-h-[4.5rem] py-3 items-center justify-between px-4 lg:px-6">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
           <Button
             variant="ghost"
             size="icon"
             onClick={onMenuClick}
-            className="lg:hidden h-9 w-9 text-muted-foreground mr-1"
+            className="lg:hidden h-9 w-9 text-muted-foreground mr-1 shrink-0"
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <h2 className="text-sm lg:text-base font-semibold text-foreground leading-tight truncate max-w-[120px] sm:max-w-none">
-            {getPageTitle()}
-          </h2>
+          <div className="min-w-0 flex-1 py-1.5 space-y-0.5">
+            {label && (
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/90">
+                {label}
+              </p>
+            )}
+            <h1 className="text-xl lg:text-2xl font-bold tracking-tight text-foreground leading-tight">
+              {title}
+            </h1>
+            {subtitle && (
+              <p className="text-[13px] text-muted-foreground/90 leading-snug max-w-xl">
+                {subtitle}
+              </p>
+            )}
+          </div>
         </div>
 
         {/* Right side actions */}

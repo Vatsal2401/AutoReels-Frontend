@@ -204,7 +204,7 @@ export default function VideoDetailPage() {
                           </p>
                         </div>
                         <div className="flex gap-4 justify-center pt-6">
-                          <Link href="/create">
+                          <Link href="/studio/reel">
                             <Button className="h-12 px-8 rounded-xl font-bold transition-all shadow-lg hover:shadow-primary/20">
                               <Plus className="mr-2 h-4 w-4" />
                               NEW GENERATION
@@ -270,7 +270,7 @@ export default function VideoDetailPage() {
                       >
                         DOWNLOAD 4K
                       </DownloadButton>
-                      <Link href="/create" className="flex-1 sm:flex-none">
+                      <Link href="/studio/reel" className="flex-1 sm:flex-none">
                         <Button className="w-full h-11 px-4 lg:px-6 font-bold shadow-lg shadow-primary/10 rounded-xl text-xs">
                           <Plus className="mr-1.5 h-4 w-4" />
                           CREATE NEW

@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta nameAI Creative Studio – Scalable Multi-Tool Architecture
+
+  Current state (summary)
+  
+  Frontend: Single flow via /create (CreateVideoForm) and dashboard at /dashboard; video list/detail use videosApi which is a facade over Media API (frontend/lib/api/videos.ts). Sidebar has hardcoded nav: Dashboard, Create Reel, My Reels, Credits. Routes: /(dashboard)/create, /(dashboard)/dashboard, `/(dashboard)/videos/[id]`.
+  
+  Backend: Two parallel systems—VideoModule (legacy videos table, VideoGenerationService) and MediaModule (active path). Create flow uses Media: MediaController POST /media → MediaService.createMedia → MediaOrchestratorService.processMedia. Media has type, flow_key, status, input_config, blob_storage_id; steps/assets in separate tables. Credits checked in createMedia (CREDIT_COSTS by duration); deducted in worker on success.
+  
+  Render: RenderQueueService and RemotionQueueService queue by mediaId; payload is Reel-specific (assets, options). Worker finalizes by updating media row and deducting credits (render-worker finalize).
+  
+  So the real pipeline is: Media create → Orchestrator (intent → script → audio → captions → images → render) → queue → worker → update media. The plan below aligns the product with a single Projects model and a tool-agnostic backend and frontend structure.
+  
+  
+  
+  ---
+  
+  
+  
+  1. Studio architecture (frontend)
+  
+  Goal: Studio Hub that lists tools from a Tool Registry; no hardcoded tool list in pages.
+  
+  
+  
+  1.1 Tool Registry
+  
+  
+  
+  Add a Tool Registry module (e.g. frontend/lib/studio/tool-registry.ts or frontend/config/tools.ts).
+  
+  Each tool entry:
+  
+  id (e.g. reel, kinetic-typography, text-to-image)
+  
+  name, description, icon (Lucide name or component), route (e.g. /studio/reel)
+  
+  category: creative | utility | ai
+  
+  creditCost, required_plan (optional, for future gating)
+  
+  component: lazy-loaded React component (e.g. () => import('@/components/tools/ReelTool'))
+  
+  Export a single array (or map) of tools; optionally a getToolById(id) helper.
+  
+  1.2 Studio Hub page
+  
+  
+  
+  New route: /studio (e.g. app/(dashboard)/studio/page.tsx).
+  
+  Page reads from the Tool Registry and renders a grid/list of tool cards (name, description, icon, category, credit cost). Each card links to tool.route (e.g. /studio/reel).
+  
+  No hardcoded list of tools in the page; adding a tool = adding an entry to the registry and implementing its module.
+  
+  1.3 Navigation
+  
+  
+  
+  Update Sidebar: replace single "Create Reel" with Studio (link to /studio). Keep Dashboard, Credits; "My Reels" can become Projects (link to /projects) once that exists.
+  
+  Optional: backward-compat redirect /create → /studio/reel.
+  
+  ---
+  
+  
+  
+  2. Modular tool workspaces (frontend)
+  
+  Goal: Each tool in its own module; shared layout and routing; tools plug into shared projects/credits.
+  
+  
+  
+  2.1 Routes
+  
+  
+  
+  /studio – Studio Hub (above).
+  
+  **`/studio/[toolId]** – Tool workspace. Dynamic segment; validate `toolId against registry (404 if unknown).
+  
+  /projects – List of all user projects (all tools).
+  
+  **`/projects/[projectId]`** – Project detail (view output, download, retry, metadata).
+  
+  2.2 Reusable ToolWorkspace layout
+  
+  
+  
+  New component: ToolWorkspace (e.g. components/studio/ToolWorkspace.tsx).
+  
+  Structure (slots/areas):
+  
+  Controls panel – left or top: tool-specific form/controls (injected as children or render prop).
+  
+  Preview panel – main area: tool-specific preview (injected).
+  
+  Action area – primary/secondary actions (e.g. "Generate", "Save").
+  
+  States: loading (initial), rendering (job in progress), success (result ready), error (with message/retry).
+  
+  Props: e.g. controls, preview, actions, status, error, onRetry. Tools compose their own controls and preview and pass status from shared hooks (e.g. project status from API).
+  
+  ToolWorkspace does not contain tool-specific logic; it only lays out and displays state.
+  
+  2.3 Per-tool modules
+  
+  
+  
+  One folder per tool under e.g. components/tools/ or app/(dashboard)/studio/tools/:
+  
+  Reel – current CreateVideoForm logic moved into a Reel tool component that uses ToolWorkspace; it provides controls (topic, duration, style, etc.), preview (progress or video player), and calls projects API with tool_type: 'reel' (or current media API behind a facade).
+  
+  Placeholder tools – e.g. Kinetic Typography, Text to Image: minimal UI (title + "Coming soon" or simple form) using the same ToolWorkspace; they still create a "project" via API when applicable so the flow is consistent.
+  
+  Each tool is lazy-loaded in the registry via dynamic import. Studio page and `/studio/[toolId]` load only the selected tool’s chunk.
+  
+  2.4 Independence
+  
+  
+  
+  Tools do not import other tools. They depend only on: ToolWorkspace, shared hooks (auth, credits, project create/status), and API client. Shared systems: projects (and/or current media), credits, and (later) plan gating.
+  
+  ---
+  
+  
+  
+  3. Centralized Projects system (backend + DB)
+  
+  Goal: One unified Projects table; all tools persist outputs there; rendering flow is generic (create project → enqueue → update project).
+  
+  
+  
+  3.1 New projects table (Supabase/TypeORM)
+  
+  
+  
+  Add entity Project (e.g. backend/src/projects/entities/project.entity.ts):
+  
+  id (UUID), user_id (nullable for anon), tool_type (string, e.g. reel, text-to-image)
+  
+  status: e.g. pending | processing | rendering | completed | failed
+  
+  output_url (text, nullable), thumbnail_url (text, nullable)
+  
+  metadata (jsonb) – tool-specific payload (e.g. topic, duration, aspect ratio)
+  
+  duration (optional, for video length), credit_cost (number), error_message (text, nullable)
+  
+  created_at, updated_at, completed_at
+  
+  Migration: create table projects; no need to drop media yet (see 3.3).
+  
+  3.2 Project-centric API
+  
+  
+  
+  ProjectService (generic):
+  
+  create(toolType, dto, userId) – validate tool type, resolve credit cost (from config/registry), check credits, create Project row, return project. Does not enqueue; that is done by the tool-specific layer (or a thin orchestration layer) so the flow stays "create project → enqueue → worker updates project."
+  
+  findByUser(userId), findOne(id), updateStatus(id, status, outputUrl?, errorMessage?), setOutput(id, outputUrl, thumbnailUrl?).
+  
+  ProjectsController: POST /projects (body: tool_type + tool payload), GET /projects (user’s list), GET /projects/:id (detail). All under auth where required.
+  
+  3.3 Reel tool and existing Media
+  
+  
+  
+  Option A (recommended for clarity): Keep Media as the implementation detail of the Reel tool. When creating a Reel "project":
+  
+  Create a Project row (tool_type=reel, status=pending, metadata = summary of input).
+  
+  Create Media row with project_id (new FK on media) and existing fields; orchestration continues as today (orchestrator runs on mediaId).
+  
+  On render completion, worker (or orchestrator) updates both Media and Project (Project.output_url = final URL, status = completed). List/detail for "projects" can be backed by Projects table; for reel, detail can still use media for step-by-step progress if needed.
+  
+  Option B: Migrate Reel fully to Project-only (no Media). All step/asset data would live in Project.metadata or new project_steps table; orchestrator and workers would be refactored to work off Project. Larger change.
+  
+  Recommendation: Option A – introduce Projects, add project_id to Media, Reel creates Project + Media; other tools create only Project. This gives a single "Projects" API for the frontend while reusing the existing reel pipeline.
+  
+  3.4 Generic rendering flow
+  
+  
+  
+  Unified flow: Tool (e.g. Reel) → create project (and for Reel, create media + link to project) → enqueue job (payload includes projectId, toolType, and tool-specific data) → worker runs → worker updates project (status, output_url, thumbnail_url) and, for Reel, updates media as today.
+  
+  Credit deduction: keep in worker on success, using project.credit_cost (or existing media-based logic for Reel until fully migrated). Prefer storing credit_cost on Project at create time so workers stay generic.
+  
+  ---
+  
+  
+  
+  4. Backend refactor (decouple tools from core)
+  
+  Goal: Project lifecycle and queue are tool-agnostic; each tool defines how it creates a project and what job payload to build.
+  
+  
+  
+  4.1 ProjectService and Projects module
+  
+  
+  
+  New ProjectsModule with Project entity, ProjectService, ProjectsController.
+  
+  ProjectService: as in 3.2 (create, findByUser, findOne, updateStatus, setOutput). Credit check inside create (using a per-tool credit map or config).
+  
+  Credit cost: Backend holds a map (e.g. TOOL_CREDIT_COSTS) from tool_type to cost. ProjectService.create(toolType, ...) looks up cost and calls CreditsService before creating the row.
+  
+  4.2 Tool abstraction (backend)
+  
+  
+  
+  Tool handler interface (e.g. in backend/src/projects/interfaces/tool-handler.interface.ts):
+  
+  toolType: string
+  
+  createProject(dto, userId): Promise<{ project: Project; enqueuePayload?: unknown }>  
+  
+  – Creates Project (and optionally Media for Reel), returns project and optional payload to enqueue.
+  
+  
+  
+  Optional: buildRenderPayload(project): Promise<unknown> if the job is built later.
+  
+  Registry: A registry (map or array) of tool handlers. ProjectService or a small ProjectOrchestrationService uses it: on POST /projects with tool_type: 'reel', it gets the Reel handler, calls handler.createProject(), then if enqueuePayload is present, calls RenderQueueService (or a generic JobQueueService) with a generic envelope { projectId, toolType, ...payload }.
+  
+  Reel handler: Implements the interface; creates Project + Media (with project_id), runs existing MediaOrchestratorService.processMedia(mediaId), and returns project + no extra payload (or payload if you move enqueue to this layer). Orchestrator and workers continue to work with mediaId; worker also updates Project by project_id when media is finalized.
+  
+  4.3 Generic queue and workers
+  
+  
+  
+  RenderQueueService (or a new JobQueueService) accepts a generic job shape, e.g. { projectId, toolType, ...rest }. Reel jobs still carry current mediaId, stepId, userId, assets, options in rest so existing workers need no change at first. Worker on success: update Media (current behavior) and Project (project_id from media or from job envelope).
+  
+  New tools (e.g. text-to-image): their handler creates only a Project and enqueues a job with toolType: 'text-to-image' and tool-specific payload; a dedicated worker for that type updates only the Project.
+  
+  Decoupling: Core services (ProjectService, CreditsService, queue, storage) do not depend on Reel-specific logic. Reel-specific code lives in the Reel tool handler and in the existing MediaOrchestratorService / render worker.
+  
+  4.4 Credits and validation
+  
+  
+  
+  Before creating a project: ProjectService (or handler) checks credits via CreditsService using the tool’s credit cost. Deduct on success in worker (or in ProjectService after job is queued, depending on product preference; typically deduct on success to avoid charging for failed jobs).
+  
+  ---
+  
+  
+  
+  5. Frontend state and routing (scalability)
+  
+  Goal: Clear routes; lazy-loaded tools; project-based state.
+  
+  
+  
+  5.1 Routes (final)
+  
+  
+  
+  /(dashboard)/studio/page.tsx – Studio Hub (registry-driven).
+  
+  `/(dashboard)/studio/[toolId]/page.tsx – Single dynamic page: resolve tool from registry by `toolId, render DashboardLayout → ToolWorkspace with the tool’s lazy component inside.
+  
+  /(dashboard)/projects/page.tsx – List projects (GET /projects); filter by tool_type optional.
+  
+  `/(dashboard)/projects/[projectId]/page.tsx` – Project detail (GET /projects/:id); show output, thumbnail, metadata, download, retry.
+  
+  Redirects: /create → /studio/reel; `/videos/[id]` → `/projects/[id]` (if you make project id the canonical id for reel outputs).
+  
+  5.2 State
+  
+  
+  
+  Projects: React Query keys e.g. ['projects'], ['project', projectId]; hooks like useProjects(), useProject(id) that call the new Projects API (or current media API wrapped to look like projects for Reel during transition).
+  
+  Tool workspace: Each tool component owns its form state; it uses a shared hook (e.g. useCreateProject(toolType) or mutation that calls POST /projects) and passes status/error to ToolWorkspace. Polling or WebSocket for status can remain as today (e.g. by projectId or by mediaId for Reel).
+  
+  5.3 Avoid monolithic pages
+  
+  
+  
+  Studio hub: only registry + grid; no tool logic.
+  
+  Tool page: layout + ToolWorkspace + one lazy tool component. Tool component is the only place with that tool’s logic. No large "create" page that branches on tool type.
+  
+  ---
+  
+  
+  
+  6. Extensibility and future-proofing
+  
+  Feature gating: Registry and backend support required_plan; UI can hide or disable tools based on subscription; backend can reject create by plan in ProjectService or handler.
+  
+  Credit cost per tool: In registry (frontend) and in backend map (e.g. TOOL_CREDIT_COSTS); ProjectService uses it at create and stores on Project for worker.
+  
+  Role-based access: Middleware or guard can restrict POST /projects by tool_type based on user role; registry can filter visible tools by role.
+  
+  Non-video tools: Project has output_url and metadata; non-video tools can store file URL or JSON in metadata and still use the same Project list/detail.
+  
+  Template marketplace / folders: Not in scope now; design so Project (or a future Folder) can have optional folder_id and template_id without breaking existing APIs.
+  
+  No over-design: Implement only what’s needed for Studio hub, one dynamic tool route, Projects CRUD, and one concrete tool (Reel) using the new flow; keep UI minimal.
+  
+  ---
+  
+  
+  
+  7. Implementation order (recommended)
+  
+  Backend: Projects table and ProjectService – Migration, entity, create/findOne/findByUser/updateStatus/setOutput; ProjectsController (POST/GET). No change to Media or workers yet.
+  
+  Backend: Tool handler for Reel – Reel handler creates Project + Media (add project_id to Media), returns project; optional orchestration adapter that creates project then triggers existing processMedia. Worker: on media completion, update linked Project (output_url, status).
+  
+  Frontend: Tool Registry and Studio Hub – Registry with Reel + 1–2 placeholder tools; /studio page; Sidebar link to Studio.
+  
+  **Frontend: ToolWorkspace and /studio/[toolId]** – ToolWorkspace component; dynamic route that loads tool by id from registry; move CreateVideoForm into Reel tool component using ToolWorkspace.
+  
+  Frontend: Projects list and detail – /projects, `/projects/[projectId]`; API client for Projects; list/detail pages; redirect `/videos/[id]` → `/projects/[id]` if project_id is used for reel.
+  
+  Frontend: Navigation and redirects – "My Reels" → "Projects"; /create → /studio/reel.
+  
+  Backend: Credit cost per tool – TOOL_CREDIT_COSTS; Project.create stores credit_cost; worker deducts from Project.credit_cost.
+  
+  Optional: Second tool (e.g. Text to Image) – handler that creates only Project and enqueues a simple job; minimal worker that updates Project. Proves the pattern without Reel-specific steps.
+  
+  ---
+  
+  
+  
+  8. Diagram (high-level)
+  
+  Backend
+  
+  Frontend
+  
+  POST /projects (tool=reel)
+  
+  Create Project + Media
+  
+  Update project status + output_url
+  
+  Projects API
+  
+  ProjectService
+  
+  Reel Tool Handler
+  
+  MediaOrchestrator
+  
+  Render Queue
+  
+  Render Worker
+  
+  /studio - Hub
+  
+  /studio/:toolId
+  
+  /projects
+  
+  /projects/:id
+  
+  Tool Registry
+  
+  ToolWorkspace layout
+  
+  Reel Tool component
+  
+  ---
+  
+  
+  
+  9. Files to add or touch (concise)
+  
+  | Area | Action |
+  
+  
+  
+  |------|--------|
+  
+  
+  
+  | Backend | New migration: projects table. New: projects/ module (entity, service, controller), project.entity.ts, projects.service.ts, projects.controller.ts. Optional: tool-handler.interface.ts, Reel handler, project_id on Media. |
+  
+  
+  
+  | Backend | Media: add project_id (nullable FK). Worker finalize: update Project by project_id when media completes. |
+  
+  
+  
+  | Frontend | New: lib/studio/tool-registry.ts (or config/tools.ts), components/studio/ToolWorkspace.tsx, app/(dashboard)/studio/page.tsx, `app/(dashboard)/studio/[toolId]/page.tsx, `app/(dashboard)/projects/page.tsx, `app/(dashboard)/projects/[projectId]/page.tsx`. |
+  
+  
+  
+  | Frontend | New: components/tools/ReelTool.tsx (move/create logic from CreateVideoForm into this + ToolWorkspace). |
+  
+  
+  
+  | Frontend | lib/api/projects.ts (client for GET/POST projects). |
+  
+  
+  
+  | Frontend | Sidebar: Studio link, Projects link; optional redirects in middleware or next.config for /create, `/videos/[id]`. |
+  
+  
+  
+  This plan turns the app into a scalable AI Creative Studio: one place to list and open tools, one place to list and open projects, and a backend that can add new tools without rewriting core services.="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Creative Studio – UI Mockup</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card: #141414;
+      --border: #262626;
+      --text: #fafafa;
+      --muted: #a1a1aa;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    .app { display: flex; min-height: 100vh; }
+    /* Sidebar */
+    .sidebar {
+      width: 72px;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 16px 0;
+      flex-shrink: 0;
+    }
+    .sidebar:hover { width: 240px; }
+    .logo { padding: 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+    .logo svg { width: 24px; height: 24px; color: var(--primary); flex-shrink: 0; }
+    .logo-text { white-space: nowrap; overflow: hidden; opacity: 0; }
+    .sidebar:hover .logo-text { opacity: 1; }
+    .logo-title { font-size: 12px; font-weight: 800; letter-spacing: 0.05em; }
+    .logo-sub { font-size: 9px; color: var(--muted); letter-spacing: 0.15em; margin-top: 2px; }
+    nav { flex: 1; }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      height: 44px;
+      padding: 0 20px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      border-left: 3px solid transparent;
+    }
+    .nav-item:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+    .nav-item.active { color: var(--primary); background: rgba(59,130,246,0.08); border-left-color: var(--primary); }
+    .nav-item svg { width: 20px; height: 20px; flex-shrink: 0; }
+    .nav-item span { white-space: nowrap; overflow: hidden; opacity: 0; }
+    .sidebar:hover .nav-item span { opacity: 1; }
+    .user { padding: 16px 20px; border-top: 1px solid var(--border); }
+    .user-email { font-size: 10px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; }
+    /* Main */
+    .main { flex: 1; overflow: auto; padding: 32px 40px; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 24px; }
+    .tab {
+      padding: 8px 16px;
+      border-radius: 8px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .tab:hover { color: var(--text); }
+    .tab.active { background: var(--primary); border-color: var(--primary); color: white; }
+    .view { display: none; }
+    .view.active { display: block; }
+    /* Studio Hub */
+    .page-title { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+    .page-sub { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+    .categories { display: flex; gap: 8px; margin-bottom: 24px; }
+    .pill { padding: 6px 14px; border-radius: 999px; font-size: 11px; font-weight: 600; background: var(--card); border: 1px solid var(--border); color: var(--muted); cursor: pointer; }
+    .pill.active { background: var(--primary); border-color: var(--primary); color: white; }
+    .tool-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+    .tool-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      cursor: pointer;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .tool-card:hover { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
+    .tool-icon { width: 44px; height: 44px; border-radius: 12px; background: rgba(59,130,246,0.15); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; color: var(--primary); }
+    .tool-name { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+    .tool-desc { font-size: 13px; color: var(--muted); margin-bottom: 12px; line-height: 1.4; }
+    .tool-meta { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--muted); }
+    .tool-cost { color: var(--primary); font-weight: 600; }
+    .tool-badge { background: rgba(59,130,246,0.2); color: var(--primary); padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 600; }
+    /* Tool Workspace */
+    .workspace { display: flex; gap: 24px; height: calc(100vh - 120px); min-height: 500px; }
+    .workspace-controls { width: 320px; flex-shrink: 0; background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+    .workspace-controls label { font-size: 11px; font-weight: 700; letter-spacing: 0.05em; color: var(--muted); display: block; margin-bottom: 6px; }
+    .workspace-controls textarea { width: 100%; min-height: 80px; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 14px; resize: vertical; }
+    .workspace-controls select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 14px; }
+    .btn-primary { width: 100%; padding: 14px; border-radius: 12px; background: var(--primary); color: white; border: none; font-size: 13px; font-weight: 700; letter-spacing: 0.05em; cursor: pointer; margin-top: auto; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .workspace-preview { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 16px; display: flex; align-items: center; justify-content: center; border-style: dashed; }
+    .workspace-preview-inner { text-align: center; color: var(--muted); font-size: 14px; }
+    .workspace-breadcrumb { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+    .workspace-breadcrumb a { color: var(--primary); text-decoration: none; }
+    .workspace-status { margin-top: 16px; font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; }
+    /* Projects list */
+    .projects-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .project-filters { display: flex; gap: 8px; }
+    .project-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+    .project-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .project-card:hover { border-color: var(--primary); }
+    .project-thumb { aspect-ratio: 9/16; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 12px; }
+    .project-body { padding: 16px; }
+    .project-title { font-size: 14px; font-weight: 600; margin-bottom: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .project-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .project-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 6px; background: rgba(59,130,246,0.2); color: var(--primary); }
+    .project-status { font-size: 11px; color: var(--muted); }
+    .project-date { font-size: 11px; color: var(--muted); }
+    .project-status.rendering { color: #eab308; }
+    .project-status.completed { color: #22c55e; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="logo">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09L9 18.75z"/></svg>
+        <div class="logo-text">
+          <div class="logo-title">AUTOREELS</div>
+          <div class="logo-sub">Studio</div>
+        </div>
+      </div>
+      <nav>
+        <a class="nav-item" href="#"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg><span>Dashboard</span></a>
+        <a class="nav-item active" href="#"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09L9 18.75z"/></svg><span>Studio</span></a>
+        <a class="nav-item" href="#"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg><span>Projects</span></a>
+        <a class="nav-item" href="#"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg><span>Credits</span></a>
+      </nav>
+      <div class="user">
+        <div class="logo-text user-email">creator@example.com</div>
+        <div class="logo-sub">Creator Pro</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="tabs">
+        <button class="tab active" onclick="showView('hub')">Studio Hub</button>
+        <button class="tab" onclick="showView('workspace')">Tool Workspace (Reel)</button>
+        <button class="tab" onclick="showView('projects')">Projects</button>
+      </div>
+
+      <!-- 1. Studio Hub -->
+      <div id="view-hub" class="view active">
+        <h1 class="page-title">Studio</h1>
+        <p class="page-sub">Choose a tool to get started. Each tool uses credits from your balance.</p>
+        <div class="categories">
+          <button class="pill active">All</button>
+          <button class="pill">Creative</button>
+          <button class="pill">Utility</button>
+          <button class="pill">AI</button>
+        </div>
+        <div class="tool-grid">
+          <div class="tool-card">
+            <div class="tool-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M4 4.5C4 3.67 4.67 3 5.5 3H18.5c.83 0 1.5.67 1.5 1.5v15c0 .83-.67 1.5-1.5 1.5H5.5C4.67 21 4 20.33 4 19.5v-15z"/></svg></div>
+            <div class="tool-name">Reel Generator</div>
+            <div class="tool-desc">Create AI-powered short-form videos from a topic. Script, voice, images, and captions in one flow.</div>
+            <div class="tool-meta"><span class="tool-cost">1 credit</span><span class="tool-badge">Creative</span></div>
+          </div>
+          <div class="tool-card">
+            <div class="tool-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg></div>
+            <div class="tool-name">Kinetic Typography</div>
+            <div class="tool-desc">Animated text videos with motion and effects. Perfect for quotes and titles.</div>
+            <div class="tool-meta"><span class="tool-cost">1 credit</span><span class="tool-badge">Creative</span></div>
+          </div>
+          <div class="tool-card">
+            <div class="tool-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>
+            <div class="tool-name">Text to Image</div>
+            <div class="tool-desc">Generate images from a text prompt. Multiple styles and aspect ratios.</div>
+            <div class="tool-meta"><span class="tool-cost">1 credit</span><span class="tool-badge">AI</span></div>
+          </div>
+          <div class="tool-card">
+            <div class="tool-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 4h6v6M10 20H4v-6M20 4L4 20"/></svg></div>
+            <div class="tool-name">Background Remover</div>
+            <div class="tool-desc">Remove or replace image backgrounds in one click.</div>
+            <div class="tool-meta"><span class="tool-cost">1 credit</span><span class="tool-badge">Utility</span></div>
+          </div>
+          <div class="tool-card">
+            <div class="tool-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
+            <div class="tool-name">Video Trimmer</div>
+            <div class="tool-desc">Trim and cut video clips. Simple timeline controls.</div>
+            <div class="tool-meta"><span class="tool-cost">Free</span><span class="tool-badge">Utility</span></div>
+          </div>
+          <div class="tool-card">
+            <div class="tool-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg></div>
+            <div class="tool-name">Video Resizer</div>
+            <div class="tool-desc">Resize video to 9:16, 1:1, or 16:9 for different platforms.</div>
+            <div class="tool-meta"><span class="tool-cost">Free</span><span class="tool-badge">Utility</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Tool Workspace (Reel) -->
+      <div id="view-workspace" class="view">
+        <div class="workspace-breadcrumb"><a href="#">Studio</a> &rarr; Reel Generator</div>
+        <div class="workspace">
+          <div class="workspace-controls">
+            <div>
+              <label>Topic / Creative intent</label>
+              <textarea placeholder="e.g. 5 productivity tips for remote workers... (min 8 words, 45 chars)"></textarea>
+            </div>
+            <div>
+              <label>Duration</label>
+              <select><option>Short (30–60s)</option><option>Medium (60–90s)</option><option>Long (90–120s)</option></select>
+            </div>
+            <div>
+              <label>Visual style</label>
+              <select><option>Cinematic</option><option>Documentary</option><option>Minimal</option></select>
+            </div>
+            <div>
+              <label>Language</label>
+              <select><option>English (US)</option><option>Hindi</option></select>
+            </div>
+            <button class="btn-primary">Generate Reel</button>
+          </div>
+          <div class="workspace-preview">
+            <div class="workspace-preview-inner">
+              <p>Preview</p>
+              <p style="font-size: 12px; margin-top: 8px;">Your reel will appear here after generation.</p>
+              <p style="font-size: 11px; margin-top: 16px;">States: Ready → Rendering → Complete</p>
+            </div>
+          </div>
+        </div>
+        <div class="workspace-status"><span class="status-dot"></span> Ready</div>
+      </div>
+
+      <!-- 3. Projects list -->
+      <div id="view-projects" class="view">
+        <div class="projects-header">
+          <div>
+            <h1 class="page-title">Projects</h1>
+            <p class="page-sub">All your creations across tools.</p>
+          </div>
+          <div class="project-filters">
+            <button class="pill active">All</button>
+            <button class="pill">Reels</button>
+            <button class="pill">Images</button>
+          </div>
+        </div>
+        <div class="project-grid">
+          <div class="project-card">
+            <div class="project-thumb">9:16</div>
+            <div class="project-body">
+              <div class="project-title">5 productivity tips for remote workers</div>
+              <div class="project-meta"><span class="project-badge">Reel</span><span class="project-status completed">Completed</span><span class="project-date">Feb 12, 2025</span></div>
+            </div>
+          </div>
+          <div class="project-card">
+            <div class="project-thumb">Rendering…</div>
+            <div class="project-body">
+              <div class="project-title">How to start a successful startup</div>
+              <div class="project-meta"><span class="project-badge">Reel</span><span class="project-status rendering">Rendering</span><span class="project-date">Feb 13, 2025</span></div>
+            </div>
+          </div>
+          <div class="project-card">
+            <div class="project-thumb">1:1</div>
+            <div class="project-body">
+              <div class="project-title">Mountain sunset – Text to Image</div>
+              <div class="project-meta"><span class="project-badge">Image</span><span class="project-status completed">Completed</span><span class="project-date">Feb 11, 2025</span></div>
+            </div>
+          </div>
+          <div class="project-card">
+            <div class="project-thumb">—</div>
+            <div class="project-body">
+              <div class="project-title">Quote: The best way to predict the future</div>
+              <div class="project-meta"><span class="project-badge">Kinetic</span><span class="project-status">Pending</span><span class="project-date">Feb 10, 2025</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script>
+    function showView(id) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById('view-' + id).classList.add('active');
+      document.querySelector('.tab[onclick="showView(\'' + id + '\')"]').classList.add('active');
+    }
+  </script>
+</body>
+</html>

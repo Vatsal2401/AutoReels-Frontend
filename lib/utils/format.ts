@@ -34,6 +34,24 @@ export function formatRelativeTime(date: Date | string): string {
   return `${diffInMonths} ${diffInMonths === 1 ? "month" : "months"} ago`;
 }
 
+/** Format duration in seconds to "0:00" or "1m 30s" for table display */
+export function formatDuration(seconds: number | null | undefined): string {
+  if (seconds == null || seconds < 0) return "—";
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  if (m >= 1) return `${m}m ${s}s`;
+  return `${s}s`;
+}
+
+/** Short date for tables: "Jan 15, 2025" or "2h ago" for recent */
+export function formatDateForTable(date: Date | string): string {
+  const d = typeof date === "string" ? new Date(date) : date;
+  const now = new Date();
+  const diffHours = (now.getTime() - d.getTime()) / (1000 * 60 * 60);
+  if (diffHours < 24 && diffHours >= 0) return formatRelativeTime(date);
+  return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+}
+
 export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
 }

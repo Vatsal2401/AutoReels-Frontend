@@ -2,20 +2,25 @@
 
 import { useState } from 'react';
 import { useCredits } from '@/lib/hooks/useCredits';
+import { useAuth } from '@/lib/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Check, Loader2, Sparkles, Zap, ShieldCheck, Lock, RefreshCcw, ArrowRight } from 'lucide-react';
+import { Check, Loader2, Sparkles, Zap, ShieldCheck, Mail, RefreshCcw, ArrowRight } from 'lucide-react';
 import { paymentApi, CreditPlan } from '@/lib/api/payment';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 
 export function CreditPurchase() {
   const { credits, isLoading: isCreditsLoading } = useCredits();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [purchaseSuccess, setPurchaseSuccess] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  /** Only verified users can purchase; restrict payment until email is verified. */
+  const canPurchase = user?.email_verified === true;
 
   const { data: plans, isLoading: isPlansLoading } = useQuery({
     queryKey: ['creditPlans'],
@@ -37,6 +42,7 @@ export function CreditPurchase() {
   };
 
   const handlePurchase = async (planId: string) => {
+    if (!canPurchase) return;
     try {
       setIsProcessing(true);
       setSelectedPlanId(planId);
@@ -116,6 +122,22 @@ export function CreditPurchase() {
           <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-500/20 rounded-full blur-[120px] animate-pulse delay-700" />
         </div>
 
+        {!canPurchase && (
+          <div className="relative z-10 mb-6 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-5 flex items-start gap-4">
+            <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center shrink-0">
+              <Mail className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+            </div>
+            <div>
+              <p className="text-base font-bold text-amber-800 dark:text-amber-200">
+                Verify your email to purchase credits
+              </p>
+              <p className="text-sm text-amber-700/90 dark:text-amber-300/90 mt-1">
+                Please verify your email address before purchasing credits. Check your inbox for the verification link.
+              </p>
+            </div>
+          </div>
+        )}
+
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div className="space-y-1">
             <h2 className="text-2xl md:text-3xl font-black tracking-tighter text-foreground leading-tight">
@@ -123,7 +145,7 @@ export function CreditPurchase() {
             </h2>
             <div className="flex items-center gap-3">
               <p className="text-xs text-muted-foreground/60 font-medium">
-                Choose a plan to fuel your AI journey.
+                {canPurchase ? 'Choose a plan to fuel your AI journey.' : 'Verify your email to purchase credits.'}
               </p>
               <div className="w-px h-3 bg-white/10" />
               <p className="text-[10px] text-primary/80 font-bold flex items-center gap-1.5 uppercase tracking-wider">
@@ -269,6 +291,7 @@ export function CreditPurchase() {
                     <Button
                       className={cn(
                         'w-full h-9 rounded-lg font-black uppercase tracking-[0.1em] text-[9px] transition-all duration-300 group/btn',
+                        !canPurchase && 'opacity-60 cursor-not-allowed',
                         isPopular
                           ? 'bg-white text-primary hover:bg-white/90 shadow-lg'
                           : 'bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm',
@@ -277,12 +300,17 @@ export function CreditPurchase() {
                         e.stopPropagation();
                         handlePurchase(plan.id);
                       }}
-                      disabled={isProcessing}
+                      disabled={isProcessing || !canPurchase}
                     >
                       {isProcessing && selectedPlanId === plan.id ? (
                         <div className="flex items-center gap-2">
                           <Loader2 className="h-5 w-5 animate-spin" />
                           <span>Processing</span>
+                        </div>
+                      ) : !canPurchase ? (
+                        <div className="flex items-center gap-2">
+                          <Mail className="w-3.5 h-3.5" />
+                          <span>Verify email to buy</span>
                         </div>
                       ) : (
                         <div className="flex items-center gap-2">
