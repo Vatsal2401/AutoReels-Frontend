@@ -118,11 +118,11 @@ export function TopBar({ onMenuClick }: TopBarProps) {
                 <CreditCard className="mr-2 h-4 w-4" />
                 Buy Credits
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <a href="https://calendly.com/nirajsheladiya/15min" target="_blank" rel="noopener noreferrer">
-                  <Calendar className="mr-2 h-4 w-4" />
-                  Book your demo call
-                </a>
+              <DropdownMenuItem
+                onClick={() => window.open('https://calendly.com/nirajsheladiya/15min', '_blank', 'noopener,noreferrer')}
+              >
+                <Calendar className="mr-2 h-4 w-4" />
+                Book your demo call
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuLabel className="text-xs font-normal text-muted-foreground pt-1">Theme</DropdownMenuLabel>
