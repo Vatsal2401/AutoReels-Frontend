@@ -126,8 +126,8 @@ export default function ProjectDetailPage() {
 
   return (
     <DashboardLayout>
-      <div className="relative flex flex-col min-h-full">
-        <div className="max-w-[1700px] mx-auto w-full px-4 lg:px-12 py-4 lg:py-6">
+      <div className="relative flex flex-col min-h-full h-full">
+        <div className="w-full max-w-[1920px] mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-4 lg:py-6 flex flex-col flex-1 min-h-0">
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6 mb-6">
             <div className="flex items-start sm:items-center gap-3 lg:gap-8">
@@ -239,18 +239,18 @@ export default function ProjectDetailPage() {
             </div>
           )}
 
-          {/* Completed: Video + sidebar */}
+          {/* Completed: Video + sidebar — use full width */}
           {isCompleted && (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
-              <div className="lg:col-span-8 flex flex-col gap-6">
-                <div className="flex-1 bg-muted/10 border border-border/50 rounded-2xl overflow-hidden flex items-center justify-center p-4 lg:p-8 min-h-[400px]">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 flex-1 min-h-0">
+              <div className="lg:col-span-9 flex flex-col gap-4 min-h-0">
+                <div className="flex-1 min-h-[320px] lg:min-h-0 bg-muted/10 border border-border/50 rounded-2xl overflow-hidden flex items-center justify-center p-4 lg:p-6">
                   {urlLoading ? (
                     <div className="flex flex-col items-center gap-4">
                       <Loader2 className="h-10 w-10 animate-spin text-primary" />
                       <span className="text-sm text-muted-foreground">Loading video…</span>
                     </div>
                   ) : outputUrl ? (
-                    <div className={cn("w-full max-w-lg rounded-2xl overflow-hidden shadow-lg bg-black", aspectClass)}>
+                    <div className={cn("w-full max-w-full rounded-2xl overflow-hidden shadow-lg bg-black", aspectClass)}>
                       <VideoPlayer videoUrl={outputUrl} title={getProjectTitle(project)} />
                     </div>
                   ) : (
@@ -259,7 +259,7 @@ export default function ProjectDetailPage() {
                     </div>
                   )}
                 </div>
-                <div className="flex flex-wrap items-center gap-4 p-4 bg-muted/20 border border-border/50 rounded-2xl">
+                <div className="flex flex-wrap items-center gap-4 p-4 bg-muted/20 border border-border/50 rounded-2xl shrink-0">
                   {outputUrl && (
                     <a href={outputUrl} download="graphic-motion.mp4">
                       <Button variant="secondary" size="lg" className="gap-2">
@@ -276,25 +276,25 @@ export default function ProjectDetailPage() {
                   </Link>
                 </div>
               </div>
-              <div className="lg:col-span-4">
-                <Card className="border border-border/60 rounded-2xl overflow-hidden">
-                  <CardContent className="p-6 space-y-6">
+              <div className="lg:col-span-3 flex flex-col min-h-0">
+                <Card className="border border-border/60 rounded-2xl overflow-hidden flex-1 flex flex-col min-h-0">
+                  <CardContent className="p-5 lg:p-6 flex flex-col flex-1 min-h-0 gap-5">
                     {scriptSnippet && (
-                      <div>
-                        <div className="flex items-center gap-2 mb-2">
+                      <div className="flex flex-col min-h-0 flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-2 shrink-0">
                           <FileText className="h-4 w-4 text-primary" />
                           <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                             Script
                           </h4>
                         </div>
-                        <div className="p-3 bg-muted/30 rounded-xl max-h-[200px] overflow-y-auto">
+                        <div className="p-3 bg-muted/30 rounded-xl min-h-0 flex-1 overflow-y-auto">
                           <p className="text-sm text-foreground/90 whitespace-pre-wrap">
                             {scriptSnippet}
                           </p>
                         </div>
                       </div>
                     )}
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 gap-3 shrink-0">
                       <div className="p-3 bg-muted/30 rounded-xl">
                         <span className="block text-[10px] font-bold uppercase text-muted-foreground/70 mb-1">
                           Tool

@@ -1,9 +1,17 @@
 import apiClient from "./client";
 
+export type ShowcaseItemType = "reel" | "graphic_motion" | "text_to_image";
+
+export interface ShowcaseItem {
+  id: string;
+  type: ShowcaseItemType;
+  url: string | null;
+  mediaId?: string;
+  projectId?: string;
+}
+
 export interface ShowcaseResponse {
-  reel: { mediaId: string; url: string | null };
-  graphicMotion: { projectId: string; url: string | null };
-  textToImage: { url: string };
+  items: ShowcaseItem[];
 }
 
 export const showcaseApi = {

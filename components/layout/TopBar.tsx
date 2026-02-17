@@ -40,7 +40,7 @@ export function TopBar({ onMenuClick }: TopBarProps) {
     if (pathname === "/studio") return "AI Creative Studio";
     if (pathname === "/dashboard") {
       if (searchParams?.get("purchase") === "credits") return "Purchase Credits";
-      return "Dashboard";
+      return "Studio Dashboard";
     }
     return "Dashboard";
   };

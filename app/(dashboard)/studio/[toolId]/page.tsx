@@ -2,11 +2,22 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, Suspense } from "react";
+import dynamic from "next/dynamic";
 import { getToolById } from "@/lib/studio/tool-registry";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { GraphicMotionWorkspace } from "@/components/studio/GraphicMotionWorkspace";
 import { CreateVideoForm } from "@/components/video/CreateVideoForm";
 import { Loader2 } from "lucide-react";
+
+const VideoResizerWorkspace = dynamic(
+  () => import("@/components/studio/VideoResizerWorkspace").then((m) => ({ default: m.VideoResizerWorkspace })),
+  { ssr: false }
+);
+
+const VideoCompressorWorkspace = dynamic(
+  () => import("@/components/studio/VideoCompressorWorkspace").then((m) => ({ default: m.VideoCompressorWorkspace })),
+  { ssr: false }
+);
 
 export default function StudioToolPage() {
   const params = useParams();
@@ -52,6 +63,26 @@ export default function StudioToolPage() {
       <DashboardLayout>
         <div className="h-full min-h-0 overflow-hidden flex flex-col bg-background p-6 sm:p-8">
           <GraphicMotionWorkspace />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (tool.id === "video-resizer") {
+    return (
+      <DashboardLayout>
+        <div className="h-full min-h-0 overflow-hidden flex flex-col bg-background">
+          <VideoResizerWorkspace />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (tool.id === "video-compressor") {
+    return (
+      <DashboardLayout>
+        <div className="h-full min-h-0 overflow-hidden flex flex-col bg-background">
+          <VideoCompressorWorkspace />
         </div>
       </DashboardLayout>
     );

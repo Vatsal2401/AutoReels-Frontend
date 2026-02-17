@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { Video, Type, Image } from "lucide-react";
+import { Video, Type, Image, Maximize2, Minus } from "lucide-react";
 
 export type ToolCategory = "video" | "image" | "text";
 
@@ -25,6 +25,24 @@ const GRAPHIC_MOTION_TOOL: ToolEntry = {
   category: "text",
 };
 
+const VIDEO_RESIZER_TOOL: ToolEntry = {
+  id: "video-resizer",
+  name: "Video Resizer",
+  description: "Change video resolution and aspect ratio. 100% free. Processed on our servers.",
+  route: "/studio/video-resizer",
+  icon: Maximize2,
+  category: "video",
+};
+
+const VIDEO_COMPRESSOR_TOOL: ToolEntry = {
+  id: "video-compressor",
+  name: "Video Compressor",
+  description: "Reduce video file size. 100% free. Unlimited usage.",
+  route: "/studio/video-compressor",
+  icon: Minus,
+  category: "video",
+};
+
 const TOOL_LIST: ToolEntry[] = [
   {
     id: "reel",
@@ -36,6 +54,8 @@ const TOOL_LIST: ToolEntry[] = [
     category: "video",
   },
   GRAPHIC_MOTION_TOOL,
+  VIDEO_RESIZER_TOOL,
+  VIDEO_COMPRESSOR_TOOL,
   {
     id: "text-to-image",
     name: "Text to Image",
@@ -51,5 +71,7 @@ export const TOOL_REGISTRY: ToolEntry[] = TOOL_LIST;
 
 export function getToolById(id: string): ToolEntry | undefined {
   if (id === "kinetic-typography") return GRAPHIC_MOTION_TOOL;
+  if (id === "video-resize") return VIDEO_RESIZER_TOOL;
+  if (id === "video-compress") return VIDEO_COMPRESSOR_TOOL;
   return TOOL_LIST.find((t) => t.id === id);
 }
