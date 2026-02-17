@@ -11,7 +11,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, User, Settings, CreditCard, Sun, Moon, Laptop, Check, Menu } from "lucide-react";
+import { LogOut, User, Settings, CreditCard, Sun, Moon, Laptop, Check, Menu, Calendar } from "lucide-react";
+import Link from "next/link";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useTheme } from "next-themes";
 
@@ -83,9 +84,17 @@ export function TopBar({ onMenuClick }: TopBarProps) {
         </div>
 
         {/* Right side actions */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-4">
           <CreditsIndicator />
-          
+          <Link
+            href="https://calendly.com/nirajsheladiya/15min"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-background/80 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/10 transition-colors"
+          >
+            <Calendar className="h-3 w-3" />
+            <span className="hidden sm:inline">Book demo</span>
+          </Link>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="gap-2">
@@ -108,6 +117,12 @@ export function TopBar({ onMenuClick }: TopBarProps) {
               <DropdownMenuItem onClick={() => router.push("/dashboard?purchase=credits")}>
                 <CreditCard className="mr-2 h-4 w-4" />
                 Buy Credits
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <a href="https://calendly.com/nirajsheladiya/15min" target="_blank" rel="noopener noreferrer">
+                  <Calendar className="mr-2 h-4 w-4" />
+                  Book your demo call
+                </a>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuLabel className="text-xs font-normal text-muted-foreground pt-1">Theme</DropdownMenuLabel>
