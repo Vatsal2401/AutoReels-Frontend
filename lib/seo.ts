@@ -283,6 +283,89 @@ export function generateHowToSchema() {
   };
 }
 
+export function generateProductSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: SITE_CONFIG.name,
+    description: SITE_CONFIG.description,
+    url: SITE_CONFIG.url,
+    brand: {
+      "@type": "Brand",
+      name: SITE_CONFIG.name,
+    },
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: "4.9",
+      ratingCount: "3240",
+      bestRating: "5",
+      worstRating: "1",
+    },
+    review: [
+      {
+        "@type": "Review",
+        author: { "@type": "Person", name: "Alex Rivera" },
+        reviewRating: { "@type": "Rating", ratingValue: "5", bestRating: "5" },
+        reviewBody:
+          "AutoReels cut my production time by 90%. I went from posting twice a week to three times a day. My views have exploded.",
+      },
+      {
+        "@type": "Review",
+        author: { "@type": "Person", name: "Sarah Chen" },
+        reviewRating: { "@type": "Rating", ratingValue: "5", bestRating: "5" },
+        reviewBody:
+          "The AI voices in the Neural Pipeline are incredibly human. My audience has no idea these videos are AI-generated.",
+      },
+      {
+        "@type": "Review",
+        author: { "@type": "Person", name: "Marcus Thorne" },
+        reviewRating: { "@type": "Rating", ratingValue: "5", bestRating: "5" },
+        reviewBody:
+          "Managing 15 client accounts used to be a nightmare. AutoReels' auto-scheduling is the ultimate lifesaver for my agency.",
+      },
+    ],
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+      description: "Free to try with 10 credits starter pack",
+      url: `${SITE_CONFIG.url}/signup`,
+    },
+  };
+}
+
+export function generateVideoObjectSchema({
+  name,
+  description,
+  thumbnailUrl,
+  uploadDate,
+  contentUrl,
+  embedUrl,
+}: {
+  name: string;
+  description: string;
+  thumbnailUrl: string;
+  uploadDate: string;
+  contentUrl?: string;
+  embedUrl?: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "VideoObject",
+    name,
+    description,
+    thumbnailUrl,
+    uploadDate,
+    publisher: {
+      "@type": "Organization",
+      name: SITE_CONFIG.name,
+      url: SITE_CONFIG.url,
+    },
+    ...(contentUrl && { contentUrl }),
+    ...(embedUrl && { embedUrl }),
+  };
+}
+
 export function generateBreadcrumbSchema(items: { name: string; path: string }[]) {
   return {
     "@context": "https://schema.org",

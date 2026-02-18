@@ -1,6 +1,6 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { generatePageMetadata } from "@/lib/seo";
+import { generatePageMetadata, generateBreadcrumbSchema } from "@/lib/seo";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = generatePageMetadata({
@@ -11,7 +11,17 @@ export const metadata: Metadata = generatePageMetadata({
 });
 
 export default function AboutPage() {
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: "Home", path: "/" },
+    { name: "About", path: "/about" },
+  ]);
+
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
     <div className="flex min-h-screen flex-col">
       <Header />
       <main className="flex-1">
@@ -73,5 +83,6 @@ export default function AboutPage() {
       </main>
       <Footer />
     </div>
+    </>
   );
 }

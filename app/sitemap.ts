@@ -4,6 +4,8 @@ import { SITE_CONFIG } from "@/lib/seo";
 /**
  * Sitemap URLs must return 200 OK when crawled (no redirect).
  * baseUrl is canonical: HTTPS, non-www, no trailing slash (see lib/seo.ts).
+ * Auth pages (/login, /signup) are excluded — they redirect authenticated users
+ * and are marked noindex, so including them wastes crawl budget.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = SITE_CONFIG.url;
@@ -17,16 +19,40 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1.0,
     },
     {
-      url: `${baseUrl}/signup`,
+      url: `${baseUrl}/features`,
       lastModified: currentDate,
-      changeFrequency: "weekly",
+      changeFrequency: "monthly",
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/login`,
+      url: `${baseUrl}/for-youtube`,
       lastModified: currentDate,
       changeFrequency: "monthly",
-      priority: 0.7,
+      priority: 0.85,
+    },
+    {
+      url: `${baseUrl}/for-instagram`,
+      lastModified: currentDate,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
+      url: `${baseUrl}/for-tiktok`,
+      lastModified: currentDate,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
+      url: `${baseUrl}/blog`,
+      lastModified: currentDate,
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/blog/how-to-create-faceless-videos-ai-2026`,
+      lastModified: "2026-02-01T00:00:00.000Z",
+      changeFrequency: "monthly",
+      priority: 0.75,
     },
     {
       url: `${baseUrl}/about`,

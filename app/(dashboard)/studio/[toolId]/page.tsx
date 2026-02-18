@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import { getToolById } from "@/lib/studio/tool-registry";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { GraphicMotionWorkspace } from "@/components/studio/GraphicMotionWorkspace";
+import { TextToImageWorkspace } from "@/components/studio/TextToImageWorkspace";
 import { CreateVideoForm } from "@/components/video/CreateVideoForm";
 import { Loader2 } from "lucide-react";
 
@@ -56,6 +57,16 @@ export default function StudioToolPage() {
 
   if (!tool) {
     return null;
+  }
+
+  if (tool.id === "text-to-image") {
+    return (
+      <DashboardLayout>
+        <div className="h-full min-h-0 overflow-hidden flex bg-background">
+          <TextToImageWorkspace />
+        </div>
+      </DashboardLayout>
+    );
   }
 
   if (tool.id === "graphic-motion") {

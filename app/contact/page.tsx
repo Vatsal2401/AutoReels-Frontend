@@ -1,7 +1,7 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ContactForm } from "@/components/contact/ContactForm";
-import { generatePageMetadata } from "@/lib/seo";
+import { generatePageMetadata, generateBreadcrumbSchema } from "@/lib/seo";
 import type { Metadata } from "next";
 import { Mail, MessageSquare } from "lucide-react";
 
@@ -13,7 +13,17 @@ export const metadata: Metadata = generatePageMetadata({
 });
 
 export default function ContactPage() {
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: "Home", path: "/" },
+    { name: "Contact", path: "/contact" },
+  ]);
+
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
     <div className="flex min-h-screen flex-col">
       <Header />
       <main className="flex-1">
@@ -73,5 +83,6 @@ export default function ContactPage() {
       </main>
       <Footer />
     </div>
+    </>
   );
 }

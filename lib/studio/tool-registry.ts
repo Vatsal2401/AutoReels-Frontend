@@ -62,7 +62,7 @@ const TOOL_LIST: ToolEntry[] = [
     description: "Generate images from text prompts using AI.",
     route: "/studio/text-to-image",
     icon: Image,
-    comingSoon: true,
+    creditCost: 0,
     category: "image",
   },
 ];

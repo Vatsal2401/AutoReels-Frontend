@@ -115,10 +115,17 @@ export default function ProjectDetailPage() {
   const isFailed = project.status === "failed";
   const tool = getToolById(project.tool_type);
   const isGraphicMotion = project.tool_type === "kinetic-typography";
+  const isTextToImage = project.tool_type === "text-to-image";
   const scriptSnippet = (project.metadata as { script?: string })?.script;
   const format = (project.metadata as { format?: "reels" | "tiktok" | "horizontal" | "square" })?.format;
-  const aspectClass =
-    format === "horizontal"
+  const meta = project.metadata as { aspectRatio?: string } | null;
+  const aspectClass = isTextToImage
+    ? meta?.aspectRatio === "16:9"
+      ? "aspect-video"
+      : meta?.aspectRatio === "1:1"
+        ? "aspect-square"
+        : "aspect-[9/16]"
+    : format === "horizontal"
       ? "aspect-video"
       : format === "square"
         ? "aspect-square"
@@ -192,7 +199,7 @@ export default function ProjectDetailPage() {
                     <div>
                       <h2 className="text-lg font-semibold text-foreground">
                         {project.status === "rendering" || project.status === "processing"
-                          ? "Rendering your video"
+                          ? isTextToImage ? "Generating your image" : "Rendering your video"
                           : "Queued"}
                       </h2>
                       <p className="text-sm text-muted-foreground mt-1">
@@ -247,28 +254,50 @@ export default function ProjectDetailPage() {
                   {urlLoading ? (
                     <div className="flex flex-col items-center gap-4">
                       <Loader2 className="h-10 w-10 animate-spin text-primary" />
-                      <span className="text-sm text-muted-foreground">Loading video…</span>
+                      <span className="text-sm text-muted-foreground">
+                        {isTextToImage ? "Loading image…" : "Loading video…"}
+                      </span>
                     </div>
                   ) : outputUrl ? (
-                    <div className={cn("w-full max-w-full rounded-2xl overflow-hidden shadow-lg bg-black", aspectClass)}>
-                      <VideoPlayer videoUrl={outputUrl} title={getProjectTitle(project)} />
-                    </div>
+                    isTextToImage ? (
+                      <img
+                        src={outputUrl}
+                        alt={getProjectTitle(project)}
+                        className="max-w-full max-h-full rounded-2xl shadow-lg object-contain"
+                        style={{ maxHeight: "70vh" }}
+                      />
+                    ) : (
+                      <div className={cn("w-full max-w-full rounded-2xl overflow-hidden shadow-lg bg-black", aspectClass)}>
+                        <VideoPlayer videoUrl={outputUrl} title={getProjectTitle(project)} />
+                      </div>
+                    )
                   ) : (
                     <div className="text-center text-muted-foreground text-sm">
-                      Video URL not available.
+                      {isTextToImage ? "Image URL not available." : "Video URL not available."}
                     </div>
                   )}
                 </div>
                 <div className="flex flex-wrap items-center gap-4 p-4 bg-muted/20 border border-border/50 rounded-2xl shrink-0">
                   {outputUrl && (
-                    <a href={outputUrl} download="graphic-motion.mp4">
+                    <a
+                      href={outputUrl}
+                      download={isTextToImage ? "output.jpg" : "output.mp4"}
+                    >
                       <Button variant="secondary" size="lg" className="gap-2">
                         <Download className="h-4 w-4" />
                         Download
                       </Button>
                     </a>
                   )}
-                  <Link href={isGraphicMotion ? "/studio/graphic-motion" : "/studio/reel"}>
+                  <Link
+                    href={
+                      isTextToImage
+                        ? "/studio/text-to-image"
+                        : isGraphicMotion
+                          ? "/studio/graphic-motion"
+                          : "/studio/reel"
+                    }
+                  >
                     <Button size="lg" className="gap-2">
                       <Plus className="h-4 w-4" />
                       Create another
