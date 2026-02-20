@@ -158,7 +158,7 @@ export default function ForTikTokPage() {
                     {
                       icon: BarChart3,
                       title: "Post 5x Per Day Without Burnout",
-                      desc: "Top TikTok growth accounts post 3-5 times daily. Generate a week's content in an hour and schedule it all at once.",
+                      desc: "Top TikTok growth accounts post 3-5 times daily. Generate a week's content in an hour and download it all at once.",
                     },
                     {
                       icon: Layers,

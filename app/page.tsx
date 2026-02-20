@@ -4,21 +4,13 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { PricingSection } from '@/components/landing/PricingSection';
 import {
-  Zap,
-  Camera,
   Sparkles,
-  Share2,
   Settings2,
   CheckCircle2,
   ArrowRight,
   MessageSquare,
   Layers,
   Send,
-  Video,
-  Monitor,
-  Users,
-  Briefcase,
-  GraduationCap,
   Cloud,
 } from 'lucide-react';
 import { generatePageMetadata } from '@/lib/seo';
@@ -69,13 +61,13 @@ export default function LandingPage() {
                         <ArrowRight className="ml-2 h-5 w-5" />
                       </Button>
                     </Link>
-                    <Link href="#demo" className="w-full sm:w-auto">
+                    <Link href="#showcase" className="w-full sm:w-auto">
                       <Button
                         variant="outline"
                         size="lg"
                         className="w-full h-14 px-8 text-lg rounded-xl border-border/60 hover:bg-muted/50 transition-all"
                       >
-                        Watch Demo
+                        See Examples
                       </Button>
                     </Link>
                   </div>
@@ -85,8 +77,6 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              {/* Scroll anchor for Watch Demo button */}
-              <div id="demo" className="mt-16 md:mt-20" />
             </div>
           </section>
 
@@ -155,13 +145,13 @@ export default function LandingPage() {
                     step: '02',
                     icon: Layers,
                     title: 'AI Crafts the Video',
-                    desc: 'We generate the perfect script, visual scenes, narration, and background music.',
+                    desc: 'We write the script, generate an AI voiceover, sync word-level captions, and pair matching images — automatically.',
                   },
                   {
                     step: '03',
                     icon: Send,
                     title: 'Ready to Post',
-                    desc: 'Download in HD or let us auto-post to your social accounts while you sleep.',
+                    desc: 'Download clean 1080p vertical videos, ready to post on any platform instantly.',
                   },
                 ].map((item, i) => (
                   <div key={i} className="flex flex-col items-center space-y-6 relative z-10">
@@ -180,61 +170,6 @@ export default function LandingPage() {
                   </div>
                 ))}
               </div>
-            </div>
-          </section>
-
-          {/* NEW Use-Case Section */}
-          <section className="py-24 px-4 container mx-auto max-w-6xl">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-5xl font-bold mb-4 tracking-tight">
-                Built for Modern Creators
-              </h2>
-              <p className="text-muted-foreground">
-                Whatever your niche, AutoReels accelerates your output.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[
-                {
-                  icon: Video,
-                  title: 'TikTok Creators',
-                  desc: 'Produce 5-10 viral videos per day without burning out on editing.',
-                },
-                {
-                  icon: Users,
-                  title: 'Faceless Instagram Pages',
-                  desc: 'Build massive following accounts without ever showing your face.',
-                },
-                {
-                  icon: Briefcase,
-                  title: 'Affiliate Marketers',
-                  desc: 'Create quick product review or demo shorts to drive link clicks.',
-                },
-                {
-                  icon: Monitor,
-                  title: 'YouTube Shorts Pages',
-                  desc: 'Scale your revenue by automating the production of high-CPM content.',
-                },
-                {
-                  icon: GraduationCap,
-                  title: 'Coaches & SaaS Founders',
-                  desc: 'Turn your insights and feature updates into snackable video content.',
-                },
-              ].map((item, i) => (
-                <div
-                  key={i}
-                  className="p-6 rounded-2xl border border-border/30 hover:border-primary/20 hover:bg-primary/[0.02] transition-colors flex gap-4 items-start"
-                >
-                  <div className="w-10 h-10 rounded-lg bg-primary/5 flex items-center justify-center shrink-0">
-                    <item.icon className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="space-y-1">
-                    <h4 className="font-bold">{item.title}</h4>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
-                  </div>
-                </div>
-              ))}
             </div>
           </section>
 
@@ -318,6 +253,62 @@ export default function LandingPage() {
 
           {/* Pricing Section (Credit Bundles) */}
           <PricingSection />
+
+          {/* FAQ Section */}
+          <section className="py-24 px-4 bg-muted/20">
+            <div className="container mx-auto max-w-3xl">
+              <div className="text-center mb-12 space-y-3">
+                <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+                  Frequently Asked Questions
+                </h2>
+                <p className="text-muted-foreground text-sm">
+                  Everything you need to know before you start.
+                </p>
+              </div>
+
+              <div className="divide-y divide-border/50">
+                {[
+                  {
+                    q: 'How long does it take to create a video?',
+                    a: 'Most videos are ready in under 60 seconds. Longer scripts or higher-resolution exports may take up to 2 minutes.',
+                  },
+                  {
+                    q: 'Do I need any video editing experience?',
+                    a: 'None. Type a topic, choose a voice and style, and AutoReels handles everything — script, voiceover, captions, and visuals.',
+                  },
+                  {
+                    q: 'What kinds of videos can AutoReels make?',
+                    a: 'Vertical short-form videos (9:16) optimised for TikTok, Instagram Reels, and YouTube Shorts. Fact videos, motivational content, tips, product explainers — any niche that works well as a faceless talking-style reel.',
+                  },
+                  {
+                    q: 'Do I need to show my face or record audio?',
+                    a: 'No. Every video uses an AI voiceover and AI-selected images. You never need a camera, microphone, or studio.',
+                  },
+                  {
+                    q: 'How many free videos do I get?',
+                    a: 'New accounts start with 10 free video credits. No credit card required to sign up and use them.',
+                  },
+                  {
+                    q: 'Do credits expire?',
+                    a: 'Never. Credits you purchase stay in your account indefinitely — use them at your own pace.',
+                  },
+                  {
+                    q: 'Can I use the videos commercially?',
+                    a: 'Yes. You own the videos you create. Post them on any platform, monetise them, or use them in paid campaigns.',
+                  },
+                  {
+                    q: 'Is there a monthly subscription?',
+                    a: 'No subscription. AutoReels is credit-based — buy credits when you need them. Founding creators lock in the lowest price per video, permanently.',
+                  },
+                ].map((item, i) => (
+                  <div key={i} className="py-5">
+                    <h3 className="font-semibold text-base mb-1.5">{item.q}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{item.a}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
 
           {/* Final CTA Section */}
           <section className="py-24 px-4 bg-primary text-white text-center relative overflow-hidden">

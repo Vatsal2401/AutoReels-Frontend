@@ -32,7 +32,7 @@ const benefits = [
   "Trending-style auto-captions for silent viewers",
   "9:16 format optimized for Reels feed and Explore",
   "Consistent visual style to build a recognizable page",
-  "Schedule and auto-post to Instagram",
+  "Download HD Reels ready to post in one tap",
 ];
 
 export default function ForInstagramPage() {
@@ -163,7 +163,7 @@ export default function ForInstagramPage() {
                     {
                       icon: Repeat2,
                       title: "Post Every Day Without Burning Out",
-                      desc: "Generate 30 Reels in an hour. Schedule them for the month. Wake up to new followers every morning.",
+                      desc: "Generate 30 Reels in an hour. Download them all at once and post on your own schedule.",
                     },
                   ].map((item, i) => (
                     <div key={i} className="p-5 rounded-xl border border-border/40 flex gap-4">

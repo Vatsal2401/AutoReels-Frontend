@@ -3,32 +3,45 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { showcaseApi, type ShowcaseItem } from '@/lib/api/showcase';
-import { Button } from '@/components/ui/button';
 import { ArrowRight, Play } from 'lucide-react';
 
-function ShowcaseVideoCard({ item }: { item: ShowcaseItem }) {
+function ShowcaseVideoCard({ item, sectionVisible }: { item: ShowcaseItem; sectionVisible: boolean }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoError, setVideoError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const hasVideo = item.url && !videoError;
+  const [isPlaying, setIsPlaying] = useState(false);
+  const hasVideo = !!item.url && !videoError;
+
+  // When section becomes visible, switch to preload="auto" and buffer the clip
+  useEffect(() => {
+    if (sectionVisible && videoRef.current && hasVideo) {
+      videoRef.current.preload = 'auto';
+      videoRef.current.load();
+    }
+  }, [sectionVisible, hasVideo]);
 
   const handleMouseEnter = () => {
     setIsHovered(true);
-    if (videoRef.current && hasVideo) {
-      videoRef.current.currentTime = 0;
-      videoRef.current.play().catch(() => {});
-    }
+    const vid = videoRef.current;
+    if (!vid || !hasVideo) return;
+    vid.currentTime = 0;
+    vid.play()
+      .then(() => setIsPlaying(true))
+      .catch(() => {});
   };
 
   const handleMouseLeave = () => {
     setIsHovered(false);
-    if (videoRef.current) videoRef.current.pause();
+    const vid = videoRef.current;
+    if (!vid) return;
+    vid.pause();
+    setIsPlaying(false);
   };
 
   return (
     <Link href="/signup" className="block flex-shrink-0 snap-start">
       <div
-        className="relative w-[160px] sm:w-[180px] rounded-2xl overflow-hidden bg-muted border border-border/50 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 cursor-pointer group"
+        className="relative w-[150px] sm:w-[170px] rounded-2xl overflow-hidden bg-muted border border-border/50 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 cursor-pointer"
         style={{ aspectRatio: '9/16' }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -47,13 +60,22 @@ function ShowcaseVideoCard({ item }: { item: ShowcaseItem }) {
           />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
-            <Play className="h-8 w-8 text-primary/40" />
+            <Play className="h-8 w-8 text-primary/30" />
+          </div>
+        )}
+
+        {/* Play hint — visible when not hovering and video ready */}
+        {hasVideo && !isHovered && !isPlaying && (
+          <div className="absolute inset-0 flex items-end justify-center pb-4 pointer-events-none">
+            <div className="px-2 py-1 rounded-full bg-black/50 backdrop-blur-sm text-[9px] font-bold text-white/80 tracking-wide">
+              Hover to play
+            </div>
           </div>
         )}
 
         {/* Hover overlay */}
         <div
-          className={`absolute inset-0 bg-black/30 flex items-center justify-center transition-opacity duration-200 ${
+          className={`absolute inset-0 bg-black/25 flex items-center justify-center transition-opacity duration-200 ${
             isHovered ? 'opacity-100' : 'opacity-0'
           }`}
         >
@@ -75,26 +97,40 @@ function ShowcaseVideoCard({ item }: { item: ShowcaseItem }) {
 export function ShowcaseSection() {
   const [items, setItems] = useState<ShowcaseItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const [sectionVisible, setSectionVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     showcaseApi
       .getShowcase()
       .then((res) => {
-        // Only show items that have a clip URL
-        setItems(res.items.filter((item) => item.type === 'reel' && item.url));
+        setItems(res.items.filter((item) => item.url));
       })
-      .catch(() => {
-        // Silently fail — section just won't render if API is down
-      })
+      .catch(() => {})
       .finally(() => setIsLoading(false));
   }, []);
 
-  // Don't render the section if no items loaded
+  // Intersection observer — start buffering videos when section enters view
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setSectionVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 },
+    );
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
+
   if (!isLoading && items.length === 0) return null;
 
   return (
-    <section className="py-20 px-4">
+    <section id="showcase" ref={sectionRef} className="py-20 px-4">
       <div className="container mx-auto max-w-6xl">
         {/* Header */}
         <div className="text-center mb-10 space-y-3">
@@ -115,32 +151,32 @@ export function ShowcaseSection() {
             {[1, 2, 3, 4, 5].map((i) => (
               <div
                 key={i}
-                className="flex-shrink-0 w-[160px] sm:w-[180px] rounded-2xl bg-muted/50 border border-border/30 animate-pulse"
+                className="flex-shrink-0 w-[150px] sm:w-[170px] rounded-2xl bg-muted/50 border border-border/30 animate-pulse"
                 style={{ aspectRatio: '9/16' }}
               />
             ))}
           </div>
         ) : (
           <div
-            ref={scrollRef}
-            className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory no-scrollbar -mx-4 px-4"
+            className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory -mx-4 px-4"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {items.map((item) => (
-              <ShowcaseVideoCard key={item.id} item={item} />
+              <ShowcaseVideoCard key={item.id} item={item} sectionVisible={sectionVisible} />
             ))}
           </div>
         )}
 
-        {/* CTA below */}
-        <div className="text-center mt-10 space-y-3">
-          <Link href="/signup">
-            <Button size="lg" className="h-12 px-8 rounded-xl font-bold shadow-lg shadow-primary/20">
-              Create Your First Video Free
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+        {/* Softer CTA */}
+        <div className="text-center mt-8">
+          <Link
+            href="/signup"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline underline-offset-4 transition-all"
+          >
+            Create your own for free
+            <ArrowRight className="h-3.5 w-3.5" />
           </Link>
-          <p className="text-xs text-muted-foreground">No credit card · 10 free videos to start</p>
+          <p className="text-xs text-muted-foreground mt-1">No credit card · 10 free videos</p>
         </div>
       </div>
     </section>

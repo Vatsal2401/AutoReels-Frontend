@@ -158,7 +158,7 @@ export default function ForYouTubePage() {
                     {
                       icon: Clock,
                       title: "Batch Create a Week in an Hour",
-                      desc: "Generate 7 Shorts in under an hour. Schedule them across the week and let the algorithm do the rest.",
+                      desc: "Generate 7 Shorts in under an hour. Download them all and post across the week at your own pace.",
                     },
                   ].map((item, i) => (
                     <div key={i} className="p-5 rounded-xl border border-border/40 flex gap-4">

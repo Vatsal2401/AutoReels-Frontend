@@ -32,6 +32,21 @@ export function Header() {
           </span>
         </Link>
 
+        {/* Public nav links — only on marketing pages */}
+        {isPublicPage && (
+          <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
+            <Link href="/features" className="hover:text-foreground transition-colors">
+              Features
+            </Link>
+            <Link href="/#pricing" className="hover:text-foreground transition-colors">
+              Pricing
+            </Link>
+            <Link href="/blog" className="hover:text-foreground transition-colors">
+              Blog
+            </Link>
+          </nav>
+        )}
+
         <div className="flex items-center gap-4">
           {isAuthenticated && !isPublicPage ? (
             <>

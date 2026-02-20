@@ -125,12 +125,12 @@ const posts: Record<string, Post> = {
         </p>
 
         <h2 className="text-2xl font-bold text-foreground mt-8">
-          Step 5: Post Daily (or Let AutoReels Do It)
+          Step 5: Post Daily — Consistency Wins
         </h2>
         <p className="leading-relaxed">
           The algorithm rewards volume. Aim for at least one video per day. With AutoReels, you
-          can batch-create a week's worth of content in an hour and schedule it for auto-posting.
-          Your channel keeps growing while you're offline.
+          can batch-create a week's worth of content in an hour, download everything, and post
+          consistently without the daily grind.
         </p>
 
         <h2 className="text-2xl font-bold text-foreground mt-8">

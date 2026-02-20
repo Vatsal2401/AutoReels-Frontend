@@ -12,7 +12,7 @@ import { ArrowRight, Sparkles, Mic2, Captions, Music2, Palette, Zap, Download, S
 export const metadata: Metadata = generatePageMetadata({
   title: "AI Video Generator Features",
   description:
-    "Discover everything AutoReels can do: AI scriptwriting, realistic voiceovers, auto-captions, music sync, 12+ visual styles, and one-click publishing. The most complete AI video generator for creators.",
+    "Discover everything AutoReels can do: AI scriptwriting, realistic voiceovers, auto-captions, music sync, 12+ visual styles, and HD download. The most complete AI video generator for creators.",
   path: "/features",
   keywords: [
     "AI video generator features",
@@ -70,9 +70,9 @@ const features = [
   },
   {
     icon: Share2,
-    title: "Auto-Publish & Scheduling",
+    title: "Credit-Based, No Subscription",
     description:
-      "Connect TikTok, Instagram, and YouTube Shorts. Batch-create a week of content and let AutoReels post it while you sleep.",
+      "Buy credits when you need them. No monthly fee, no expiry. Founding creators lock in the lowest price per video — permanently.",
   },
   {
     icon: Clock,
