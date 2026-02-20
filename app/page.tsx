@@ -4,7 +4,6 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { PricingSection } from '@/components/landing/PricingSection';
 import {
-  Play,
   Zap,
   Camera,
   Sparkles,
@@ -24,6 +23,7 @@ import {
 } from 'lucide-react';
 import { generatePageMetadata } from '@/lib/seo';
 import { StructuredData } from '@/components/seo/StructuredData';
+import { ShowcaseSection } from '@/components/landing/ShowcaseSection';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = generatePageMetadata({
@@ -55,8 +55,8 @@ export default function LandingPage() {
                   <span className="text-primary italic px-2">— In Seconds</span>
                 </h1>
                 <p className="max-w-2xl mx-auto text-lg md:text-xl text-muted-foreground leading-relaxed">
-                  Stop spending hours editing. Turn your ideas into high-engagement shorts for
-                  TikTok, YouTube & Instagram with one click. No camera or face needed.
+                  Type a topic. AutoReels writes the script, adds an AI voiceover, syncs captions,
+                  and assembles a ready-to-post video — in under 60 seconds. No camera. No editing.
                 </p>
                 <div className="flex flex-col items-center gap-4 pt-4">
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
@@ -85,91 +85,13 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              {/* Product Mockup (Refined based on real dashboard) */}
-              <div id="demo" className="mt-16 md:mt-24 relative mx-auto max-w-5xl">
-                <div className="absolute -inset-10 bg-primary/20 rounded-[3rem] blur-[100px] opacity-20 pointer-events-none" />
-                <div className="relative rounded-2xl border border-border/50 bg-card overflow-hidden shadow-2xl shadow-primary/10 animate-float">
-                  {/* Dashboard Header Bar */}
-                  <div className="h-10 border-b border-border/40 bg-muted/30 flex items-center px-4 gap-2">
-                    <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
-                    <div className="w-2.5 h-2.5 rounded-full bg-yellow-400" />
-                    <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
-                    <div className="ml-4 h-5 flex-1 max-w-[400px] bg-background/50 rounded flex items-center px-3 text-[10px] text-muted-foreground">
-                      autoreels.in/dashboard/studio
-                    </div>
-                  </div>
-
-                  {/* Mock UI Content */}
-                  <div className="aspect-[16/10] bg-background p-4 md:p-8 flex gap-6 overflow-hidden">
-                    {/* Mock Sidebar */}
-                    <div className="hidden md:flex flex-col gap-4 w-12 pt-2 items-center opacity-40">
-                      <div className="w-8 h-8 rounded-lg bg-primary/10" />
-                      <div className="w-8 h-8 rounded-lg bg-muted" />
-                      <div className="w-8 h-8 rounded-lg bg-muted" />
-                      <div className="w-8 h-8 rounded-lg bg-muted" />
-                    </div>
-
-                    {/* Mock Main Application Area */}
-                    <div className="flex-1 flex flex-col gap-6">
-                      {/* App Header */}
-                      <div className="flex justify-between items-center opacity-80">
-                        <div className="space-y-1">
-                          <div className="h-4 w-32 bg-foreground/10 rounded" />
-                          <div className="h-2 w-48 bg-muted-foreground/10 rounded" />
-                        </div>
-                        <div className="h-8 w-24 bg-primary/20 rounded-lg" />
-                      </div>
-
-                      {/* Editor Layout Simulation */}
-                      <div className="flex-1 flex gap-6 overflow-hidden">
-                        {/* Video Preview Panel */}
-                        <div className="flex-[1.5] bg-muted/30 rounded-2xl border border-border/40 flex items-center justify-center relative group/play">
-                          <div className="aspect-[9/16] h-full bg-slate-900 rounded-lg overflow-hidden relative shadow-2xl shadow-black/40 border border-white/5">
-                            <img
-                              src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=800"
-                              className="absolute inset-0 w-full h-full object-cover opacity-60"
-                              alt="Mock reel preview"
-                            />
-                            <div className="absolute inset-x-4 bottom-12 space-y-2">
-                              <div className="h-2 w-full bg-white/20 rounded" />
-                              <div className="h-4 w-3/4 bg-white/40 rounded mx-auto" />
-                              <div className="h-2 w-full bg-white/20 rounded" />
-                            </div>
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center animate-pulse">
-                                <Play className="h-5 w-5 fill-white text-white" />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Settings Panel */}
-                        <div className="flex-1 hidden md:flex flex-col gap-4">
-                          <div className="p-4 bg-muted/20 rounded-xl border border-border/30 space-y-3">
-                            <div className="h-3 w-16 bg-foreground/10 rounded" />
-                            <div className="h-10 w-full bg-background border border-border/50 rounded-lg" />
-                            <div className="h-3 w-20 bg-foreground/10 rounded" />
-                            <div className="h-10 w-full bg-background border border-border/50 rounded-lg" />
-                          </div>
-                          <div className="p-4 bg-primary/5 rounded-xl border border-primary/20 space-y-3 flex-1">
-                            <div className="h-3 w-24 bg-primary/20 rounded" />
-                            <div className="space-y-2 opacity-60">
-                              {[1, 2, 3, 4].map((i) => (
-                                <div key={i} className="flex gap-2 items-center">
-                                  <div className="w-3 h-3 rounded-full bg-primary/30" />
-                                  <div className="h-2 flex-1 bg-primary/10 rounded" />
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              {/* Scroll anchor for Watch Demo button */}
+              <div id="demo" className="mt-16 md:mt-20" />
             </div>
           </section>
+
+          {/* Real video showcase — fetched from /showcase */}
+          <ShowcaseSection />
 
           {/* Value Propositions (Rewrite for benefits) */}
           <section className="py-24 px-4 container mx-auto max-w-6xl">
@@ -177,23 +99,23 @@ export default function LandingPage() {
               {[
                 {
                   icon: Sparkles,
-                  title: 'Turn Ideas Into Viral Shorts',
-                  desc: 'Our Neural Pipeline transforms simple text or ideas into polished videos in under 60 seconds.',
+                  title: 'AI Script + Voiceover',
+                  desc: 'Enter a topic — AutoReels writes the script and generates a natural AI voiceover. No recording required.',
                 },
                 {
                   icon: Cloud,
-                  title: 'Post Daily on Autopilot',
-                  desc: 'Stop manually posting. Schedule and sync your videos directly to TikTok, IG, and YouTube.',
+                  title: 'Auto Captions & Visuals',
+                  desc: 'Word-level captions sync automatically to the audio. Paired with matching visuals for your niche.',
                 },
                 {
                   icon: Settings2,
-                  title: 'Customize Voice & Style',
-                  desc: 'Choose from 50+ realistic AI voices and 12+ visual aesthetics like Cinematic, Anime, and Noir.',
+                  title: 'Pick Your Style & Voice',
+                  desc: 'Choose from 50+ AI voices and 12+ visual styles — Cinematic, Minimal, Neon, and more.',
                 },
                 {
                   icon: CheckCircle2,
-                  title: 'HD Videos With No Watermark',
-                  desc: 'Own your content. Export professional 1080x1920 HD videos ready for your brand.',
+                  title: 'Download in HD, No Watermark',
+                  desc: 'Export 1080×1920 vertical videos, ready to post. Your content, your brand — no watermark.',
                 },
               ].map((item, i) => (
                 <div
@@ -316,93 +238,80 @@ export default function LandingPage() {
             </div>
           </section>
 
-          {/* Social Proof (Updated for authenticity) */}
+          {/* Early Access — Who This Is For */}
           <section className="py-24 px-4 bg-muted/20">
-            <div className="container mx-auto max-w-6xl text-center">
-              <div className="mb-16 space-y-2">
-                <p className="text-sm font-bold tracking-widest text-primary uppercase">
-                  Why creators love us
-                </p>
-                <h2 className="text-3xl font-bold tracking-tight">
-                  Trusted by 10,000+ Creators Worldwide
-                </h2>
-                <div className="flex justify-center gap-8 pt-6 opacity-60">
-                  <div className="text-center">
-                    <div className="text-xl font-bold text-foreground underline decoration-primary lg:text-2xl">
-                      10k+
-                    </div>
-                    <div className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">
-                      Generated
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-xl font-bold text-foreground underline decoration-primary lg:text-2xl">
-                      90%
-                    </div>
-                    <div className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">
-                      Time Saved
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-xl font-bold text-foreground underline decoration-primary lg:text-2xl">
-                      24/7
-                    </div>
-                    <div className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">
-                      Support
-                    </div>
-                  </div>
+            <div className="container mx-auto max-w-6xl">
+              {/* Early access badge */}
+              <div className="text-center mb-14 space-y-4">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold tracking-widest uppercase">
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                  Early Access — Now Open
                 </div>
+                <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+                  Built for Creators Who Want to Post More, Edit Less
+                </h2>
+                <p className="text-muted-foreground max-w-xl mx-auto text-sm leading-relaxed">
+                  AutoReels is in early access. Founding creators get priority support, lowest prices, and direct input on what we build next.
+                </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
+              {/* Creator type cards — no fake names, no fake avatars */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {[
                   {
-                    name: 'Alex Rivera',
-                    role: 'Faceless Page Owner',
-                    img: 'https://i.pravatar.cc/150?u=alex',
-                    content:
-                      'AutoReels cut my production time by 90%. I went from posting twice a week to three times a day. My views have exploded.',
+                    icon: '🎬',
+                    role: 'Faceless Page Owners',
+                    niche: 'Facts · Motivation · History',
+                    desc: 'Build a page around a niche you love — without showing your face or recording a single word. AutoReels handles script, voice, and visuals.',
+                    outcome: 'Post daily without burnout',
                   },
                   {
-                    name: 'Sarah Chen',
-                    role: 'YouTube Marketer',
-                    img: 'https://i.pravatar.cc/150?u=sarah',
-                    content:
-                      'The AI voices in the Neural Pipeline are incredibly human. My audience has no idea these videos are AI-generated.',
+                    icon: '📱',
+                    role: 'Short-Form Creators',
+                    niche: 'TikTok · Reels · Shorts',
+                    desc: 'Volume wins on short-form platforms. Create a week\'s worth of content in an hour — consistent quality, consistent posting.',
+                    outcome: 'More content, same effort',
                   },
                   {
-                    name: 'Marcus Thorne',
-                    role: 'Affiliate Page Owner',
-                    img: 'https://i.pravatar.cc/150?u=marcus',
-                    content:
-                      "Managing 15 client accounts used to be a nightmare. AutoReels' auto-scheduling is the ultimate lifesaver for my agency.",
+                    icon: '💼',
+                    role: 'Coaches & Founders',
+                    niche: 'Finance · Health · Business',
+                    desc: 'Turn your expertise into daily video content without hiring an editor. Share insights, tips, and updates in snackable video form.',
+                    outcome: 'Grow your audience on autopilot',
                   },
                 ].map((item, i) => (
                   <div
                     key={i}
-                    className="p-8 rounded-2xl bg-white border border-border/40 shadow-sm"
+                    className="p-6 rounded-2xl bg-white border border-border/40 shadow-sm hover:shadow-lg hover:shadow-primary/5 hover:border-primary/20 transition-all flex flex-col gap-4"
                   >
-                    <div className="flex gap-1 mb-6 text-yellow-500">
-                      {[1, 2, 3, 4, 5].map((s) => (
-                        <Sparkles key={s} className="h-4 w-4 fill-current" />
-                      ))}
+                    <div className="text-3xl">{item.icon}</div>
+                    <div>
+                      <h3 className="font-bold text-base">{item.role}</h3>
+                      <p className="text-[11px] font-semibold text-primary/70 tracking-wide mt-0.5">{item.niche}</p>
                     </div>
-                    <p className="text-base italic mb-6 leading-relaxed opacity-90">
-                      "{item.content}"
-                    </p>
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={item.img}
-                        className="w-10 h-10 rounded-full grayscale hover:grayscale-0 transition-all"
-                        alt={item.name}
-                      />
-                      <div>
-                        <h4 className="font-bold text-sm">{item.name}</h4>
-                        <p className="text-[10px] text-muted-foreground font-medium">{item.role}</p>
-                      </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed flex-1">{item.desc}</p>
+                    <div className="flex items-center gap-2 pt-2 border-t border-border/30">
+                      <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
+                      <span className="text-xs font-semibold text-foreground">{item.outcome}</span>
                     </div>
                   </div>
                 ))}
+              </div>
+
+              {/* Honest founding CTA */}
+              <div className="mt-12 p-6 md:p-8 rounded-2xl bg-primary/5 border border-primary/15 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="space-y-1 text-center md:text-left">
+                  <p className="font-bold text-base">Be a founding creator.</p>
+                  <p className="text-sm text-muted-foreground">
+                    Early adopters get the lowest credit prices — locked in forever. No subscription. Credits never expire.
+                  </p>
+                </div>
+                <Link href="/signup" className="shrink-0">
+                  <Button className="h-11 px-8 rounded-xl font-bold shadow-sm shadow-primary/20">
+                    Join Early Access
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
               </div>
             </div>
           </section>
@@ -415,11 +324,11 @@ export default function LandingPage() {
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.1)_0%,transparent_60%)]" />
             <div className="container mx-auto max-w-4xl relative z-10 space-y-8">
               <h2 className="text-4xl md:text-6xl font-bold tracking-tight">
-                Go Viral Without Ever Showing Your Face
+                Start Posting. Without a Camera.
               </h2>
               <p className="text-xl opacity-90 leading-relaxed max-w-2xl mx-auto">
-                Join 10,000+ creators building profitable faceless channels with the most advanced
-                AI video engine in the world.
+                Type a topic, get a ready-to-post video in 60 seconds. AI script, voiceover,
+                captions, and visuals — all done for you.
               </p>
               <div className="pt-4 flex flex-col items-center gap-6">
                 <Link href="/signup" className="w-full sm:w-auto">
@@ -431,7 +340,7 @@ export default function LandingPage() {
                   </Button>
                 </Link>
                 <p className="text-sm font-bold tracking-widest uppercase opacity-60">
-                  No credit card required • Cancel anytime
+                  No credit card required • Credits never expire
                 </p>
               </div>
             </div>
