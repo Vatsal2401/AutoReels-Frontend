@@ -68,4 +68,9 @@ export const authApi = {
     const response = await apiClient.post<{ message: string }>("/auth/resend-verification");
     return response.data;
   },
+
+  updateCountry: async (country: string): Promise<{ country: string }> => {
+    const response = await apiClient.patch<{ country: string }>("/auth/me/country", { country });
+    return response.data;
+  },
 };

@@ -4,22 +4,28 @@ import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { tokenStorage } from "@/lib/utils/token";
+import { authApi } from "@/lib/api/auth";
+import { COUNTRIES } from "@/lib/constants/countries";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Loader2, CheckCircle2, AlertCircle, Globe } from "lucide-react";
 
 function AuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { refreshUser } = useAuth();
-  const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
+
+  const [status, setStatus] = useState<"loading" | "country_setup" | "success" | "error">("loading");
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [selectedCountry, setSelectedCountry] = useState<string>("");
+  const [isSavingCountry, setIsSavingCountry] = useState(false);
 
   useEffect(() => {
     const handleCallback = async () => {
       try {
         const accessToken = searchParams.get("access_token");
         const refreshToken = searchParams.get("refresh_token");
+        const needsCountry = searchParams.get("needs_country") === "true";
 
         if (!accessToken || !refreshToken) {
           setStatus("error");
@@ -27,25 +33,24 @@ function AuthCallbackContent() {
           return;
         }
 
-        // Store tokens
         tokenStorage.setAccessToken(accessToken);
         tokenStorage.setRefreshToken(refreshToken);
 
-        // Refresh user data
-        await refreshUser();
+        const user = await refreshUser();
+
+        // Show country picker if IP detection failed OR user has no country on record
+        if (needsCountry || !(user as any)?.country) {
+          setStatus("country_setup");
+          return;
+        }
 
         setStatus("success");
-
-        // Redirect to dashboard after a brief delay
-        setTimeout(() => {
-          router.push("/dashboard");
-        }, 1500);
+        setTimeout(() => router.push("/dashboard"), 1500);
       } catch (error: any) {
         console.error("OAuth callback error:", error);
         setStatus("error");
         setErrorMessage(
-          error.response?.data?.message ||
-            "Authentication failed. Please try again."
+          error.response?.data?.message || "Authentication failed. Please try again."
         );
       }
     };
@@ -53,11 +58,29 @@ function AuthCallbackContent() {
     handleCallback();
   }, [searchParams, refreshUser, router]);
 
+  const handleCountrySubmit = async () => {
+    if (!selectedCountry) return;
+    setIsSavingCountry(true);
+    try {
+      await authApi.updateCountry(selectedCountry);
+      await refreshUser();
+      setStatus("success");
+      setTimeout(() => router.push("/dashboard"), 1200);
+    } catch {
+      // Non-critical — still proceed to dashboard
+      setStatus("success");
+      setTimeout(() => router.push("/dashboard"), 1200);
+    } finally {
+      setIsSavingCountry(false);
+    }
+  };
+
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md glass-strong">
         <CardContent className="pt-12 pb-12">
           <div className="flex flex-col items-center justify-center space-y-6">
+
             {status === "loading" && (
               <>
                 <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary/20 border border-primary/30">
@@ -65,9 +88,55 @@ function AuthCallbackContent() {
                 </div>
                 <div className="text-center space-y-2">
                   <h2 className="text-2xl font-semibold">Completing sign in...</h2>
+                  <p className="text-muted-foreground">Please wait while we set up your account.</p>
+                </div>
+              </>
+            )}
+
+            {status === "country_setup" && (
+              <>
+                <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary/20 border border-primary/30">
+                  <Globe className="h-8 w-8 text-primary" />
+                </div>
+                <div className="text-center space-y-2">
+                  <h2 className="text-2xl font-semibold">One last step</h2>
                   <p className="text-muted-foreground">
-                    Please wait while we set up your account.
+                    Select your country so we can show you the right pricing.
                   </p>
+                </div>
+                <div className="w-full space-y-3">
+                  <select
+                    className="w-full px-3 py-2 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    value={selectedCountry}
+                    onChange={(e) => setSelectedCountry(e.target.value)}
+                  >
+                    <option value="">Select your country...</option>
+                    {COUNTRIES.map((c) => (
+                      <option key={c.code} value={c.code}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                  <Button
+                    className="w-full"
+                    disabled={!selectedCountry || isSavingCountry}
+                    onClick={handleCountrySubmit}
+                  >
+                    {isSavingCountry ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      "Continue to Dashboard"
+                    )}
+                  </Button>
+                  <button
+                    className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors"
+                    onClick={() => router.push("/dashboard")}
+                  >
+                    Skip for now
+                  </button>
                 </div>
               </>
             )}
@@ -80,7 +149,7 @@ function AuthCallbackContent() {
                 <div className="text-center space-y-2">
                   <h2 className="text-2xl font-semibold">Success!</h2>
                   <p className="text-muted-foreground">
-                    You've been signed in successfully. Redirecting...
+                    You&apos;ve been signed in successfully. Redirecting...
                   </p>
                 </div>
               </>
@@ -95,21 +164,15 @@ function AuthCallbackContent() {
                   <h2 className="text-2xl font-semibold">Authentication Failed</h2>
                   <p className="text-muted-foreground">{errorMessage}</p>
                   <div className="flex gap-3 justify-center">
-                    <Button
-                      onClick={() => router.push("/login")}
-                    >
-                      Go to Login
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => router.push("/")}
-                    >
+                    <Button onClick={() => router.push("/login")}>Go to Login</Button>
+                    <Button variant="outline" onClick={() => router.push("/")}>
                       Go Home
                     </Button>
                   </div>
                 </div>
               </>
             )}
+
           </div>
         </CardContent>
       </Card>
