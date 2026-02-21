@@ -19,6 +19,7 @@ export interface CreateVideoDto {
   voiceId?: string;
   voiceLabel?: string;
   imageProvider?: string;
+  flowKey?: string;
   captions?: {
     enabled: boolean;
     preset: string;

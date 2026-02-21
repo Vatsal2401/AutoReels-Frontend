@@ -27,6 +27,8 @@ import {
   CheckCircle2,
   Loader2,
   FileText,
+  ImageIcon,
+  Film,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/format';
 
@@ -90,6 +92,7 @@ export function CreateVideoForm() {
     language: 'English (US)',
     duration: 'Short',
     imageProvider: 'gemini',
+    backgroundSource: 'ai-image',
     advancedOptions: {
       styleStrength: 'medium',
       lighting: 'none',
@@ -193,6 +196,7 @@ export function CreateVideoForm() {
       voiceId: settings.voiceId,
       voiceLabel: settings.voiceLabel,
       imageProvider: 'gemini',
+      flowKey: settings.backgroundSource === 'stock-video' ? 'videoMotionStock' : 'videoMotion',
       captions: settings.captions,
       music: settings.music,
     };
@@ -291,6 +295,70 @@ export function CreateVideoForm() {
                   Cinematic Universe
                 </h3>
               </div>
+
+              {/* Background Source Toggle */}
+              <div className="w-full space-y-3">
+                <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/50 px-1">
+                  Background Source
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  {(
+                    [
+                      {
+                        id: 'ai-image',
+                        label: 'AI Images',
+                        sub: 'Gemini Imagen',
+                        Icon: ImageIcon,
+                      },
+                      {
+                        id: 'stock-video',
+                        label: 'Stock Video',
+                        sub: 'Pexels clips',
+                        Icon: Film,
+                      },
+                    ] as const
+                  ).map(({ id, label, sub, Icon }) => {
+                    const isSelected = settings.backgroundSource === id;
+                    return (
+                      <button
+                        key={id}
+                        type="button"
+                        onClick={() => handleUpdate({ backgroundSource: id })}
+                        className={cn(
+                          'flex items-center gap-3 px-4 py-3 rounded-xl border transition-all duration-200 text-left',
+                          isSelected
+                            ? 'bg-primary/5 border-primary shadow-sm'
+                            : 'bg-background border-border hover:border-primary/20 hover:bg-secondary/30',
+                        )}
+                      >
+                        <Icon
+                          className={cn(
+                            'w-4 h-4 shrink-0',
+                            isSelected ? 'text-primary' : 'text-muted-foreground/50',
+                          )}
+                        />
+                        <div className="min-w-0">
+                          <p
+                            className={cn(
+                              'text-xs font-bold leading-none',
+                              isSelected ? 'text-foreground' : 'text-foreground/70',
+                            )}
+                          >
+                            {label}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground/50 mt-0.5">{sub}</p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+                {settings.backgroundSource === 'stock-video' && (
+                  <p className="text-[10px] text-muted-foreground/50 px-1">
+                    Real footage from Pexels — style name used as search query. Short (30–60s) only.
+                  </p>
+                )}
+              </div>
+
               <VisualStyleSelector settings={settings} onUpdate={handleUpdate} />
             </div>
 

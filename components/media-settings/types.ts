@@ -16,6 +16,7 @@ export interface MediaSettings {
     language: string;
     duration: Duration;
     imageProvider: 'gemini' | 'replicate' | 'dalle' | 'mock';
+    backgroundSource: 'ai-image' | 'stock-video';
     captions: {
         enabled: boolean;
         preset: 'bold-stroke' | 'red-highlight' | 'sleek' | 'karaoke-card' | 'majestic' | 'beast' | 'elegant';
