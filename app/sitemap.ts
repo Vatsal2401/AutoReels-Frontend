@@ -1,82 +1,50 @@
-import { MetadataRoute } from "next";
 import { SITE_CONFIG } from "@/lib/seo";
 
 /**
- * Sitemap URLs must return 200 OK when crawled (no redirect).
- * baseUrl is canonical: HTTPS, non-www, no trailing slash (see lib/seo.ts).
- * Auth pages (/login, /signup) are excluded — they redirect authenticated users
- * and are marked noindex, so including them wastes crawl budget.
+ * Sitemap index — replaces the static 11-URL sitemap.
+ *
+ * Returns a sitemap-index pointing to:
+ *   /sitemap/static.xml           — original 11 static pages
+ *   /sitemap/{playbook}/{page}    — pSEO pages (up to 15 files × 12 playbooks = 180 slots)
+ *
+ * Each sub-sitemap serves up to 1,000 URLs → 180,000 max pSEO pages covered (Phase 3 target).
+ *
+ * NOTE: Next.js MetadataRoute.Sitemap does not support sitemap-index natively,
+ * so we return raw sitemap-index XML via a route handler instead.
+ * This file exports a function that Next.js 14 will call at /sitemap.xml.
  */
-export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = SITE_CONFIG.url;
-  const currentDate = new Date().toISOString();
 
-  return [
-    {
-      url: baseUrl,
-      lastModified: currentDate,
-      changeFrequency: "daily",
-      priority: 1.0,
-    },
-    {
-      url: `${baseUrl}/features`,
-      lastModified: currentDate,
-      changeFrequency: "monthly",
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/for-youtube`,
-      lastModified: currentDate,
-      changeFrequency: "monthly",
-      priority: 0.85,
-    },
-    {
-      url: `${baseUrl}/for-instagram`,
-      lastModified: currentDate,
-      changeFrequency: "monthly",
-      priority: 0.85,
-    },
-    {
-      url: `${baseUrl}/for-tiktok`,
-      lastModified: currentDate,
-      changeFrequency: "monthly",
-      priority: 0.85,
-    },
-    {
-      url: `${baseUrl}/blog`,
-      lastModified: currentDate,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/blog/how-to-create-faceless-videos-ai-2026`,
-      lastModified: "2026-02-01T00:00:00.000Z",
-      changeFrequency: "monthly",
-      priority: 0.75,
-    },
-    {
-      url: `${baseUrl}/about`,
-      lastModified: currentDate,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/contact`,
-      lastModified: currentDate,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/privacy`,
-      lastModified: currentDate,
-      changeFrequency: "yearly",
-      priority: 0.5,
-    },
-    {
-      url: `${baseUrl}/terms`,
-      lastModified: currentDate,
-      changeFrequency: "yearly",
-      priority: 0.5,
-    },
+const PLAYBOOKS = [
+  "templates",
+  "curation",
+  "conversions",
+  "comparisons",
+  "examples",
+  "locations",
+  "personas",
+  "integrations",
+  "glossary",
+  "translations",
+  "directory",
+  "profiles",
+] as const;
+
+const MAX_FILES_PER_PLAYBOOK = 15; // 15 × 1000 URLs = 15k per playbook
+
+export default function sitemap() {
+  const base = SITE_CONFIG.url;
+
+  // Static sitemap
+  const sitemaps: { url: string }[] = [
+    { url: `${base}/sitemap/static.xml` },
   ];
+
+  // pSEO sitemaps per playbook
+  for (const playbook of PLAYBOOKS) {
+    for (let i = 1; i <= MAX_FILES_PER_PLAYBOOK; i++) {
+      sitemaps.push({ url: `${base}/sitemap/${playbook}/${i}` });
+    }
+  }
+
+  return sitemaps;
 }

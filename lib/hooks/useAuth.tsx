@@ -30,7 +30,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsLoading(false);
         return;
       }
-
       const userData = await authApi.getMe();
       setUser(userData);
     } catch (error) {
@@ -49,7 +48,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const response: AuthResponse = await authApi.signIn({ email, password });
     tokenStorage.setAccessToken(response.access_token);
     tokenStorage.setRefreshToken(response.refresh_token);
-    // Map API response to User type
     setUser({
       userId: response.user.id,
       email: response.user.email,
@@ -60,22 +58,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signup = async (email: string, password: string, name?: string, country?: string) => {
     const response: AuthResponse = await authApi.signUp({ email, password, name, country });
-
-    // Save tokens and set user to log in automatically
     tokenStorage.setAccessToken(response.access_token);
     tokenStorage.setRefreshToken(response.refresh_token);
-
     setUser({
       userId: response.user.id,
       email: response.user.email,
       email_verified: response.user.email_verified,
     });
-
     const { toast } = await import('sonner');
     toast.success('Account created! Please check your email to verify your account.', {
       duration: 5000,
     });
-
     router.push('/dashboard');
   };
 

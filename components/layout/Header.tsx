@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { CreditsIndicator } from "./CreditsIndicator";
 import { LogOut, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils/format";
+import { ToolsMenu } from "./ToolsMenu";
 
 export function Header() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -38,6 +39,7 @@ export function Header() {
             <Link href="/features" className="hover:text-foreground transition-colors">
               Features
             </Link>
+            <ToolsMenu />
             <Link href="/#pricing" className="hover:text-foreground transition-colors">
               Pricing
             </Link>

@@ -28,6 +28,33 @@ const nextConfig = {
       },
     ];
   },
+  async headers() {
+    return [
+      {
+        // Cache-Control for all pSEO page prefixes — 24h CDN, 1h stale-while-revalidate
+        source:
+          "/(tools|ideas|pricing|vs|examples|for|integrations|glossary|create|directory)/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, s-maxage=86400, stale-while-revalidate=3600",
+          },
+        ],
+      },
+      {
+        // Country-level location pages (e.g. /india/ai-reel-generator)
+        // These are served by the [country-slug]/[location-slug] route group.
+        // We can't enumerate every country prefix, so this is handled at the CDN level.
+        source: "/sitemap/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, s-maxage=3600, stale-while-revalidate=300",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;

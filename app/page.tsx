@@ -16,6 +16,7 @@ import {
 import { generatePageMetadata } from '@/lib/seo';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { ShowcaseSection } from '@/components/landing/ShowcaseSection';
+import { ToolsSection } from '@/components/landing/ToolsSection';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = generatePageMetadata({
@@ -172,6 +173,8 @@ export default function LandingPage() {
               </div>
             </div>
           </section>
+
+          <ToolsSection />
 
           {/* Early Access — Who This Is For */}
           <section className="py-24 px-4 bg-muted/20">

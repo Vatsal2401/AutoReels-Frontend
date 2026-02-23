@@ -31,6 +31,9 @@ export interface CreateVideoDto {
     name?: string;
     volume?: number;
   };
+  tone?: string;
+  hookType?: string;
+  cta?: string;
 }
 
 export interface Video {

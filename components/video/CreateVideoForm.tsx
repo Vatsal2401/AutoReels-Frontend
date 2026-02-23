@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { GenerationProgress } from './GenerationProgress';
+import { TopicIdeas } from './TopicIdeas';
 import { VisualStyleSelector } from '../media-settings/VisualStyleSelector';
 import { FormatSelector } from '../media-settings/FormatSelector';
 import { NarrationSettings } from '../media-settings/NarrationSettings';
@@ -17,6 +18,13 @@ import { CaptionSettings } from '../media-settings/CaptionSettings';
 import { MusicSelector } from '../media-settings/MusicSelector';
 import { MediaSettings } from '../media-settings/types';
 import { getFullPrompt } from '../media-settings/styles';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   AlertCircle,
   Sparkles,
@@ -79,6 +87,9 @@ export function CreateVideoForm() {
   const searchParams = useSearchParams();
   const retryVideoId = searchParams.get('videoId');
   const [topic, setTopic] = useState(searchParams.get('topic') || '');
+  const [tone, setTone] = useState('motivational');
+  const [hookType, setHookType] = useState('shocking_fact');
+  const [cta, setCta] = useState('follow');
   const { credits, hasCredits, isLoading: creditsLoading } = useCredits();
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
 
@@ -195,6 +206,9 @@ export function CreateVideoForm() {
       imageProvider: 'gemini',
       captions: settings.captions,
       music: settings.music,
+      tone,
+      hookType,
+      cta,
     };
 
     if (retryVideoId) {
@@ -227,6 +241,8 @@ export function CreateVideoForm() {
                 Transform your <span className="text-primary italic">vision</span> into cinematic
                 reality.
               </h2>
+              <TopicIdeas onSelect={(t) => setTopic(t)} />
+
               <div className="group relative bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl lg:rounded-[32px] p-6 lg:p-8 transition-all duration-500 hover:border-primary/40 hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] focus-within:ring-2 focus-within:ring-primary/10 focus-within:border-primary h-auto min-h-[180px] lg:min-h-[220px] flex flex-col">
                 <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 mb-4 px-1 text-left">
                   Creative Intent
@@ -332,6 +348,67 @@ export function CreateVideoForm() {
                   </span>
                 </div>
                 <DurationSelector settings={settings} onUpdate={handleUpdate} />
+              </div>
+            </div>
+
+            {/* 5. Script Style */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 pb-12 lg:pb-12">
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 pb-3 border-b border-border/40 px-1">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
+                    Tone
+                  </span>
+                </div>
+                <Select value={tone} onValueChange={setTone}>
+                  <SelectTrigger className="h-9 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="motivational">Motivational</SelectItem>
+                    <SelectItem value="educational">Educational</SelectItem>
+                    <SelectItem value="storytelling">Storytelling</SelectItem>
+                    <SelectItem value="humorous">Humorous</SelectItem>
+                    <SelectItem value="controversial">Controversial</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 pb-3 border-b border-border/40 px-1">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
+                    Hook Style
+                  </span>
+                </div>
+                <Select value={hookType} onValueChange={setHookType}>
+                  <SelectTrigger className="h-9 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="shocking_fact">Shocking Fact</SelectItem>
+                    <SelectItem value="bold_question">Bold Question</SelectItem>
+                    <SelectItem value="bold_claim">Bold Claim</SelectItem>
+                    <SelectItem value="story">Personal Story</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 pb-3 border-b border-border/40 px-1">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
+                    CTA
+                  </span>
+                </div>
+                <Select value={cta} onValueChange={setCta}>
+                  <SelectTrigger className="h-9 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="follow">Follow for more</SelectItem>
+                    <SelectItem value="comment">Comment below</SelectItem>
+                    <SelectItem value="link_in_bio">Link in bio</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </div>

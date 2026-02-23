@@ -1,0 +1,148 @@
+export type Niche = {
+  label: string;
+  emoji: string;
+  topics: string[];
+};
+
+export const TOPIC_IDEAS: Niche[] = [
+  {
+    label: 'Finance',
+    emoji: '💰',
+    topics: [
+      '5 money mistakes you are making in your 20s that will hurt you later',
+      'Why 90 percent of people stay broke even with a good salary',
+      'Warren Buffett one investing rule that changed everything for me',
+      'The silent wealth killer most people never talk about',
+      'How to save money fast even when you think you have nothing left',
+      'Three financial habits that separate the rich from the broke',
+      'Why your savings account is actually losing you money every year',
+      'The one money move you should make before turning 30',
+    ],
+  },
+  {
+    label: 'Psychology',
+    emoji: '🧠',
+    topics: [
+      'The psychological trick that makes people fall for bad habits instantly',
+      'Why your brain lies to you every single day without you knowing it',
+      'The science behind why you procrastinate even when you care deeply',
+      'How your environment secretly controls every decision you make daily',
+      'The cognitive bias that makes smart people make terrible financial choices',
+      'Why people stay in toxic relationships according to behavioral psychology',
+      'The hidden reason you feel drained after spending time with certain people',
+      'How childhood experiences secretly shape all your adult behaviors forever',
+    ],
+  },
+  {
+    label: 'History',
+    emoji: '📚',
+    topics: [
+      'The ancient Roman habit that made their soldiers nearly unbeatable in battle',
+      'How one small mistake by Napoleon changed the entire course of world history',
+      'The forgotten empire that was bigger than Rome and Alexander combined',
+      'Why the Library of Alexandria was burned and who was really responsible',
+      'The medieval invention that accidentally caused the Black Death to spread faster',
+      'How a single telegram started World War One and shocked the entire world',
+      'The ancient civilization that invented democracy long before the Greeks did',
+      'Why the most powerful empire in history collapsed in just one generation',
+    ],
+  },
+  {
+    label: 'Motivation',
+    emoji: '💪',
+    topics: [
+      'The one mindset shift that separates people who succeed from those who quit',
+      'Why most people give up three feet away from their biggest breakthrough ever',
+      'The daily habit of every billionaire that most people dismiss as too simple',
+      'How to build discipline when motivation always fails you at the worst times',
+      'The harsh truth about success that nobody wants to hear but everyone needs',
+      'Why the people who seem lucky are actually just incredibly consistent daily',
+      'The two minute rule that completely rewired how I approach every hard task',
+      'What Michael Jordan did differently that made him impossible to compete with',
+    ],
+  },
+  {
+    label: 'Science Facts',
+    emoji: '🔬',
+    topics: [
+      'The human brain has enough storage to hold three million hours of video content',
+      'Scientists discovered that trees actually communicate with each other underground constantly',
+      'Your body replaces almost every single cell it has within the span of seven years',
+      'The reason you feel butterflies in your stomach is more complex than you realize',
+      'Octopuses have three hearts and blue blood and can edit their own RNA instantly',
+      'The universe is so large that light from some stars left before Earth even existed',
+      'Scientists found bacteria that can survive in space and thrive without any oxygen',
+      'Your gut bacteria influence your mood and decisions more than your brain does',
+    ],
+  },
+  {
+    label: 'Health',
+    emoji: '🏃',
+    topics: [
+      'The one sleep habit that is silently destroying your metabolism and mental health',
+      'Why doctors now say sitting for eight hours is as dangerous as smoking cigarettes',
+      'The anti-inflammatory food most people avoid that reduces chronic pain dramatically',
+      'How just ten minutes of morning sunlight completely rewires your circadian rhythm',
+      'The breathing technique that activates your nervous system and eliminates anxiety fast',
+      'Why eating less is actually making you gain more weight according to new research',
+      'The daily walk habit that cuts dementia risk by forty percent in clinical studies',
+      'How chronic dehydration secretly mimics the symptoms of anxiety and depression',
+    ],
+  },
+  {
+    label: 'AI & Tech',
+    emoji: '⚡',
+    topics: [
+      'The AI breakthrough that made scientists realize machines can actually learn to reason',
+      'Why every major tech company is secretly building the same dangerous AI right now',
+      'The algorithm that knows your next purchase before you even think about buying it',
+      'How AI is already writing music that listeners prefer over songs by real artists',
+      'The tech billionaires are quietly investing in that will replace entire industries soon',
+      'Why your smartphone already knows things about you that even your therapist does not',
+      'The hidden cost of free AI tools that nobody in the tech industry talks about',
+      'How quantum computing will break every password and encryption system in existence',
+    ],
+  },
+  {
+    label: 'Business',
+    emoji: '📈',
+    topics: [
+      'The pricing psychology trick that makes customers choose the most expensive option',
+      'Why most startups fail in year three even after a successful first two years',
+      'The business model that Amazon quietly built that now prints billions in pure profit',
+      'How one small pivot saved a failing company and turned it into a billion dollar brand',
+      'The negotiation tactic that gets you a raise without ever asking for more money',
+      'Why businesses that give away their best content for free always win long term',
+      'The hidden reason most marketing campaigns fail before they even reach the customer',
+      'How Steve Jobs used one simple story framework to sell billions in products',
+    ],
+  },
+  {
+    label: 'Philosophy',
+    emoji: '🧘',
+    topics: [
+      'The stoic philosophy technique that Marcus Aurelius used to master self control daily',
+      'Why the happiest people in the world own fewer things than the average American does',
+      'The ancient Greek concept that explains why modern humans are chronically unfulfilled',
+      'How Viktor Frankl found meaning in suffering and rewrote the rules of human psychology',
+      'The paradox of choice that proves having more options actually makes us deeply unhappy',
+      'Why Nietzsche believed most people live their entire lives following someone else story',
+      'The Buddhist concept of impermanence that instantly removes anxiety about the future',
+      'How Socrates used one question to expose the biggest lies people tell themselves daily',
+    ],
+  },
+  {
+    label: 'Nature & Space',
+    emoji: '🌿',
+    topics: [
+      'There is a planet in our solar system where it literally rains diamonds every single day',
+      'The deep ocean is more unexplored than the surface of Mars and equally as strange',
+      'A single teaspoon of soil contains more living organisms than all humans on Earth combined',
+      'The reason some forests have been growing continuously for over ten thousand years undisturbed',
+      'Scientists discovered a star so large that our entire solar system fits inside its core',
+      'The migration of monarch butterflies is still not fully understood by modern scientists today',
+      'There is a fungus that infects ants brains and turns them into mindless zombie servants',
+      'The mysterious radio signal from space that repeats every sixteen days and baffles scientists',
+    ],
+  },
+];
