@@ -18,17 +18,11 @@ const URLS_PER_FILE = 1000;
  */
 async function getPublishedCounts(): Promise<Record<string, number>> {
   try {
-    const res = await fetch(`${API_URL}/admin/pseo/stats`, {
+    const res = await fetch(`${API_URL}/pseo/published-counts`, {
       next: { revalidate: 3600 },
     });
     if (!res.ok) return {};
-    const stats: Record<string, Record<string, number>> = await res.json();
-    const counts: Record<string, number> = {};
-    for (const playbook of PLAYBOOKS) {
-      const published = stats[playbook]?.published ?? 0;
-      if (published > 0) counts[playbook] = published;
-    }
-    return counts;
+    return res.json();
   } catch {
     return {};
   }
