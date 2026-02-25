@@ -15,6 +15,7 @@ import { LogOut, User, Settings, CreditCard, Sun, Moon, Laptop, Check, Menu, Cal
 import Link from "next/link";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useTheme } from "next-themes";
+import { NotificationBell } from "./NotificationBell";
 
 interface TopBarProps {
   onMenuClick?: () => void;
@@ -86,6 +87,7 @@ export function TopBar({ onMenuClick }: TopBarProps) {
         {/* Right side actions */}
         <div className="flex items-center gap-3 sm:gap-4">
           <CreditsIndicator />
+          <NotificationBell />
           <Link
             href="https://calendly.com/nirajsheladiya/15min"
             target="_blank"

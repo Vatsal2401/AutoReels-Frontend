@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { videosApi, CreateVideoDto, Video, VideoStatus } from '@/lib/api/videos';
@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { GenerationProgress } from './GenerationProgress';
+import { CelebrationOverlay } from './CelebrationOverlay';
 import { TopicIdeas } from './TopicIdeas';
 import { VisualStyleSelector } from '../media-settings/VisualStyleSelector';
 import { FormatSelector } from '../media-settings/FormatSelector';
@@ -37,6 +38,18 @@ import {
   FileText,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/format';
+import { toast } from 'sonner';
+
+function getApiErrorMessage(error: unknown): string {
+  if (error && typeof error === 'object' && 'response' in error) {
+    const res = (error as { response?: { data?: { message?: string | string[] } } }).response;
+    const msg = res?.data?.message;
+    if (Array.isArray(msg)) return msg[0];
+    if (typeof msg === 'string') return msg;
+  }
+  if (error instanceof Error) return error.message;
+  return 'Something went wrong. Please try again.';
+}
 
 const DURATION_MAPPING = {
   Short: '30-60',
@@ -92,6 +105,8 @@ export function CreateVideoForm() {
   const [cta, setCta] = useState('follow');
   const { credits, hasCredits, isLoading: creditsLoading } = useCredits();
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const prevCompletedRef = useRef(false);
 
   const [settings, setSettings] = useState<MediaSettings>({
     visualStyleId: 'cinematic',
@@ -157,6 +172,9 @@ export function CreateVideoForm() {
     onSuccess: (data) => {
       setActiveVideoId(data.video_id);
     },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error));
+    },
   });
 
   const retryMutation = useMutation({
@@ -168,6 +186,9 @@ export function CreateVideoForm() {
     },
     onSuccess: (data) => {
       if (data) setActiveVideoId(data.video_id);
+    },
+    onError: (error) => {
+      toast.error(getApiErrorMessage(error));
     },
   });
 
@@ -194,6 +215,8 @@ export function CreateVideoForm() {
     if (!hasCredits) return;
 
     setActiveVideoId(null);
+    setShowCelebration(false);
+    prevCompletedRef.current = false;
 
     const payload: CreateVideoDto = {
       topic: topic.trim(),
@@ -224,8 +247,23 @@ export function CreateVideoForm() {
   const isFailed = currentStatus === 'failed';
   const errorMessage = videoStatus?.error_message;
 
+  // Show celebration overlay the first time a video transitions to completed
+  useEffect(() => {
+    if (isCompleted && !prevCompletedRef.current) {
+      setShowCelebration(true);
+    }
+    prevCompletedRef.current = isCompleted;
+  }, [isCompleted]);
+
   return (
     <div className="flex flex-col lg:h-full bg-background lg:rounded-xl lg:border lg:border-border lg:overflow-hidden lg:shadow-sm">
+      {showCelebration && activeVideoId && (
+        <CelebrationOverlay
+          videoId={activeVideoId}
+          topic={topic}
+          onDismiss={() => setShowCelebration(false)}
+        />
+      )}
       <div className="flex flex-col lg:flex-row lg:flex-1 lg:h-full lg:overflow-hidden">
         {/* LEFT: Composition Studio */}
         <div className="w-full lg:flex-1 min-w-0 h-auto lg:h-full lg:overflow-y-auto scrollbar-saas bg-zinc-50/20 dark:bg-zinc-950/20">
