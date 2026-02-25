@@ -2,8 +2,6 @@ import Link from 'next/link';
 import type { PseoPageData } from '@/lib/api/pseo';
 import PseoPageShell from './shared/PseoPageShell';
 import PseoCTA from './shared/PseoCTA';
-import { COMPETITORS } from '../../../../backend/src/pseo/config/seed-dimensions';
-
 // Note: We can't easily import from backend, so let's define it here or fetch it.
 // Since this is a frontend component, we'll use a hardcoded list for now or fetch it from the backend if we had an endpoint.
 // But we can see they are exported in seed-dimensions.ts

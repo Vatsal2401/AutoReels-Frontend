@@ -61,16 +61,19 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
 
   const unreadCount = useMemo(() => data.filter((n) => !n.read).length, [data]);
 
+  const { mutate: mutateRead } = markReadMutation;
+  const { mutate: mutateAllRead } = markAllReadMutation;
+
   const value = useMemo<NotificationsContextType>(
     () => ({
       notifications: data,
       unreadCount,
       isLoading,
-      markRead: (id) => markReadMutation.mutate(id),
-      markAllRead: () => markAllReadMutation.mutate(),
+      markRead: (id) => mutateRead(id),
+      markAllRead: () => mutateAllRead(),
       refetch,
     }),
-    [data, unreadCount, isLoading, refetch],
+    [data, unreadCount, isLoading, refetch, mutateRead, mutateAllRead],
   );
 
   return (
