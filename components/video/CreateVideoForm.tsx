@@ -5,11 +5,13 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { videosApi, CreateVideoDto, Video, VideoStatus } from '@/lib/api/videos';
 import { useCredits } from '@/lib/hooks/useCredits';
+import { useOnboarding } from '@/lib/hooks/useOnboarding';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { GenerationProgress } from './GenerationProgress';
 import { CelebrationOverlay } from './CelebrationOverlay';
+import { OnboardingWalkthrough } from './OnboardingWalkthrough';
 import { TopicIdeas } from './TopicIdeas';
 import { VisualStyleSelector } from '../media-settings/VisualStyleSelector';
 import { FormatSelector } from '../media-settings/FormatSelector';
@@ -36,6 +38,7 @@ import {
   CheckCircle2,
   Loader2,
   FileText,
+  HelpCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/format';
 import { toast } from 'sonner';
@@ -95,6 +98,30 @@ const getProgressFromStatus = (status: string) => {
   }
 };
 
+// Layer 2: Inline info tooltip — always-visible ? icon on section headers
+function InfoTooltip({ text }: { text: string }) {
+  const [show, setShow] = useState(false);
+  return (
+    <span className="relative inline-flex items-center">
+      <HelpCircle
+        className="w-3 h-3 text-muted-foreground/30 hover:text-primary cursor-help ml-1 transition-colors"
+        onMouseEnter={() => setShow(true)}
+        onMouseLeave={() => setShow(false)}
+      />
+      {show && (
+        <span
+          className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50
+          px-3 py-1.5 rounded-lg bg-popover border border-border shadow-md
+          text-xs text-popover-foreground whitespace-nowrap font-normal
+          normal-case tracking-normal pointer-events-none"
+        >
+          {text}
+        </span>
+      )}
+    </span>
+  );
+}
+
 export function CreateVideoForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -107,6 +134,15 @@ export function CreateVideoForm() {
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
   const [showCelebration, setShowCelebration] = useState(false);
   const prevCompletedRef = useRef(false);
+
+  // Layer 1 + 3: onboarding state
+  const { onboardingDone, completeOnboarding, skillMode, setSkillMode } = useOnboarding();
+
+  // Layer 1: section refs for spotlight
+  const creativeIntentRef = useRef<HTMLDivElement>(null);
+  const visualStyleRef = useRef<HTMLDivElement>(null);
+  const captionSettingsRef = useRef<HTMLDivElement>(null);
+  const musicSelectorRef = useRef<HTMLDivElement>(null);
 
   const [settings, setSettings] = useState<MediaSettings>({
     visualStyleId: 'cinematic',
@@ -264,10 +300,44 @@ export function CreateVideoForm() {
           onDismiss={() => setShowCelebration(false)}
         />
       )}
+
+      {/* Layer 1: Walkthrough — only shown before onboarding is complete */}
+      {onboardingDone === false && (
+        <OnboardingWalkthrough
+          sectionRefs={{
+            creativeIntent: creativeIntentRef,
+            visualStyle: visualStyleRef,
+            captionSettings: captionSettingsRef,
+            musicSelector: musicSelectorRef,
+          }}
+          onComplete={completeOnboarding}
+          onExampleSelect={(t) => setTopic(t)}
+        />
+      )}
+
       <div className="flex flex-col lg:flex-row lg:flex-1 lg:h-full lg:overflow-hidden">
         {/* LEFT: Composition Studio */}
         <div className="w-full lg:flex-1 min-w-0 h-auto lg:h-full lg:overflow-y-auto scrollbar-saas bg-zinc-50/20 dark:bg-zinc-950/20">
           <div className="flex flex-col pt-6 pb-12 lg:py-12 px-4 lg:px-8 space-y-8 lg:space-y-16 w-full max-w-4xl mx-auto">
+
+            {/* Layer 3: Skill mode toggle */}
+            <div className="flex items-center gap-2 justify-end -mb-4">
+              {(['beginner', 'pro'] as const).map((m) => (
+                <button
+                  key={m}
+                  onClick={() => setSkillMode(m)}
+                  className={cn(
+                    'px-3 py-1 text-[10px] font-bold rounded-full uppercase tracking-wider transition-all',
+                    skillMode === m
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'bg-muted text-muted-foreground hover:bg-muted/80',
+                  )}
+                >
+                  {m === 'beginner' ? '🔘 Beginner' : '⚙️ Pro'}
+                </button>
+              ))}
+            </div>
+
             <div className="w-full space-y-6 lg:space-y-8 text-center pb-8 lg:pb-12 border-b border-border/40">
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-full border border-primary/20 scale-90">
                 <Sparkles className="w-3 h-3 text-primary" />
@@ -281,9 +351,14 @@ export function CreateVideoForm() {
               </h2>
               <TopicIdeas onSelect={(t) => setTopic(t)} />
 
-              <div className="group relative bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl lg:rounded-[32px] p-6 lg:p-8 transition-all duration-500 hover:border-primary/40 hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] focus-within:ring-2 focus-within:ring-primary/10 focus-within:border-primary h-auto min-h-[180px] lg:min-h-[220px] flex flex-col">
-                <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 mb-4 px-1 text-left">
+              {/* Creative Intent — Layer 1 ref + Layer 2 tooltip */}
+              <div
+                ref={creativeIntentRef}
+                className="group relative bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl lg:rounded-[32px] p-6 lg:p-8 transition-all duration-500 hover:border-primary/40 hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] focus-within:ring-2 focus-within:ring-primary/10 focus-within:border-primary h-auto min-h-[180px] lg:min-h-[220px] flex flex-col"
+              >
+                <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 mb-4 px-1 text-left flex items-center">
                   Creative Intent
+                  <InfoTooltip text="The stronger your prompt, the better the reel." />
                 </label>
                 <Textarea
                   id="topic"
@@ -337,118 +412,129 @@ export function CreateVideoForm() {
               </div>
             </div>
 
-            {/* 2. Visual Style (Dominant) */}
-            <div className="w-full space-y-8">
+            {/* 2. Visual Style (Dominant) — Layer 1 ref + Layer 2 tooltip */}
+            <div ref={visualStyleRef} className="w-full space-y-8">
               <div className="flex items-center gap-3 px-1 border-b border-border/40 pb-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
+                <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 flex items-center">
                   Cinematic Universe
+                  <InfoTooltip text="Controls the image generation style." />
                 </h3>
               </div>
               <VisualStyleSelector settings={settings} onUpdate={handleUpdate} />
             </div>
 
-            {/* 3. Caption Style (New Dedicated Section) */}
-            <div className="w-full pt-4">
-              <CaptionSettings settings={settings} onUpdate={handleUpdate} />
-            </div>
-
-            {/* 3.1 Background Atmosphere */}
-            <div className="w-full pt-4">
-              <MusicSelector settings={settings} onUpdate={handleUpdate} />
-            </div>
-
-            {/* 4. Configuration Grid (Remaining) */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 pt-8 pb-12 lg:pb-12">
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 pb-3 border-b border-border/40 px-1">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
-                    Format
-                  </span>
-                  <Info className="w-3 h-3 text-muted-foreground/30" />
-                </div>
-                <FormatSelector settings={settings} onUpdate={handleUpdate} />
+            {/* 3. Caption Style — Layer 1 ref, hidden in Beginner mode */}
+            {skillMode === 'pro' && (
+              <div ref={captionSettingsRef} className="w-full pt-4">
+                <CaptionSettings settings={settings} onUpdate={handleUpdate} />
               </div>
+            )}
 
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 pb-3 border-b border-border/40 px-1">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
-                    Voice Narration
-                  </span>
-                </div>
-                <NarrationSettings settings={settings} onUpdate={handleUpdate} />
+            {/* 3.1 Background Atmosphere — Layer 1 ref, hidden in Beginner mode */}
+            {skillMode === 'pro' && (
+              <div ref={musicSelectorRef} className="w-full pt-4">
+                <MusicSelector settings={settings} onUpdate={handleUpdate} />
               </div>
+            )}
 
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 pb-3 border-b border-border/40 px-1">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
-                    Video Length
-                  </span>
+            {/* 4. Configuration Grid (Remaining) — hidden in Beginner mode */}
+            {skillMode === 'pro' && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 pt-8 pb-12 lg:pb-12">
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3 pb-3 border-b border-border/40 px-1">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 flex items-center">
+                      Format
+                      <InfoTooltip text="Aspect ratio of the output video." />
+                    </span>
+                  </div>
+                  <FormatSelector settings={settings} onUpdate={handleUpdate} />
                 </div>
-                <DurationSelector settings={settings} onUpdate={handleUpdate} />
-              </div>
-            </div>
 
-            {/* 5. Script Style */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 pb-12 lg:pb-12">
-              <div className="space-y-4">
-                <div className="flex items-center gap-3 pb-3 border-b border-border/40 px-1">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
-                    Tone
-                  </span>
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3 pb-3 border-b border-border/40 px-1">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 flex items-center">
+                      Voice Narration
+                      <InfoTooltip text="The AI voice that narrates your script." />
+                    </span>
+                  </div>
+                  <NarrationSettings settings={settings} onUpdate={handleUpdate} />
                 </div>
-                <Select value={tone} onValueChange={setTone}>
-                  <SelectTrigger className="h-9 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="motivational">Motivational</SelectItem>
-                    <SelectItem value="educational">Educational</SelectItem>
-                    <SelectItem value="storytelling">Storytelling</SelectItem>
-                    <SelectItem value="humorous">Humorous</SelectItem>
-                    <SelectItem value="controversial">Controversial</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
 
-              <div className="space-y-4">
-                <div className="flex items-center gap-3 pb-3 border-b border-border/40 px-1">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
-                    Hook Style
-                  </span>
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3 pb-3 border-b border-border/40 px-1">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 flex items-center">
+                      Video Length
+                      <InfoTooltip text="Total duration of the generated reel." />
+                    </span>
+                  </div>
+                  <DurationSelector settings={settings} onUpdate={handleUpdate} />
                 </div>
-                <Select value={hookType} onValueChange={setHookType}>
-                  <SelectTrigger className="h-9 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="shocking_fact">Shocking Fact</SelectItem>
-                    <SelectItem value="bold_question">Bold Question</SelectItem>
-                    <SelectItem value="bold_claim">Bold Claim</SelectItem>
-                    <SelectItem value="story">Personal Story</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
+            )}
 
-              <div className="space-y-4">
-                <div className="flex items-center gap-3 pb-3 border-b border-border/40 px-1">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
-                    CTA
-                  </span>
+            {/* 5. Script Style — hidden in Beginner mode */}
+            {skillMode === 'pro' && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 pb-12 lg:pb-12">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 pb-3 border-b border-border/40 px-1">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
+                      Tone
+                    </span>
+                  </div>
+                  <Select value={tone} onValueChange={setTone}>
+                    <SelectTrigger className="h-9 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="motivational">Motivational</SelectItem>
+                      <SelectItem value="educational">Educational</SelectItem>
+                      <SelectItem value="storytelling">Storytelling</SelectItem>
+                      <SelectItem value="humorous">Humorous</SelectItem>
+                      <SelectItem value="controversial">Controversial</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-                <Select value={cta} onValueChange={setCta}>
-                  <SelectTrigger className="h-9 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="follow">Follow for more</SelectItem>
-                    <SelectItem value="comment">Comment below</SelectItem>
-                    <SelectItem value="link_in_bio">Link in bio</SelectItem>
-                    <SelectItem value="none">None</SelectItem>
-                  </SelectContent>
-                </Select>
+
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 pb-3 border-b border-border/40 px-1">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
+                      Hook Style
+                    </span>
+                  </div>
+                  <Select value={hookType} onValueChange={setHookType}>
+                    <SelectTrigger className="h-9 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="shocking_fact">Shocking Fact</SelectItem>
+                      <SelectItem value="bold_question">Bold Question</SelectItem>
+                      <SelectItem value="bold_claim">Bold Claim</SelectItem>
+                      <SelectItem value="story">Personal Story</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 pb-3 border-b border-border/40 px-1">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
+                      CTA
+                    </span>
+                  </div>
+                  <Select value={cta} onValueChange={setCta}>
+                    <SelectTrigger className="h-9 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="follow">Follow for more</SelectItem>
+                      <SelectItem value="comment">Comment below</SelectItem>
+                      <SelectItem value="link_in_bio">Link in bio</SelectItem>
+                      <SelectItem value="none">None</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
