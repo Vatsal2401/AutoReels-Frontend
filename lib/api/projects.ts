@@ -41,6 +41,18 @@ export interface CreateProjectDto {
   [key: string]: unknown;
 }
 
+export interface SharedProject {
+  id: string;
+  tool_type: string;
+  status: string;
+  metadata: Record<string, unknown> | null;
+  duration: number | null;
+  completed_at: string | null;
+  videoUrl: string | null;
+}
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
+
 export const projectsApi = {
   getProjects: async (): Promise<Project[]> => {
     const { data } = await apiClient.get<Project[]>("/projects");
@@ -60,5 +72,17 @@ export const projectsApi = {
   getOutputUrl: async (projectId: string): Promise<string> => {
     const { data } = await apiClient.get<{ url: string }>(`/projects/${projectId}/output-url`);
     return data.url;
+  },
+
+  generateShareToken: async (projectId: string): Promise<string> => {
+    const { data } = await apiClient.post<{ token: string }>(`/projects/${projectId}/share`);
+    return data.token;
+  },
+
+  /** Public — no auth — used from the share page (plain fetch, no JWT) */
+  getSharedProject: async (token: string): Promise<SharedProject> => {
+    const res = await fetch(`${API_BASE}/projects/share/${token}`);
+    if (!res.ok) throw new Error("Share link not found or has expired");
+    return res.json();
   },
 };

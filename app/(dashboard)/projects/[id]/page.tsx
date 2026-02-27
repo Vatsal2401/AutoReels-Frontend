@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
@@ -18,6 +18,8 @@ import {
   Loader2,
   CheckCircle2,
   FileText,
+  Share2,
+  Check,
 } from "lucide-react";
 import { formatRelativeTime, cn } from "@/lib/utils/format";
 import { getToolById } from "@/lib/studio/tool-registry";
@@ -49,6 +51,8 @@ export default function ProjectDetailPage() {
   const params = useParams();
   const projectId = params?.id as string;
   const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const [shareLoading, setShareLoading] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
 
   const { data: project, isLoading, error } = useQuery({
     queryKey: ["project", projectId],
@@ -108,6 +112,21 @@ export default function ProjectDetailPage() {
         </div>
       </DashboardLayout>
     );
+  }
+
+  async function handleShare() {
+    setShareLoading(true);
+    try {
+      const token = await projectsApi.generateShareToken(projectId);
+      const url = `${window.location.origin}/share/${token}`;
+      await navigator.clipboard.writeText(url);
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2500);
+    } catch {
+      // fallback: do nothing silently
+    } finally {
+      setShareLoading(false);
+    }
   }
 
   const isProcessing = ["pending", "processing", "rendering"].includes(project.status);
@@ -277,7 +296,7 @@ export default function ProjectDetailPage() {
                     </div>
                   )}
                 </div>
-                <div className="flex flex-wrap items-center gap-4 p-4 bg-muted/20 border border-border/50 rounded-2xl shrink-0">
+                <div className="flex flex-wrap items-center gap-3 p-4 bg-muted/20 border border-border/50 rounded-2xl shrink-0">
                   {outputUrl && (
                     <a
                       href={outputUrl}
@@ -289,6 +308,22 @@ export default function ProjectDetailPage() {
                       </Button>
                     </a>
                   )}
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className={cn("gap-2 transition-colors", shareCopied && "border-emerald-500 text-emerald-600")}
+                    onClick={handleShare}
+                    disabled={shareLoading}
+                  >
+                    {shareLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : shareCopied ? (
+                      <Check className="h-4 w-4 text-emerald-500" />
+                    ) : (
+                      <Share2 className="h-4 w-4" />
+                    )}
+                    {shareCopied ? "Link copied!" : "Share"}
+                  </Button>
                   <Link
                     href={
                       isTextToImage
