@@ -36,6 +36,8 @@ import {
   Info,
   Eye,
   CheckCircle2,
+  XCircle,
+  Captions,
   Loader2,
   FileText,
   HelpCircle,
@@ -424,7 +426,37 @@ export function CreateVideoForm() {
               <VisualStyleSelector settings={settings} onUpdate={handleUpdate} />
             </div>
 
-            {/* 3. Caption Style — Layer 1 ref, hidden in Beginner mode */}
+            {/* 3. Caption on/off — shown in basic/beginner modes only */}
+            {skillMode !== 'pro' && (
+              <div className="w-full pt-3">
+                <div className="flex items-center justify-between rounded-xl border border-border bg-muted/30 px-4 py-3">
+                  <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                    <Captions size={15} className="text-muted-foreground" />
+                    Captions
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleUpdate({ captions: { ...settings.captions, enabled: !settings.captions.enabled } })
+                    }
+                    className={cn(
+                      'flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[11px] font-bold transition-all border',
+                      settings.captions.enabled
+                        ? 'bg-[#f5f3ff] text-[#7c3aed] border-[#ddd6fe] shadow-sm'
+                        : 'bg-muted text-muted-foreground border-border',
+                    )}
+                  >
+                    {settings.captions.enabled ? (
+                      <><CheckCircle2 size={13} /><span>On</span></>
+                    ) : (
+                      <><XCircle size={13} /><span>Off</span></>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* 3. Caption Style — Layer 1 ref, full settings for Pro mode */}
             {skillMode === 'pro' && (
               <div ref={captionSettingsRef} className="w-full pt-4">
                 <CaptionSettings settings={settings} onUpdate={handleUpdate} />

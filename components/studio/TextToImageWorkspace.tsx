@@ -4,11 +4,11 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { textToImageApi } from "@/lib/api/text-to-image";
-import { Loader2, ImageIcon, Download, Sparkles, Zap, Star, RefreshCw, AlertCircle } from "lucide-react";
+import { Loader2, ImageIcon, Download, Sparkles, Zap, Star, RefreshCw, AlertCircle, Cpu, Wand2 } from "lucide-react";
 import { cn } from "@/lib/utils/format";
 
 type AspectRatio = "9:16" | "16:9" | "1:1";
-type Model = "standard" | "fast";
+type Model = "standard" | "fast" | "nano";
 
 const ASPECT_RATIOS: { value: AspectRatio; label: string; sub: string; w: number; h: number }[] = [
   { value: "9:16", label: "9:16", sub: "Portrait", w: 9, h: 16 },
@@ -16,9 +16,41 @@ const ASPECT_RATIOS: { value: AspectRatio; label: string; sub: string; w: number
   { value: "1:1",  label: "1:1",  sub: "Square",    w: 1,  h: 1  },
 ];
 
-const MODELS: { value: Model; label: string; sub: string; badge: string; icon: typeof Sparkles }[] = [
-  { value: "standard", label: "Imagen 4",      sub: "Best quality",  badge: "Quality", icon: Star },
-  { value: "fast",     label: "Imagen 4 Fast", sub: "2× faster",     badge: "Speed",   icon: Zap  },
+const MODELS: { value: Model; label: string; sub: string; badge: string; icon: typeof Sparkles; color: string }[] = [
+  { value: "standard", label: "Imagen 4",        sub: "Best quality", badge: "Quality", icon: Star,  color: "text-amber-500" },
+  { value: "fast",     label: "Imagen 4 Fast",   sub: "2× faster",    badge: "Speed",   icon: Zap,   color: "text-blue-500"  },
+  { value: "nano",     label: "Nano Banana 2",   sub: "Gemini Flash", badge: "New",     icon: Cpu,   color: "text-emerald-500" },
+];
+
+const EXAMPLE_PROMPTS: { id: number; label: string; prompt: string; imageUrl: string; aspect: AspectRatio }[] = [
+  {
+    id: 1,
+    label: "Neon City",
+    prompt: "A cinematic photo of a futuristic city at night, neon lights reflecting on rain-soaked streets, 8K, hyper-realistic",
+    imageUrl: "https://picsum.photos/seed/city42/240/360",
+    aspect: "9:16",
+  },
+  {
+    id: 2,
+    label: "Golden Portrait",
+    prompt: "Portrait of a person with dramatic golden hour side lighting, film photography style, shallow depth of field, cinematic",
+    imageUrl: "https://picsum.photos/seed/portrait81/240/360",
+    aspect: "9:16",
+  },
+  {
+    id: 3,
+    label: "Mountain Dawn",
+    prompt: "Misty mountain valley at dawn, soft pink sky, pine trees silhouettes, hyperrealistic landscape photography",
+    imageUrl: "https://picsum.photos/seed/mountain33/360/240",
+    aspect: "16:9",
+  },
+  {
+    id: 4,
+    label: "Abstract Art",
+    prompt: "Vibrant abstract digital art, flowing liquid geometric shapes, neon colors on dark background, ultra-detailed",
+    imageUrl: "https://picsum.photos/seed/abstract77/240/240",
+    aspect: "1:1",
+  },
 ];
 
 function AspectPreview({ w, h, active }: { w: number; h: number; active: boolean }) {
@@ -67,14 +99,21 @@ export function TextToImageWorkspace() {
     setTimeout(() => promptRef.current?.focus(), 50);
   }
 
+  function handleExampleClick(example: typeof EXAMPLE_PROMPTS[0]) {
+    setPrompt(example.prompt);
+    setAspectRatio(example.aspect);
+    setError(null);
+    setTimeout(() => promptRef.current?.focus(), 50);
+  }
+
   const charCount = prompt.length;
 
   return (
     <div className="flex h-full min-h-0 w-full gap-0">
 
       {/* ── Left panel: Form ─────────────────────────────────────── */}
-      <div className="flex flex-col w-full max-w-[460px] flex-shrink-0 border-r border-border bg-background overflow-y-auto">
-        <div className="flex flex-col gap-7 p-6 lg:p-8">
+      <div className="flex flex-col w-full max-w-[480px] flex-shrink-0 border-r border-border bg-background overflow-y-auto">
+        <div className="flex flex-col gap-6 p-6 lg:p-8">
 
           {/* Header */}
           <div className="flex flex-col gap-1">
@@ -85,7 +124,7 @@ export function TextToImageWorkspace() {
               <h1 className="text-base font-semibold text-foreground tracking-tight">AI Image Generator</h1>
             </div>
             <p className="text-xs text-muted-foreground mt-1 leading-relaxed pl-10">
-              Describe an image and generate it instantly with Google Imagen 4.
+              Describe an image and generate it instantly with Google AI models.
             </p>
           </div>
 
@@ -104,7 +143,7 @@ export function TextToImageWorkspace() {
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               placeholder="A cinematic photo of a futuristic city at night, neon lights reflecting on rain-soaked streets, 8K, hyper-realistic..."
-              className="min-h-[140px] resize-none text-sm leading-relaxed bg-muted/30 border-border/60 focus:border-primary/60 rounded-xl"
+              className="min-h-[130px] resize-none text-sm leading-relaxed bg-muted/30 border-border/60 focus:border-primary/60 rounded-xl"
               disabled={isLoading}
               maxLength={1000}
             />
@@ -115,7 +154,7 @@ export function TextToImageWorkspace() {
             <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Model
             </label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               {MODELS.map((m) => {
                 const Icon = m.icon;
                 const active = model === m.value;
@@ -125,19 +164,24 @@ export function TextToImageWorkspace() {
                     onClick={() => setModel(m.value)}
                     disabled={isLoading}
                     className={cn(
-                      "relative flex flex-col items-start gap-1.5 rounded-xl border p-4 text-left transition-all duration-150",
+                      "relative flex flex-col items-start gap-1.5 rounded-xl border p-3 text-left transition-all duration-150",
                       active
                         ? "border-primary bg-primary/5 shadow-sm"
                         : "border-border bg-background hover:border-primary/40 hover:bg-muted/30"
                     )}
                   >
-                    <div className="flex items-center gap-2 w-full">
-                      <Icon className={cn("h-4 w-4", active ? "text-primary" : "text-muted-foreground")} />
-                      <span className={cn("text-sm font-semibold", active ? "text-foreground" : "text-muted-foreground")}>
+                    {m.value === "nano" && (
+                      <span className="absolute top-2 right-2 text-[9px] font-bold uppercase tracking-wide text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded-full leading-none">
+                        New
+                      </span>
+                    )}
+                    <Icon className={cn("h-4 w-4", active ? "text-primary" : m.color)} />
+                    <div className="flex flex-col gap-0.5">
+                      <span className={cn("text-xs font-semibold leading-tight", active ? "text-foreground" : "text-muted-foreground")}>
                         {m.label}
                       </span>
+                      <span className="text-[10px] text-muted-foreground/70 leading-tight">{m.sub}</span>
                     </div>
-                    <span className="text-xs text-muted-foreground">{m.sub}</span>
                     {active && (
                       <div className="absolute top-2.5 right-2.5 w-1.5 h-1.5 rounded-full bg-primary" />
                     )}
@@ -250,9 +294,9 @@ export function TextToImageWorkspace() {
             </div>
           </div>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center gap-5 p-8">
+          <div className="flex-1 flex flex-col min-h-0 overflow-y-auto">
             {isLoading ? (
-              <div className="flex flex-col items-center gap-5">
+              <div className="flex-1 flex flex-col items-center justify-center gap-5 p-8">
                 <div className="relative w-20 h-20 flex items-center justify-center">
                   <div className="absolute inset-0 rounded-full border-4 border-primary/20 animate-ping" />
                   <div className="absolute inset-2 rounded-full border-4 border-primary/30" />
@@ -260,20 +304,70 @@ export function TextToImageWorkspace() {
                 </div>
                 <div className="text-center">
                   <p className="text-sm font-medium text-foreground">Generating your image…</p>
-                  <p className="text-xs text-muted-foreground mt-1">This usually takes 10–20 seconds</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {model === "nano" ? "Gemini Flash is working on it…" : "This usually takes 10–20 seconds"}
+                  </p>
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col items-center gap-4 text-center max-w-xs">
-                <div className="w-20 h-20 rounded-2xl bg-muted/60 border-2 border-dashed border-border flex items-center justify-center">
-                  <ImageIcon className="h-8 w-8 text-muted-foreground/40" />
+              <div className="flex flex-col gap-6 p-6 lg:p-8">
+
+                {/* Empty state hint */}
+                <div className="flex flex-col items-center gap-3 text-center pt-2">
+                  <div className="w-12 h-12 rounded-2xl bg-muted/60 border-2 border-dashed border-border flex items-center justify-center">
+                    <ImageIcon className="h-5 w-5 text-muted-foreground/40" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Your image will appear here</p>
+                    <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                      Or click an example below to get started quickly.
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-foreground">Your image will appear here</p>
-                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                    Enter a prompt on the left and click <span className="font-medium text-foreground">Generate Image</span> to get started.
-                  </p>
+
+                {/* Divider */}
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 h-px bg-border/60" />
+                  <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60">
+                    <Wand2 className="h-3 w-3" />
+                    Example Prompts
+                  </div>
+                  <div className="flex-1 h-px bg-border/60" />
                 </div>
+
+                {/* Example images grid */}
+                <div className="grid grid-cols-2 gap-3">
+                  {EXAMPLE_PROMPTS.map((ex) => (
+                    <button
+                      key={ex.id}
+                      onClick={() => handleExampleClick(ex)}
+                      className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-background transition-all duration-150 hover:border-primary/50 hover:shadow-md text-left"
+                    >
+                      {/* Image */}
+                      <div className="relative overflow-hidden bg-muted/40 aspect-[3/4]">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={ex.imageUrl}
+                          alt={ex.label}
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                        {/* Overlay on hover */}
+                        <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex items-center justify-center">
+                          <div className="bg-background/90 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-1.5 shadow-sm">
+                            <Sparkles className="h-3 w-3 text-primary" />
+                            <span className="text-xs font-semibold text-foreground">Use prompt</span>
+                          </div>
+                        </div>
+                      </div>
+                      {/* Label + prompt preview */}
+                      <div className="p-3 flex flex-col gap-1">
+                        <span className="text-xs font-semibold text-foreground leading-tight">{ex.label}</span>
+                        <p className="text-[10px] text-muted-foreground leading-relaxed line-clamp-2">{ex.prompt}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+
               </div>
             )}
           </div>
