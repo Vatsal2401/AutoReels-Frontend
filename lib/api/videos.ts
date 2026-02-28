@@ -42,6 +42,7 @@ export interface Video {
   topic: string;
   script?: string;
   final_video_url?: string;
+  s3_key?: string;
   error_message?: string;
   metadata?: {
     duration?: string;
@@ -71,6 +72,7 @@ const transformMediaToVideo = (media: Media): Video => {
     topic: media.input_config?.topic || "Untitled",
     script: scriptText,
     final_video_url: media.final_url || media.blob_storage_id || undefined,
+    s3_key: media.blob_storage_id || undefined,
     error_message: media.error_message || undefined,
     metadata: {
       duration: media.input_config?.duration,

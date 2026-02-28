@@ -1,34 +1,30 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/useAuth';
+import { useUserSettings } from '@/lib/hooks/useUserSettings';
 import { useVideoProgress } from '@/lib/hooks/useVideoProgress';
-import { videosApi } from '@/lib/api/videos';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { ProgressIndicator } from '@/components/video/ProgressIndicator';
 import { VideoPlayer } from '@/components/video/VideoPlayer';
+import { DownloadButton } from '@/components/video/DownloadButton';
+import { SchedulePostModal } from '@/components/social/SchedulePostModal';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import {
   ArrowLeft,
-  Download,
   Plus,
   AlertCircle,
   Loader2,
-  ChevronDown,
-  ChevronUp,
   FileText,
-  Calendar,
   CheckCircle2,
+  Share2,
 } from 'lucide-react';
-import { useState } from 'react';
 import { formatRelativeTime } from '@/lib/utils/format';
 import { cn } from '@/lib/utils/format';
-
-import { DownloadButton } from '@/components/video/DownloadButton';
 
 // ... existing component ...
 // Replacing the usage site (VideoDetailPage)
@@ -37,8 +33,9 @@ export default function VideoDetailPage() {
   const params = useParams();
   const videoId = params.id as string;
   const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { socialSchedulerEnabled } = useUserSettings();
   const { video, isLoading, error } = useVideoProgress(videoId);
-  const [showScript, setShowScript] = useState(false);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -270,6 +267,16 @@ export default function VideoDetailPage() {
                       >
                         DOWNLOAD 4K
                       </DownloadButton>
+                      {socialSchedulerEnabled && video.s3_key && (
+                        <Button
+                          variant="outline"
+                          className="h-11 px-4 lg:px-6 font-bold rounded-xl text-xs border-primary/30 text-primary hover:bg-primary/5 gap-1.5"
+                          onClick={() => setShowScheduleModal(true)}
+                        >
+                          <Share2 className="h-3.5 w-3.5" />
+                          <span className="hidden sm:inline">SCHEDULE</span>
+                        </Button>
+                      )}
                       <Link href="/studio/reel" className="flex-1 sm:flex-none">
                         <Button className="w-full h-11 px-4 lg:px-6 font-bold shadow-lg shadow-primary/10 rounded-xl text-xs">
                           <Plus className="mr-1.5 h-4 w-4" />
@@ -382,6 +389,17 @@ export default function VideoDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Schedule to Social modal */}
+      {socialSchedulerEnabled && video.s3_key && (
+        <SchedulePostModal
+          open={showScheduleModal}
+          onClose={() => setShowScheduleModal(false)}
+          videoId={video.id}
+          videoS3Key={video.s3_key}
+          videoTopic={video.topic}
+        />
+      )}
     </DashboardLayout>
   );
 }
