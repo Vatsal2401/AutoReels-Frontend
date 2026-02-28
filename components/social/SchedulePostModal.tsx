@@ -133,11 +133,17 @@ export function SchedulePostModal({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-md p-0 gap-0 overflow-hidden rounded-2xl">
+      {/*
+       * left-[50vw]: use viewport units instead of % so centering is always
+       * relative to the full viewport (not the stacking-context-shifted content area).
+       * flex flex-col + max-h: establishes a proper flex height boundary for scroll.
+       * overflow-hidden: clip the container; inner body handles scroll with overflow-y-auto.
+       */}
+      <DialogContent className="max-w-md p-0 gap-0 rounded-2xl left-[50vw] flex flex-col max-h-[min(90dvh,640px)] overflow-hidden">
         {success ? (
           <SuccessView onClose={onClose} platform={platform} />
         ) : (
-          <div className="flex flex-col max-h-[90vh]">
+          <>
             {/* Fixed header */}
             <DialogHeader className="px-6 pt-5 pb-4 border-b border-border shrink-0">
               <div className="flex items-center gap-2 mb-0.5">
@@ -149,8 +155,8 @@ export function SchedulePostModal({
               </p>
             </DialogHeader>
 
-            {/* Scrollable body */}
-            <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+            {/* Scrollable body — min-h-0 is required for flex children to shrink & scroll */}
+            <div className="flex-1 min-h-0 overflow-y-auto px-6 py-5 space-y-5">
 
               {/* Platform selector — horizontal segmented control */}
               <div>
@@ -275,7 +281,7 @@ export function SchedulePostModal({
                 Schedule
               </Button>
             </div>
-          </div>
+          </>
         )}
       </DialogContent>
     </Dialog>
