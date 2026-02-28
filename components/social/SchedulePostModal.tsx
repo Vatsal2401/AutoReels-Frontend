@@ -139,7 +139,10 @@ export function SchedulePostModal({
        * flex flex-col + max-h: establishes a proper flex height boundary for scroll.
        * overflow-hidden: clip the container; inner body handles scroll with overflow-y-auto.
        */}
-      <DialogContent className="max-w-md p-0 gap-0 rounded-2xl left-[50vw] flex flex-col max-h-[min(90dvh,640px)] overflow-hidden">
+      <DialogContent
+        className="max-w-md p-0 gap-0 rounded-2xl flex flex-col max-h-[min(90dvh,640px)] overflow-hidden"
+        style={{ left: '50vw' }}
+      >
         {success ? (
           <SuccessView onClose={onClose} platform={platform} />
         ) : (
