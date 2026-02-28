@@ -1,4 +1,4 @@
-import { apiClient } from './client';
+import apiClient from './client';
 
 export interface UserSettingsResponse {
   social_media_scheduler_enabled: boolean;
