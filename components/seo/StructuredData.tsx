@@ -19,7 +19,7 @@ export function StructuredData() {
     description:
       "Watch how AutoReels AI turns a simple idea into a fully produced faceless reel — script, voiceover, captions, and visuals — in under 60 seconds.",
     thumbnailUrl: SITE_CONFIG.ogImageUrl,
-    uploadDate: "2026-01-01",
+    uploadDate: "2026-01-01T00:00:00+05:30",
     embedUrl: `${SITE_CONFIG.url}#demo`,
   });
 

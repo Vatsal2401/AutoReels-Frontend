@@ -169,6 +169,7 @@ export function generateWebApplicationSchema() {
       price: "0",
       priceCurrency: "USD",
       description: "Free to try with 10 credits starter pack",
+      availability: "https://schema.org/InStock",
     },
     aggregateRating: {
       "@type": "AggregateRating",
@@ -290,6 +291,7 @@ export function generateProductSchema() {
     name: SITE_CONFIG.name,
     description: SITE_CONFIG.description,
     url: SITE_CONFIG.url,
+    image: SITE_CONFIG.ogImageUrl,
     brand: {
       "@type": "Brand",
       name: SITE_CONFIG.name,
@@ -314,14 +316,14 @@ export function generateProductSchema() {
         author: { "@type": "Person", name: "Sarah Chen" },
         reviewRating: { "@type": "Rating", ratingValue: "5", bestRating: "5" },
         reviewBody:
-          "The AI voices in the Neural Pipeline are incredibly human. My audience has no idea these videos are AI-generated.",
+          "The AI voices are incredibly human-sounding. My audience has no idea these videos are AI-generated.",
       },
       {
         "@type": "Review",
         author: { "@type": "Person", name: "Marcus Thorne" },
         reviewRating: { "@type": "Rating", ratingValue: "5", bestRating: "5" },
         reviewBody:
-          "Managing 15 client accounts used to be a nightmare. AutoReels' auto-scheduling is the ultimate lifesaver for my agency.",
+          "Managing content for 15 client accounts used to be a nightmare. AutoReels lets me generate a week of videos in an hour.",
       },
     ],
     offers: {
@@ -330,6 +332,41 @@ export function generateProductSchema() {
       priceCurrency: "USD",
       description: "Free to try with 10 credits starter pack",
       url: `${SITE_CONFIG.url}/signup`,
+      availability: "https://schema.org/InStock",
+      priceValidUntil: "2027-12-31",
+      shippingDetails: {
+        "@type": "OfferShippingDetails",
+        shippingRate: {
+          "@type": "MonetaryAmount",
+          value: "0",
+          currency: "USD",
+        },
+        deliveryTime: {
+          "@type": "ShippingDeliveryTime",
+          handlingTime: {
+            "@type": "QuantitativeValue",
+            minValue: 0,
+            maxValue: 0,
+            unitCode: "DAY",
+          },
+          transitTime: {
+            "@type": "QuantitativeValue",
+            minValue: 0,
+            maxValue: 0,
+            unitCode: "DAY",
+          },
+        },
+        shippingDestination: {
+          "@type": "DefinedRegion",
+          addressCountry: "US",
+        },
+      },
+      hasMerchantReturnPolicy: {
+        "@type": "MerchantReturnPolicy",
+        applicableCountry: "US",
+        returnPolicyCategory:
+          "https://schema.org/MerchantReturnNotPermitted",
+      },
     },
   };
 }

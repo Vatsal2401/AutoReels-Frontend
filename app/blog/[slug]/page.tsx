@@ -1,220 +1,89 @@
-import { notFound } from "next/navigation";
-import Link from "next/link";
-import type { Metadata } from "next";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
-import { generatePageMetadata, generateBreadcrumbSchema, SITE_CONFIG } from "@/lib/seo";
-import { Button } from "@/components/ui/button";
-import { ArrowRight, Clock, ArrowLeft } from "lucide-react";
-
-type Post = {
-  slug: string;
-  title: string;
-  description: string;
-  date: string;
-  readTime: string;
-  category: string;
-  keywords: string[];
-  content: React.ReactNode;
-};
-
-const posts: Record<string, Post> = {
-  "how-to-create-faceless-videos-ai-2026": {
-    slug: "how-to-create-faceless-videos-ai-2026",
-    title: "How to Create Faceless Videos with AI in 2026",
-    description:
-      "A complete step-by-step guide to building a faceless video channel using AI tools — no camera, no editing skills, no face required.",
-    date: "2026-02-01",
-    readTime: "7 min read",
-    category: "Guide",
-    keywords: [
-      "faceless video creator",
-      "how to make faceless videos",
-      "AI faceless channel",
-      "faceless YouTube channel",
-      "AI video generator",
-      "automated video creation",
-    ],
-    content: (
-      <div className="prose max-w-none space-y-6 text-muted-foreground">
-        <p className="text-lg leading-relaxed">
-          Faceless video channels are one of the fastest-growing niches on the internet in 2026.
-          Creators are building audiences of hundreds of thousands — without ever showing their face,
-          speaking into a microphone, or touching a video editor. The secret? AI.
-        </p>
-
-        <p className="leading-relaxed">
-          This guide walks you through everything you need to know to start a faceless video channel
-          using an AI video creator like AutoReels — from picking a niche to publishing your first
-          reel in under 60 seconds.
-        </p>
-
-        <h2 className="text-2xl font-bold text-foreground mt-8">What Is a Faceless Video Channel?</h2>
-        <p className="leading-relaxed">
-          A faceless channel is a social media account or YouTube channel where the creator never
-          appears on camera. Instead of a talking head, videos use stock footage, AI-generated
-          visuals, animated text, and AI voiceovers to deliver content.
-        </p>
-        <p className="leading-relaxed">
-          Popular faceless niches include: motivational content, finance tips, history facts,
-          tech news, true crime, language learning, and "did you know" style edutainment.
-        </p>
-
-        <h2 className="text-2xl font-bold text-foreground mt-8">Why Faceless Videos Work in 2026</h2>
-        <p className="leading-relaxed">
-          Short-form video platforms — TikTok, Instagram Reels, and YouTube Shorts — reward
-          consistency above all else. Algorithms push accounts that post daily or multiple times
-          per day. For human creators, that pace is unsustainable. With an AI faceless video
-          creator, you can generate 5–10 videos per day in the time it used to take to film one.
-        </p>
-
-        <h2 className="text-2xl font-bold text-foreground mt-8">
-          Step 1: Choose Your Niche
-        </h2>
-        <p className="leading-relaxed">
-          Pick a niche with high engagement and broad appeal. Some of the best-performing faceless
-          niches right now:
-        </p>
-        <ul className="list-disc pl-6 space-y-2">
-          <li><strong>Motivational quotes</strong> — evergreen, high share rate</li>
-          <li><strong>Finance & investing tips</strong> — high CPM if monetized</li>
-          <li><strong>AI & tech news</strong> — rapidly growing audience</li>
-          <li><strong>History facts</strong> — extremely viral on TikTok</li>
-          <li><strong>Life hacks</strong> — consistently high engagement</li>
-        </ul>
-
-        <h2 className="text-2xl font-bold text-foreground mt-8">
-          Step 2: Set Up Your AI Video Creator
-        </h2>
-        <p className="leading-relaxed">
-          Use AutoReels as your AI faceless video creator. Sign up for free — you get 10 starter
-          credits. Each credit generates one complete video: AI-written script, AI voiceover,
-          automatic captions, and synced background visuals.
-        </p>
-        <p className="leading-relaxed">
-          No software to install. No editing timeline to learn. Just describe your video topic and
-          the AI does the rest.
-        </p>
-
-        <h2 className="text-2xl font-bold text-foreground mt-8">
-          Step 3: Generate Your First Video
-        </h2>
-        <p className="leading-relaxed">
-          Go to <strong>Create</strong> in your AutoReels dashboard. Enter a topic — for example:
-          "5 habits of self-made millionaires". The AI will:
-        </p>
-        <ul className="list-disc pl-6 space-y-2">
-          <li>Write a punchy script optimized for short-form engagement</li>
-          <li>Generate a professional AI voiceover (50+ voice options)</li>
-          <li>Add animated captions synchronized to the audio</li>
-          <li>Select cinematic stock footage or AI visuals matching your script</li>
-          <li>Render a 9:16 vertical video ready for TikTok, Reels, or Shorts</li>
-        </ul>
-        <p className="leading-relaxed">
-          The entire process takes 30–60 seconds.
-        </p>
-
-        <h2 className="text-2xl font-bold text-foreground mt-8">
-          Step 4: Customize Your Style
-        </h2>
-        <p className="leading-relaxed">
-          AutoReels offers 12+ visual styles — Cinematic, Minimal, Anime, Noir, Nature, and more.
-          Pick a consistent style for your channel to build a recognizable brand aesthetic.
-          Consistency in visual style is one of the most underrated growth levers on short-form
-          platforms.
-        </p>
-
-        <h2 className="text-2xl font-bold text-foreground mt-8">
-          Step 5: Post Daily — Consistency Wins
-        </h2>
-        <p className="leading-relaxed">
-          The algorithm rewards volume. Aim for at least one video per day. With AutoReels, you
-          can batch-create a week's worth of content in an hour, download everything, and post
-          consistently without the daily grind.
-        </p>
-
-        <h2 className="text-2xl font-bold text-foreground mt-8">
-          Common Mistakes to Avoid
-        </h2>
-        <ul className="list-disc pl-6 space-y-2">
-          <li><strong>Inconsistent posting</strong> — algorithms punish gaps. Post every day.</li>
-          <li><strong>Too many niches</strong> — pick one and dominate it before expanding.</li>
-          <li><strong>Ignoring captions</strong> — 85% of social video is watched on mute. Captions are non-negotiable.</li>
-          <li><strong>No CTA</strong> — always end with a question or prompt ("Follow for more").</li>
-        </ul>
-
-        <h2 className="text-2xl font-bold text-foreground mt-8">The Bottom Line</h2>
-        <p className="leading-relaxed">
-          Building a faceless video channel with AI is no longer a side hustle experiment — it's
-          a proven content strategy. With a faceless video creator like AutoReels, you can start
-          today, post consistently, and grow an audience without ever appearing on camera.
-        </p>
-        <p className="leading-relaxed">
-          The barrier to entry has never been lower. The only thing between you and your first
-          viral reel is hitting "Create".
-        </p>
-      </div>
-    ),
-  },
-};
-
-export function generateStaticParams() {
-  return Object.keys(posts).map((slug) => ({ slug }));
-}
+import { notFound } from 'next/navigation';
+import Link from 'next/link';
+import type { Metadata } from 'next';
+import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
+import { generatePageMetadata, generateBreadcrumbSchema, SITE_CONFIG } from '@/lib/seo';
+import { Button } from '@/components/ui/button';
+import { ArrowRight, Clock, ArrowLeft } from 'lucide-react';
+import { getBlogPost } from '@/lib/api/blog';
+import { generateHTML } from '@tiptap/html';
+import StarterKit from '@tiptap/starter-kit';
+import TiptapLink from '@tiptap/extension-link';
+import Image from '@tiptap/extension-image';
+import LikeButton from '@/components/blog/LikeButton';
+import CommentsSection from '@/components/blog/CommentsSection';
 
 export async function generateMetadata({
   params,
 }: {
   params: { slug: string };
 }): Promise<Metadata> {
-  const post = posts[params.slug];
+  const post = await getBlogPost(params.slug);
   if (!post) return {};
   return generatePageMetadata({
-    title: post.title,
+    title: post.meta_title || post.title,
     description: post.description,
     path: `/blog/${post.slug}`,
-    keywords: post.keywords,
+    keywords: post.keywords || [],
   });
 }
 
-export default function BlogPostPage({ params }: { params: { slug: string } }) {
-  const post = posts[params.slug];
+export default async function BlogPostPage({ params }: { params: { slug: string } }) {
+  const post = await getBlogPost(params.slug);
   if (!post) notFound();
 
+  // Parse TopTap JSON into HTML
+  let contentHtml = '';
+  if (post.content && typeof post.content === 'object') {
+    try {
+      contentHtml = generateHTML(post.content, [StarterKit, TiptapLink, Image]);
+    } catch (e) {
+      console.error('Failed to parse blog content', e);
+      contentHtml = '<p>Error loading content.</p>';
+    }
+  }
+
   const breadcrumbSchema = generateBreadcrumbSchema([
-    { name: "Home", path: "/" },
-    { name: "Blog", path: "/blog" },
+    { name: 'Home', path: '/' },
+    { name: 'Blog', path: '/blog' },
     { name: post.title, path: `/blog/${post.slug}` },
   ]);
 
   const articleSchema = {
-    "@context": "https://schema.org",
-    "@type": "Article",
+    '@context': 'https://schema.org',
+    '@type': 'Article',
     headline: post.title,
     description: post.description,
-    datePublished: post.date,
-    dateModified: post.date,
+    datePublished: post.published_at || post.created_at,
+    dateModified: post.updated_at,
     author: {
-      "@type": "Organization",
+      '@type': 'Organization',
       name: SITE_CONFIG.name,
       url: SITE_CONFIG.url,
     },
     publisher: {
-      "@type": "Organization",
+      '@type': 'Organization',
       name: SITE_CONFIG.name,
       url: SITE_CONFIG.url,
       logo: {
-        "@type": "ImageObject",
+        '@type': 'ImageObject',
         url: SITE_CONFIG.ogImageUrl,
       },
     },
     url: `${SITE_CONFIG.url}/blog/${post.slug}`,
-    image: SITE_CONFIG.ogImageUrl,
+    image: post.cover_image_url || SITE_CONFIG.ogImageUrl,
     mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": `${SITE_CONFIG.url}/blog/${post.slug}`,
+      '@type': 'WebPage',
+      '@id': `${SITE_CONFIG.url}/blog/${post.slug}`,
     },
   };
+
+  const publishDate = new Date(post.published_at || post.created_at).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 
   return (
     <>
@@ -240,25 +109,42 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
               </Link>
 
               <header className="mb-10 space-y-4">
+                {post.cover_image_url && (
+                  <img
+                    src={post.cover_image_url}
+                    alt={post.title}
+                    className="w-full h-[400px] object-cover rounded-2xl mb-8"
+                  />
+                )}
                 <div className="flex items-center gap-2 text-xs font-bold text-primary uppercase tracking-widest">
-                  <span>{post.category}</span>
+                  <span>{post.category || 'General'}</span>
                   <span className="text-muted-foreground/40">·</span>
                   <Clock className="h-3 w-3 text-muted-foreground" />
-                  <span className="text-muted-foreground font-normal">{post.readTime}</span>
+                  <span className="text-muted-foreground font-normal">
+                    {post.read_time || '5 min read'}
+                  </span>
+                  <span className="text-muted-foreground/40">·</span>
+                  <span className="text-muted-foreground font-normal">{post.views} views</span>
                 </div>
                 <h1 className="text-3xl md:text-4xl font-bold leading-tight">{post.title}</h1>
                 <p className="text-lg text-muted-foreground leading-relaxed">{post.description}</p>
-                <p className="text-sm text-muted-foreground">
-                  Published{" "}
-                  {new Date(post.date).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </p>
+                <p className="text-sm text-muted-foreground">Published {publishDate}</p>
               </header>
 
-              {post.content}
+              <div
+                className="prose max-w-none text-muted-foreground
+                  prose-headings:text-foreground prose-strong:text-foreground
+                  prose-a:text-primary prose-a:font-bold hover:prose-a:underline"
+                dangerouslySetInnerHTML={{ __html: contentHtml }}
+              />
+
+              <div className="mt-12 flex justify-start">
+                <LikeButton slug={post.slug} initialCount={post.likes_count} />
+              </div>
+
+              <hr className="my-12 border-border/40" />
+
+              <CommentsSection slug={post.slug} comments={post.comments} />
 
               <div className="mt-16 p-8 rounded-2xl bg-primary/5 border border-primary/20 text-center space-y-4">
                 <h2 className="text-2xl font-bold">Ready to Create Your First Faceless Video?</h2>

@@ -1,40 +1,32 @@
-import Link from "next/link";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
-import { generatePageMetadata, generateBreadcrumbSchema, SITE_CONFIG } from "@/lib/seo";
-import type { Metadata } from "next";
-import { ArrowRight, Clock } from "lucide-react";
+import Link from 'next/link';
+import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
+import { generatePageMetadata, generateBreadcrumbSchema, SITE_CONFIG } from '@/lib/seo';
+import type { Metadata } from 'next';
+import { ArrowRight, Clock } from 'lucide-react';
 
 export const metadata: Metadata = generatePageMetadata({
-  title: "Blog — AI Video Creation Tips & Guides",
+  title: 'Blog — AI Video Creation Tips & Guides',
   description:
-    "Learn how to create viral faceless videos with AI. Tips, guides, and strategies for content creators using AutoReels to grow on TikTok, Instagram, and YouTube.",
-  path: "/blog",
+    'Learn how to create viral faceless videos with AI. Tips, guides, and strategies for content creators using AutoReels to grow on TikTok, Instagram, and YouTube.',
+  path: '/blog',
   keywords: [
-    "AI video creation guide",
-    "faceless video creator",
-    "how to make faceless videos",
-    "AI content creation tips",
-    "viral reels guide",
+    'AI video creation guide',
+    'faceless video creator',
+    'how to make faceless videos',
+    'AI content creation tips',
+    'viral reels guide',
   ],
 });
 
-const posts = [
-  {
-    slug: "how-to-create-faceless-videos-ai-2026",
-    title: "How to Create Faceless Videos with AI in 2026",
-    description:
-      "A step-by-step guide to building a faceless video channel using AI — no camera, no editing skills, no face required.",
-    date: "2026-02-01",
-    readTime: "7 min read",
-    category: "Guide",
-  },
-];
+import { getBlogPosts } from '@/lib/api/blog';
 
-export default function BlogPage() {
+export default async function BlogPage() {
+  const { data: posts } = await getBlogPosts();
+
   const breadcrumbSchema = generateBreadcrumbSchema([
-    { name: "Home", path: "/" },
-    { name: "Blog", path: "/blog" },
+    { name: 'Home', path: '/' },
+    { name: 'Blog', path: '/blog' },
   ]);
 
   return (
@@ -56,12 +48,13 @@ export default function BlogPage() {
                   AI Video Creation Tips & Guides
                 </h1>
                 <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
-                  Everything you need to know about creating viral faceless content with AI — strategies, tutorials, and insider tips.
+                  Everything you need to know about creating viral faceless content with AI —
+                  strategies, tutorials, and insider tips.
                 </p>
               </div>
 
               <div className="space-y-6">
-                {posts.map((post) => (
+                {posts.map((post: any) => (
                   <Link
                     key={post.slug}
                     href={`/blog/${post.slug}`}
@@ -70,10 +63,12 @@ export default function BlogPage() {
                     <div className="flex items-start justify-between gap-4">
                       <div className="space-y-2 flex-1">
                         <div className="flex items-center gap-2 text-xs font-bold text-primary uppercase tracking-widest">
-                          <span>{post.category}</span>
+                          <span>{post.category || 'General'}</span>
                           <span className="text-muted-foreground/40">·</span>
                           <Clock className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-muted-foreground font-normal">{post.readTime}</span>
+                          <span className="text-muted-foreground font-normal">
+                            {post.read_time || '5 min read'}
+                          </span>
                         </div>
                         <h2 className="text-xl font-bold group-hover:text-primary transition-colors">
                           {post.title}
@@ -82,11 +77,14 @@ export default function BlogPage() {
                           {post.description}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {new Date(post.date).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          })}
+                          {new Date(post.published_at || post.created_at).toLocaleDateString(
+                            'en-US',
+                            {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                            },
+                          )}
                         </p>
                       </div>
                       <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0 mt-1" />
