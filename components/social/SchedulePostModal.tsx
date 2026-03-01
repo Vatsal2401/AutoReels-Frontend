@@ -4,12 +4,7 @@ import { useState, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { socialApi, type SocialPlatform } from '@/lib/api/social';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils/format';
 import {
   AlertCircle,
@@ -104,7 +99,7 @@ export function SchedulePostModal({
   });
 
   const platformAccounts = accounts.filter(
-    (a) => a.platform === platform && a.isActive && !a.needsReauth
+    (a) => a.platform === platform && a.isActive && !a.needsReauth,
   );
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -134,14 +129,24 @@ export function SchedulePostModal({
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       {/*
-       * left-[50vw]: use viewport units instead of % so centering is always
-       * relative to the full viewport (not the stacking-context-shifted content area).
        * flex flex-col + max-h: establishes a proper flex height boundary for scroll.
        * overflow-hidden: clip the container; inner body handles scroll with overflow-y-auto.
        */}
       <DialogContent
-        className="max-w-md p-0 gap-0 rounded-2xl flex flex-col max-h-[min(90dvh,640px)] overflow-hidden"
-        style={{ left: '50vw' }}
+        className="max-w-md p-0 gap-0 rounded-2xl !translate-x-[-50%] !translate-y-[-50%] !top-[50%] !left-[50%]"
+        style={{
+          /* Ensure the position is shifted back by 50% of its own dimensions */
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          position: 'fixed',
+          /* Explicit flex column — inline style beats base 'grid' class with no CSS-var ambiguity */
+          display: 'flex',
+          flexDirection: 'column',
+          /* Hard cap: dialog never exceeds 90% of viewport height */
+          maxHeight: '90vh',
+          overflow: 'hidden',
+        }}
       >
         {success ? (
           <SuccessView onClose={onClose} platform={platform} />
@@ -160,7 +165,6 @@ export function SchedulePostModal({
 
             {/* Scrollable body — min-h-0 is required for flex children to shrink & scroll */}
             <div className="flex-1 min-h-0 overflow-y-auto px-6 py-5 space-y-5">
-
               {/* Platform selector — horizontal segmented control */}
               <div>
                 <label className="block text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2">
@@ -178,7 +182,7 @@ export function SchedulePostModal({
                           'flex-1 flex items-center justify-center gap-1.5 h-10 rounded-xl border text-[11px] font-bold transition-all',
                           isActive
                             ? activeClass
-                            : 'border-border text-muted-foreground hover:text-foreground hover:bg-muted/30'
+                            : 'border-border text-muted-foreground hover:text-foreground hover:bg-muted/30',
                         )}
                       >
                         <Icon className="h-3.5 w-3.5 shrink-0" />
@@ -339,7 +343,10 @@ function PlatformOptions({
             onChange={(e) =>
               set(
                 'tags',
-                e.target.value.split(',').map((t: string) => t.trim()).filter(Boolean)
+                e.target.value
+                  .split(',')
+                  .map((t: string) => t.trim())
+                  .filter(Boolean),
               )
             }
             className={inputClass}
@@ -412,10 +419,7 @@ function PlatformOptions({
             <p className="text-xs font-medium text-foreground">Share to Feed</p>
             <p className="text-[10px] text-muted-foreground">Also appear in your profile grid</p>
           </div>
-          <Toggle
-            on={options.shareToFeed ?? true}
-            onChange={(v) => set('shareToFeed', v)}
-          />
+          <Toggle on={options.shareToFeed ?? true} onChange={(v) => set('shareToFeed', v)} />
         </div>
       </div>
     );
@@ -465,7 +469,7 @@ function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void 
       onClick={() => onChange(!on)}
       className={cn(
         'relative w-10 h-6 rounded-full border-2 transition-colors shrink-0',
-        on ? 'bg-primary border-primary' : 'bg-muted border-border'
+        on ? 'bg-primary border-primary' : 'bg-muted border-border',
       )}
       aria-checked={on}
       role="switch"
@@ -473,7 +477,7 @@ function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void 
       <span
         className={cn(
           'absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform',
-          on ? 'translate-x-4' : 'translate-x-0.5'
+          on ? 'translate-x-4' : 'translate-x-0.5',
         )}
       />
     </button>
@@ -531,7 +535,7 @@ const inputClass =
 function buildPublishOptions(
   platform: SocialPlatform,
   options: Record<string, any>,
-  videoTopic: string
+  videoTopic: string,
 ): Record<string, any> {
   if (platform === 'youtube') {
     return {
