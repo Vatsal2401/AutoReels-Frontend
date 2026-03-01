@@ -101,13 +101,15 @@ function ShowcaseVideoCard({
   );
 }
 
-export function ShowcaseSection() {
-  const [items, setItems] = useState<ShowcaseItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+export function ShowcaseSection({ initialItems }: { initialItems?: ShowcaseItem[] }) {
+  const [items, setItems] = useState<ShowcaseItem[]>(initialItems?.filter((i) => i.url) ?? []);
+  const [isLoading, setIsLoading] = useState(!initialItems);
   const [sectionVisible, setSectionVisible] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
+    // Skip fetch if data was passed server-side
+    if (initialItems) return;
     showcaseApi
       .getShowcase()
       .then((res) => {
@@ -115,7 +117,7 @@ export function ShowcaseSection() {
       })
       .catch(() => {})
       .finally(() => setIsLoading(false));
-  }, []);
+  }, [initialItems]);
 
   // Intersection observer — start buffering videos when section enters view
   useEffect(() => {

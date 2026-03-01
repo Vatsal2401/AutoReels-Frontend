@@ -26,7 +26,22 @@ export const metadata: Metadata = generatePageMetadata({
   path: '/',
 });
 
-export default function LandingPage() {
+async function getShowcaseItems() {
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+    const res = await fetch(`${apiUrl}/showcase`, {
+      next: { revalidate: 3600 }, // ISR — revalidate every 60 min
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.items ?? [];
+  } catch {
+    return [];
+  }
+}
+
+export default async function LandingPage() {
+  const showcaseItems = await getShowcaseItems();
   return (
     <>
       <StructuredData />
@@ -82,7 +97,7 @@ export default function LandingPage() {
           </section>
 
           {/* Real video showcase — fetched from /showcase */}
-          <ShowcaseSection />
+          <ShowcaseSection initialItems={showcaseItems} />
 
           {/* Value Propositions (Rewrite for benefits) */}
           <section className="py-24 px-4 container mx-auto max-w-6xl">
