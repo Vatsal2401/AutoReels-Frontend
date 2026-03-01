@@ -12,7 +12,7 @@ import Link from "next/link";
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { user: authUser } = useAuth();
+  const { user: authUser, refreshUser } = useAuth();
   const token = searchParams.get("token");
   const email = searchParams.get("email");
   
@@ -39,14 +39,18 @@ function VerifyEmailContent() {
           if (response.refresh_token) {
             tokenStorage.setRefreshToken(response.refresh_token);
           }
-          
+
+          // Hydrate the AuthProvider context with the new token so downstream
+          // pages (onboarding, studio) see isAuthenticated=true immediately
+          await refreshUser();
+
           setStatus("success");
           setMessage(response.message || "Email verified successfully!");
-          
+
           // Dismiss the reminder toast if it exists
           const { toast } = await import("sonner");
           toast.dismiss("verify-email-reminder");
-          
+
           // Redirect after a short delay — onboarding for new users, dashboard for returning
           const { isOnboardingCompleted } = await import("@/lib/hooks/useOnboardingRedirect");
           setTimeout(() => {

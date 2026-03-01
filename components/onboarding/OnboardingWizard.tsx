@@ -143,8 +143,9 @@ function SkipLink({ onSkip }: { onSkip: () => void }) {
 
 export function OnboardingWizard() {
   const router = useRouter();
-  const { user } = useAuth();
-  const { hasCompletedOnboarding, isLoading } = useUserSettings();
+  const { user, isLoading: authLoading } = useAuth();
+  const { hasCompletedOnboarding, isLoading: settingsLoading } = useUserSettings();
+  const isLoading = authLoading || settingsLoading;
 
   const [step, setStep] = useState<Step>(0);
   const [selectedNicheId, setSelectedNicheId] = useState<string | null>(null);
@@ -178,14 +179,22 @@ export function OnboardingWizard() {
     }
   }, [step, topic, styleId, selectedNicheId]);
 
-  // Guard — DB is source of truth
+  // Auth guard — redirect to login if not authenticated
   useEffect(() => {
-    if (isLoading) return;
+    if (authLoading) return;
+    if (!user) {
+      router.replace('/login');
+    }
+  }, [authLoading, user, router]);
+
+  // Onboarding guard — DB is source of truth
+  useEffect(() => {
+    if (isLoading || !user) return;
     if (hasCompletedOnboarding || isOnboardingCompleted()) {
       if (hasCompletedOnboarding) markOnboardingCompleted(); // re-seed localStorage
       router.replace('/dashboard');
     }
-  }, [isLoading, hasCompletedOnboarding, router]);
+  }, [isLoading, user, hasCompletedOnboarding, router]);
 
   // Track step views
   useEffect(() => {
