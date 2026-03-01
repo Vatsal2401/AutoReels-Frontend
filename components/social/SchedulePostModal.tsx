@@ -133,17 +133,19 @@ export function SchedulePostModal({
        * overflow-hidden: clip the container; inner body handles scroll with overflow-y-auto.
        */}
       <DialogContent
-        className="max-w-md p-0 gap-0 rounded-2xl !translate-x-[-50%] !translate-y-[-50%] !top-[50%] !left-[50%]"
+        className="max-w-md p-0 gap-0 rounded-2xl"
         style={{
-          /* Ensure the position is shifted back by 50% of its own dimensions */
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
+          /*
+           * Use viewport units (vw/vh) not % — for position:fixed elements, % is
+           * relative to the containing block which shifts when a sidebar ancestor
+           * has transform/transition applied. vw/vh always reference the viewport.
+           */
+          left: '50vw',
+          top: '50vh',
+          transform: 'translateX(-50%) translateY(-50%)',
           position: 'fixed',
-          /* Explicit flex column — inline style beats base 'grid' class with no CSS-var ambiguity */
           display: 'flex',
           flexDirection: 'column',
-          /* Hard cap: dialog never exceeds 90% of viewport height */
           maxHeight: '90vh',
           overflow: 'hidden',
         }}

@@ -16,6 +16,8 @@ import {
   ChevronDown,
   ChevronRight,
   Share2,
+  Users,
+  CalendarClock,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { TOOL_REGISTRY, type ToolEntry, type ToolCategory } from "@/lib/studio/tool-registry";
@@ -331,8 +333,8 @@ export function Sidebar({ isOpen: forceOpen, onClose }: SidebarProps) {
                   aria-label="Social navigation"
                 >
                   {([
-                    { id: "social-accounts", name: "Accounts", href: "/social/accounts" },
-                    { id: "social-posts", name: "Posts", href: "/social/posts" },
+                    { id: "social-accounts", name: "Accounts", href: "/social/accounts", icon: Users },
+                    { id: "social-posts", name: "Posts", href: "/social/posts", icon: CalendarClock },
                   ] as const).map((item) => {
                     const isActive =
                       pathname === item.href || pathname?.startsWith(item.href + '/');
@@ -359,7 +361,7 @@ export function Sidebar({ isOpen: forceOpen, onClose }: SidebarProps) {
                           />
                         )}
                         <NavItemContent
-                          icon={Share2}
+                          icon={item.icon}
                           label={item.name}
                           isActive={isActive}
                           showLabel={isMobileOpen}
