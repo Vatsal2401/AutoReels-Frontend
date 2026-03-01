@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { useRouter } from 'next/navigation';
 import { authApi, AuthResponse, User } from '@/lib/api/auth';
 import { tokenStorage } from '@/lib/utils/token';
+import { track } from '@/lib/analytics';
 
 interface AuthContextType {
   user: User | null;
@@ -69,7 +70,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     toast.success('Account created! Please check your email to verify your account.', {
       duration: 5000,
     });
-    router.push('/dashboard');
+    track('onboarding_wizard_started');
+    router.push('/onboarding');
   };
 
   const logout = () => {

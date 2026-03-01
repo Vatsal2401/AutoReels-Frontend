@@ -47,9 +47,10 @@ function VerifyEmailContent() {
           const { toast } = await import("sonner");
           toast.dismiss("verify-email-reminder");
           
-          // Redirect to dashboard after a short delay
+          // Redirect after a short delay — onboarding for new users, dashboard for returning
+          const { isOnboardingCompleted } = await import("@/lib/hooks/useOnboardingRedirect");
           setTimeout(() => {
-            router.push("/dashboard");
+            router.push(isOnboardingCompleted() ? "/dashboard" : "/onboarding");
           }, 800);
         } else {
           setStatus("success");

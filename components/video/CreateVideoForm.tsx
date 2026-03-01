@@ -6,6 +6,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { videosApi, CreateVideoDto, Video, VideoStatus } from '@/lib/api/videos';
 import { useCredits } from '@/lib/hooks/useCredits';
 import { useOnboarding } from '@/lib/hooks/useOnboarding';
+import { track } from '@/lib/analytics';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
@@ -128,6 +129,10 @@ export function CreateVideoForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const retryVideoId = searchParams.get('videoId');
+  const urlStyle = searchParams.get('style');
+  const urlVoiceId = searchParams.get('voiceId');
+  const urlVoiceLabel = searchParams.get('voiceLabel');
+  const urlAutoGenerate = searchParams.get('autoGenerate') === 'true';
   const [topic, setTopic] = useState(searchParams.get('topic') || '');
   const [tone, setTone] = useState('motivational');
   const [hookType, setHookType] = useState('shocking_fact');
@@ -136,6 +141,8 @@ export function CreateVideoForm() {
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
   const [showCelebration, setShowCelebration] = useState(false);
   const prevCompletedRef = useRef(false);
+  const autoGenerateRef = useRef(false);
+  const handleSubmitRef = useRef<(e: React.FormEvent) => void>(() => {});
 
   // Layer 1 + 3: onboarding state
   const { onboardingDone, completeOnboarding, skillMode, setSkillMode } = useOnboarding();
@@ -147,10 +154,10 @@ export function CreateVideoForm() {
   const musicSelectorRef = useRef<HTMLDivElement>(null);
 
   const [settings, setSettings] = useState<MediaSettings>({
-    visualStyleId: 'cinematic',
+    visualStyleId: urlStyle || 'cinematic',
     aspectRatio: '9:16',
-    voiceId: 'aMSt68OGf4xUZAnLpTU8', // Grounded And Professional (English)
-    voiceLabel: 'Grounded And Professional',
+    voiceId: urlVoiceId || 'aMSt68OGf4xUZAnLpTU8', // Grounded And Professional (English)
+    voiceLabel: urlVoiceLabel || 'Grounded And Professional',
     language: 'English (US)',
     duration: 'Short',
     imageProvider: 'gemini',
@@ -279,11 +286,27 @@ export function CreateVideoForm() {
     }
   };
 
+  // Keep ref in sync so auto-generate effect always calls the latest handleSubmit
+  handleSubmitRef.current = handleSubmit;
+
   const currentStatus = (videoStatus?.status ||
     (createMutation.isPending || retryMutation.isPending ? 'pending' : 'pending')) as VideoStatus;
   const isCompleted = currentStatus === 'completed';
   const isFailed = currentStatus === 'failed';
   const errorMessage = videoStatus?.error_message;
+
+  // Auto-generate: fires once when coming from onboarding wizard
+  useEffect(() => {
+    if (!urlAutoGenerate || autoGenerateRef.current) return;
+    if (!isValidTopic || !hasCredits) return;
+    autoGenerateRef.current = true;
+    track('first_reel_auto_generate_fired');
+    const t = setTimeout(
+      () => handleSubmitRef.current({ preventDefault: () => {} } as React.FormEvent),
+      1200,
+    );
+    return () => clearTimeout(t);
+  }, [urlAutoGenerate, isValidTopic, hasCredits]);
 
   // Show celebration overlay the first time a video transitions to completed
   useEffect(() => {
@@ -303,8 +326,8 @@ export function CreateVideoForm() {
         />
       )}
 
-      {/* Layer 1: Walkthrough — only shown before onboarding is complete */}
-      {onboardingDone === false && (
+      {/* Layer 1: Walkthrough — only shown before onboarding is complete, suppressed during auto-generate */}
+      {onboardingDone === false && !urlAutoGenerate && (
         <OnboardingWalkthrough
           sectionRefs={{
             creativeIntent: creativeIntentRef,
