@@ -36,6 +36,7 @@ const PLATFORMS: Array<{
   name: string;
   Icon: React.ComponentType<{ className?: string }>;
   activeClass: string;
+  comingSoon?: boolean;
 }> = [
   {
     id: 'youtube',
@@ -48,12 +49,14 @@ const PLATFORMS: Array<{
     name: 'TikTok',
     Icon: Music2,
     activeClass: 'border-primary bg-primary/5 text-primary',
+    comingSoon: true,
   },
   {
     id: 'instagram',
     name: 'Instagram',
     Icon: Camera,
     activeClass: 'border-pink-500 bg-pink-50 dark:bg-pink-900/10 text-pink-600 dark:text-pink-400',
+    comingSoon: true,
   },
 ];
 
@@ -174,23 +177,33 @@ export function SchedulePostModal({
                   Platform
                 </label>
                 <div className="flex gap-2">
-                  {PLATFORMS.map(({ id, name, Icon, activeClass }) => {
+                  {PLATFORMS.map(({ id, name, Icon, activeClass, comingSoon }) => {
                     const isActive = platform === id;
                     return (
-                      <button
-                        key={id}
-                        type="button"
-                        onClick={() => setPlatform(id)}
-                        className={cn(
-                          'flex-1 flex items-center justify-center gap-1.5 h-10 rounded-xl border text-[11px] font-bold transition-all',
-                          isActive
-                            ? activeClass
-                            : 'border-border text-muted-foreground hover:text-foreground hover:bg-muted/30',
+                      <div key={id} className="relative group flex-1">
+                        <button
+                          type="button"
+                          onClick={() => !comingSoon && setPlatform(id)}
+                          disabled={comingSoon}
+                          className={cn(
+                            'w-full flex items-center justify-center gap-1.5 h-10 rounded-xl border text-[11px] font-bold transition-all',
+                            comingSoon
+                              ? 'border-border text-muted-foreground/40 bg-muted/20 cursor-not-allowed'
+                              : isActive
+                              ? activeClass
+                              : 'border-border text-muted-foreground hover:text-foreground hover:bg-muted/30',
+                          )}
+                        >
+                          <Icon className="h-3.5 w-3.5 shrink-0" />
+                          <span>{name}</span>
+                        </button>
+                        {comingSoon && (
+                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:flex items-center whitespace-nowrap bg-foreground text-background text-[11px] font-medium px-2.5 py-1.5 rounded-lg shadow-lg pointer-events-none z-10">
+                            Coming soon
+                            <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-foreground" />
+                          </div>
                         )}
-                      >
-                        <Icon className="h-3.5 w-3.5 shrink-0" />
-                        <span>{name}</span>
-                      </button>
+                      </div>
                     );
                   })}
                 </div>

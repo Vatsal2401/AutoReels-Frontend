@@ -29,6 +29,7 @@ const PLATFORMS: Array<{
   bgColor: string;
   borderColor: string;
   logo: string;
+  comingSoon?: boolean;
 }> = [
   {
     id: 'youtube',
@@ -47,6 +48,7 @@ const PLATFORMS: Array<{
     bgColor: 'bg-zinc-50 dark:bg-zinc-900/20',
     borderColor: 'border-zinc-200 dark:border-zinc-700/30',
     logo: '♪',
+    comingSoon: true,
   },
   {
     id: 'instagram',
@@ -56,6 +58,7 @@ const PLATFORMS: Array<{
     bgColor: 'bg-pink-50 dark:bg-pink-900/10',
     borderColor: 'border-pink-200 dark:border-pink-800/30',
     logo: '◈',
+    comingSoon: true,
   },
 ];
 
@@ -213,7 +216,22 @@ export default function SocialAccountsPage() {
 
                       {/* Actions */}
                       <div className="flex items-center gap-2 shrink-0">
-                        {account && !account.needsReauth ? (
+                        {platform.comingSoon ? (
+                          <div className="relative group">
+                            <Button
+                              size="sm"
+                              className="text-xs gap-1.5 opacity-50 cursor-not-allowed"
+                              disabled
+                            >
+                              <ExternalLink className="h-3 w-3" />
+                              Connect
+                            </Button>
+                            <div className="absolute bottom-full right-0 mb-2 hidden group-hover:flex items-center whitespace-nowrap bg-foreground text-background text-[11px] font-medium px-2.5 py-1.5 rounded-lg shadow-lg pointer-events-none">
+                              Coming soon
+                              <div className="absolute top-full right-3 border-4 border-transparent border-t-foreground" />
+                            </div>
+                          </div>
+                        ) : account && !account.needsReauth ? (
                           <Button
                             variant="outline"
                             size="sm"
