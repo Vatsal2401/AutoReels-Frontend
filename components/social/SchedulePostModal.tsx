@@ -107,11 +107,15 @@ export function SchedulePostModal({
     setAccountId(platformAccounts[0]?.id ?? '');
   }, [platform, accounts]);
 
+  // If the effect hasn't run yet (cached query → same reference → no re-render),
+  // fall back to the first available account so the button isn't stuck disabled.
+  const effectiveAccountId = accountId || platformAccounts[0]?.id || '';
+
   const scheduleMutation = useMutation({
     mutationFn: () =>
       socialApi.schedulePost({
         platform,
-        connectedAccountId: accountId,
+        connectedAccountId: effectiveAccountId,
         videoS3Key,
         videoTopic,
         scheduledAt: new Date(scheduledAt).toISOString(),
@@ -124,7 +128,7 @@ export function SchedulePostModal({
   });
 
   const isFuture = scheduledAt ? new Date(scheduledAt) > new Date() : false;
-  const canSubmit = !!accountId && isFuture && !scheduleMutation.isPending;
+  const canSubmit = !!effectiveAccountId && isFuture && !scheduleMutation.isPending;
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -312,6 +316,10 @@ function PlatformOptions({
 }) {
   const set = (key: string, value: any) => onChange({ ...options, [key]: value });
 
+  // Keep raw tags string in local state so commas aren't eaten by the
+  // controlled-input round-trip (value derived from array → join → comma lost).
+  const [tagsRaw, setTagsRaw] = useState(() => (options.tags ?? []).join(', '));
+
   if (platform === 'youtube') {
     return (
       <div className="space-y-3 pt-1 border-t border-border">
@@ -341,16 +349,17 @@ function PlatformOptions({
         <FieldRow label="Tags (comma-separated)">
           <input
             type="text"
-            value={(options.tags ?? []).join(', ')}
-            onChange={(e) =>
+            value={tagsRaw}
+            onChange={(e) => {
+              setTagsRaw(e.target.value);
               set(
                 'tags',
                 e.target.value
                   .split(',')
                   .map((t: string) => t.trim())
                   .filter(Boolean),
-              )
-            }
+              );
+            }}
             className={inputClass}
             placeholder="ai, shorts, viral"
           />
