@@ -128,7 +128,8 @@ export function SchedulePostModal({
   });
 
   const isFuture = scheduledAt ? new Date(scheduledAt) > new Date() : false;
-  const canSubmit = !!effectiveAccountId && isFuture && !scheduleMutation.isPending;
+  const titleRequired = platform === 'youtube' && !options.title?.trim();
+  const canSubmit = !!effectiveAccountId && isFuture && !titleRequired && !scheduleMutation.isPending;
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -322,15 +323,21 @@ function PlatformOptions({
         <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground pt-3">
           YouTube Options
         </p>
-        <FieldRow label="Title">
+        <FieldRow label="Title *">
           <input
             type="text"
-            value={options.title ?? videoTopic}
+            value={options.title ?? ''}
             onChange={(e) => set('title', e.target.value)}
             maxLength={100}
-            className={inputClass}
-            placeholder="Video title"
+            className={cn(inputClass, !options.title?.trim() && 'border-destructive/50 focus:border-destructive focus:ring-destructive/20')}
+            placeholder="Enter a YouTube title (required)"
           />
+          {!options.title?.trim() && (
+            <p className="mt-1 text-[11px] text-destructive flex items-center gap-1">
+              <AlertCircle className="h-3 w-3" />
+              Title is required
+            </p>
+          )}
         </FieldRow>
         <FieldRow label="Description">
           <textarea
@@ -546,7 +553,7 @@ function buildPublishOptions(
 ): Record<string, any> {
   if (platform === 'youtube') {
     return {
-      title: options.title || videoTopic,
+      title: options.title || '',
       description: options.description || '',
       tags: options.tags || [],
       privacyStatus: options.privacyStatus || 'public',
