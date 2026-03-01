@@ -5,7 +5,13 @@ import Link from 'next/link';
 import { showcaseApi, type ShowcaseItem } from '@/lib/api/showcase';
 import { ArrowRight, Play } from 'lucide-react';
 
-function ShowcaseVideoCard({ item, sectionVisible }: { item: ShowcaseItem; sectionVisible: boolean }) {
+function ShowcaseVideoCard({
+  item,
+  sectionVisible,
+}: {
+  item: ShowcaseItem;
+  sectionVisible: boolean;
+}) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoError, setVideoError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -25,7 +31,8 @@ function ShowcaseVideoCard({ item, sectionVisible }: { item: ShowcaseItem; secti
     const vid = videoRef.current;
     if (!vid || !hasVideo) return;
     vid.currentTime = 0;
-    vid.play()
+    vid
+      .play()
       .then(() => setIsPlaying(true))
       .catch(() => {});
   };
@@ -135,13 +142,14 @@ export function ShowcaseSection() {
         {/* Header */}
         <div className="text-center mb-10 space-y-3">
           <p className="text-xs font-bold tracking-widest text-primary uppercase">
-            Real Output · Made with AutoReels
+            Real Output · Made with autoreels.in
           </p>
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
             See What AutoReels Creates
           </h2>
           <p className="text-muted-foreground max-w-xl mx-auto text-sm leading-relaxed">
-            Every video below was generated in under 60 seconds — AI script, voice, captions, and visuals. No editing. No camera.
+            Every video below was generated in under 60 seconds — AI script, voice, captions, and
+            visuals. No editing. No camera.
           </p>
         </div>
 
