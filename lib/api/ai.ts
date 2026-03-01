@@ -13,10 +13,10 @@ export const aiApi = {
         return response.data;
     },
 
-    getTTSPreview: async (voiceId: string, language: string): Promise<Blob> => {
+    getTTSPreview: async (voiceId: string, language: string, voiceLabel?: string): Promise<Blob> => {
         const response = await apiClient.post(
             "/tts/preview",
-            { voiceId, language },
+            { voiceId, language, voiceLabel },
             { responseType: "blob" }
         );
         return response.data;

@@ -70,7 +70,7 @@ export const NarrationSettings: React.FC<MediaSettingsProps> = ({
 
     try {
       setIsPreviewLoading(true);
-      const audioBlob = await aiApi.getTTSPreview(settings.voiceId, settings.language || 'English (US)');
+      const audioBlob = await aiApi.getTTSPreview(settings.voiceId, settings.language || 'English (US)', settings.voiceLabel);
       const audioUrl = URL.createObjectURL(audioBlob);
       
       if (audioRef.current) {
