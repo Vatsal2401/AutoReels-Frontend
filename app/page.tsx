@@ -19,6 +19,9 @@ import { ShowcaseSection } from '@/components/landing/ShowcaseSection';
 import { ToolsSection } from '@/components/landing/ToolsSection';
 import type { Metadata } from 'next';
 
+// ISR — rebuild the landing page every hour (showcase URLs rotate, pricing stays fresh)
+export const revalidate = 3600;
+
 export const metadata: Metadata = generatePageMetadata({
   title: 'AI Video Generator for TikTok, YouTube & Reels',
   description:

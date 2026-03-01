@@ -32,6 +32,16 @@ const nextConfig = {
   async headers() {
     return [
       {
+        // Landing page — cacheable at CDN edge, ISR rebuilds every hour
+        source: '/',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, s-maxage=3600, stale-while-revalidate=86400',
+          },
+        ],
+      },
+      {
         // Cache-Control for all pSEO page prefixes — 24h CDN, 1h stale-while-revalidate
         source:
           "/(tools|ideas|pricing|vs|examples|for|integrations|glossary|create|directory)/:path*",
