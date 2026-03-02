@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from 'next/link';
 
 export function Footer() {
   return (
@@ -86,7 +86,7 @@ export function Footer() {
         {/* Copyright Section */}
         <div className="mt-12 border-t border-border pt-8">
           <p className="text-center text-sm text-muted-foreground leading-tight">
-            © {new Date().getFullYear()} AutoReels. All rights reserved.
+            © {new Date().getFullYear()} Programmerjokes. All rights reserved.
           </p>
         </div>
       </div>
