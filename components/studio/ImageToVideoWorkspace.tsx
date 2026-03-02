@@ -16,9 +16,9 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils/format";
 
-// Motion bucket maps slider 0-100 → 20-180
+// Motion bucket maps slider 0-100 → 20-200
 function sliderToMotionBucket(v: number): number {
-  return Math.round(20 + (v / 100) * 160);
+  return Math.round(20 + (v / 100) * 180);
 }
 
 const FORMATS: { value: VideoFormat; label: string; sub: string; w: number; h: number }[] = [
@@ -49,7 +49,7 @@ export function ImageToVideoWorkspace() {
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [format, setFormat] = useState<VideoFormat>("vertical");
-  const [motionSlider, setMotionSlider] = useState(66); // ~127 bucket
+  const [motionSlider, setMotionSlider] = useState(44); // ~100 bucket — natural default
   const [quality, setQuality] = useState<"fast" | "quality">("fast");
   const [frames, setFrames] = useState<14 | 25>(25);
   const [isLoading, setIsLoading] = useState(false);
@@ -101,10 +101,10 @@ export function ImageToVideoWorkspace() {
       const data = await animateImage(file, {
         format,
         num_frames: frames,
-        num_inference_steps: quality === "quality" ? 25 : 15,
+        num_inference_steps: quality === "quality" ? 30 : 20,
         fps: 7,
         motion_bucket_id: sliderToMotionBucket(motionSlider),
-        noise_aug_strength: 0.02,
+        noise_aug_strength: 0.1,
         seed: -1,
       });
       setResult(data);
@@ -302,7 +302,7 @@ export function ImageToVideoWorkspace() {
                     {q === "fast" ? "Fast" : "Quality"}
                   </span>
                   <span className="text-[10px] text-muted-foreground/70">
-                    {q === "fast" ? "15 steps · ~60s" : "25 steps · ~100s"}
+                    {q === "fast" ? "20 steps · ~70s" : "30 steps · ~120s"}
                   </span>
                 </button>
               ))}
