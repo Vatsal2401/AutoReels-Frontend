@@ -3,6 +3,7 @@ import apiClient from './client';
 export interface UserSettingsResponse {
   social_media_scheduler_enabled: boolean;
   has_completed_onboarding: boolean;
+  image_to_video_enabled: boolean;
 }
 
 export async function getUserSettings(): Promise<UserSettingsResponse> {

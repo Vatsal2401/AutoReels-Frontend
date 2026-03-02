@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { Video, Type, Image, Maximize2, Minus } from "lucide-react";
+import { Video, Type, Image, Maximize2, Minus, Clapperboard } from "lucide-react";
 
 export type ToolCategory = "video" | "image" | "text";
 
@@ -64,6 +64,14 @@ const TOOL_LIST: ToolEntry[] = [
     icon: Image,
     creditCost: 0,
     category: "image",
+  },
+  {
+    id: "image-to-video",
+    name: "Image to Video",
+    description: "Animate any image into a short cinematic video using AI.",
+    route: "/studio/image-to-video",
+    icon: Clapperboard,
+    category: "video",
   },
 ];
 
