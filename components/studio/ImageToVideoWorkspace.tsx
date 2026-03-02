@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { animateImage } from "@/lib/api/image-to-video";
+import { animateImage, type VideoFormat } from "@/lib/api/image-to-video";
 import { useUserSettings } from "@/lib/hooks/useUserSettings";
 import {
   Clapperboard,
@@ -21,11 +21,34 @@ function sliderToMotionBucket(v: number): number {
   return Math.round(20 + (v / 100) * 160);
 }
 
+const FORMATS: { value: VideoFormat; label: string; sub: string; w: number; h: number }[] = [
+  { value: "vertical",   label: "9:16",  sub: "Vertical",    w: 9,  h: 16 },
+  { value: "square",     label: "1:1",   sub: "Square",      w: 1,  h: 1  },
+  { value: "horizontal", label: "16:9",  sub: "Horizontal",  w: 16, h: 9  },
+];
+
+function FormatPreview({ w, h, active }: { w: number; h: number; active: boolean }) {
+  const MAX = 24;
+  const scale = MAX / Math.max(w, h);
+  const pw = Math.round(w * scale);
+  const ph = Math.round(h * scale);
+  return (
+    <div
+      className={cn(
+        "rounded border-2 transition-colors",
+        active ? "border-primary bg-primary/20" : "border-border bg-muted/40"
+      )}
+      style={{ width: pw, height: ph }}
+    />
+  );
+}
+
 export function ImageToVideoWorkspace() {
   const { imageToVideoEnabled, isLoading: settingsLoading } = useUserSettings();
 
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [format, setFormat] = useState<VideoFormat>("vertical");
   const [motionSlider, setMotionSlider] = useState(66); // ~127 bucket
   const [quality, setQuality] = useState<"fast" | "quality">("fast");
   const [frames, setFrames] = useState<14 | 25>(25);
@@ -76,6 +99,7 @@ export function ImageToVideoWorkspace() {
     setResult(null);
     try {
       const data = await animateImage(file, {
+        format,
         num_frames: frames,
         num_inference_steps: quality === "quality" ? 25 : 15,
         fps: 7,
@@ -98,7 +122,6 @@ export function ImageToVideoWorkspace() {
     setPreviewUrl(null);
   }
 
-  // Loading state while fetching settings
   if (settingsLoading) {
     return (
       <div className="flex items-center justify-center h-full min-h-[60vh]">
@@ -107,7 +130,6 @@ export function ImageToVideoWorkspace() {
     );
   }
 
-  // Locked state
   if (!imageToVideoEnabled) {
     return (
       <div className="flex flex-col items-center justify-center h-full min-h-[60vh] gap-6 p-8">
@@ -197,6 +219,39 @@ export function ImageToVideoWorkspace() {
                 Remove image
               </button>
             )}
+          </div>
+
+          {/* Format */}
+          <div className="flex flex-col gap-3">
+            <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Format
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              {FORMATS.map((f) => {
+                const active = format === f.value;
+                return (
+                  <button
+                    key={f.value}
+                    onClick={() => setFormat(f.value)}
+                    disabled={isLoading}
+                    className={cn(
+                      "flex flex-col items-center gap-2.5 rounded-xl border p-3 transition-all duration-150",
+                      active
+                        ? "border-primary bg-primary/5 shadow-sm"
+                        : "border-border bg-background hover:border-primary/40 hover:bg-muted/30"
+                    )}
+                  >
+                    <FormatPreview w={f.w} h={f.h} active={active} />
+                    <div className="flex flex-col items-center gap-0.5">
+                      <span className={cn("text-xs font-semibold leading-none", active ? "text-foreground" : "text-muted-foreground")}>
+                        {f.label}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground/70">{f.sub}</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* Motion Intensity */}
@@ -325,7 +380,6 @@ export function ImageToVideoWorkspace() {
       <div className="flex-1 flex flex-col min-h-0 bg-muted/20 relative overflow-hidden">
         {videoDataUrl ? (
           <div className="flex flex-col h-full min-h-0">
-            {/* Video area */}
             <div className="flex-1 flex items-center justify-center p-8 min-h-0 overflow-hidden">
               {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
               <video
@@ -336,15 +390,11 @@ export function ImageToVideoWorkspace() {
                 className="max-h-full max-w-full rounded-2xl shadow-2xl object-contain"
               />
             </div>
-            {/* Toolbar */}
             <div className="flex items-center justify-between px-8 py-4 border-t border-border bg-background/80 backdrop-blur-sm shrink-0">
               <span className="text-xs text-muted-foreground">
-                {result?.frames} frames · seed {result?.seed_used}
+                {result?.frames} frames · {FORMATS.find(f => f.value === format)?.label} · seed {result?.seed_used}
               </span>
-              <a
-                href={videoDataUrl}
-                download="image-to-video.mp4"
-              >
+              <a href={videoDataUrl} download="image-to-video.mp4">
                 <Button size="sm" className="gap-1.5 h-8 text-xs">
                   <Download className="h-3 w-3" />
                   Download

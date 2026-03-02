@@ -14,6 +14,12 @@ let failedQueue: Array<{
   reject: (error?: any) => void;
 }> = [];
 
+const redirectToLogin = () => {
+  if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
+    window.location.href = '/login';
+  }
+};
+
 const processQueue = (error: any, token: string | null = null) => {
   failedQueue.forEach((prom) => {
     if (error) {
@@ -71,6 +77,10 @@ apiClient.interceptors.response.use(
         tokenStorage.clearTokens();
         processQueue(error, null);
         isRefreshing = false;
+        const isAuthRequest = originalRequest.url?.includes('/auth/');
+        if (!isAuthRequest) {
+          redirectToLogin();
+        }
         return Promise.reject(error);
       }
 
@@ -99,6 +109,7 @@ apiClient.interceptors.response.use(
         processQueue(refreshError, null);
         isRefreshing = false;
         tokenStorage.clearTokens();
+        redirectToLogin();
         return Promise.reject(refreshError);
       }
     }

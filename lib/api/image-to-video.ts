@@ -1,6 +1,9 @@
 import apiClient from "./client";
 
+export type VideoFormat = "horizontal" | "vertical" | "square";
+
 export interface AnimateParams {
+  format?: VideoFormat;
   num_frames?: number;
   num_inference_steps?: number;
   fps?: number;
