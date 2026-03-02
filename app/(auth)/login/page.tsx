@@ -77,7 +77,9 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="z-10 text-sm text-slate-500">© 2026 AutoReels. All rights reserved.</div>
+        <div className="z-10 text-sm text-slate-500">
+          © 2026 Programmerjokes. All rights reserved.
+        </div>
 
         {/* Background Pattern */}
         <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl" />
