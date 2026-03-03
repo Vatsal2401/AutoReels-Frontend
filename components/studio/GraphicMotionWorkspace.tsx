@@ -43,10 +43,16 @@ const FORMAT_OPTIONS = [
   { value: "square", label: "Square (1:1)" },
 ];
 
-const VIDEO_STYLE_OPTIONS = [
+const TEMPLATE_STYLE_OPTIONS = [
   { value: "", label: "Auto" },
-  { value: "premium-saas", label: "Premium SaaS" },
-  { value: "minimal", label: "Minimal" },
+  { value: "minimal", label: "Minimal — Clean & light" },
+  { value: "bold", label: "Bold — Dark & punchy" },
+  { value: "corporate", label: "Corporate — Professional" },
+  { value: "neon", label: "Neon — Glowing teal ✦" },
+  { value: "editorial", label: "Editorial — Warm serif" },
+  { value: "gradient-pop", label: "Gradient Pop — Purple wave" },
+  { value: "dark-luxury", label: "Dark Luxury — Gold glow ✦" },
+  { value: "pastel-soft", label: "Pastel Soft — Pink & airy" },
 ];
 
 const TONE_OPTIONS = [
@@ -108,10 +114,12 @@ function GraphicMotionResultView({
 export function GraphicMotionWorkspace() {
   const [script, setScript] = useState("");
   const [format, setFormat] = useState<"reels" | "tiktok" | "horizontal" | "square">("reels");
-  const [videoStyle, setVideoStyle] = useState("");
+  const [templateStyle, setTemplateStyle] = useState("");
   const [globalTone, setGlobalTone] = useState("");
   const [fontFamily, setFontFamily] = useState("");
   const [highlightWords, setHighlightWords] = useState("");
+  const [ctaLabel, setCtaLabel] = useState("");
+  const [brandAssetUrl, setBrandAssetUrl] = useState("");
   const [music, setMusic] = useState<MediaSettings["music"]>(undefined);
   const { credits, hasCredits, isLoading: creditsLoading } = useCredits();
 
@@ -147,10 +155,12 @@ export function GraphicMotionWorkspace() {
       credit_cost: 1,
       useGraphicMotionEngine: true,
       format,
-      videoStyle: videoStyle || undefined,
+      templateStyle: (templateStyle || undefined) as CreateProjectDto["templateStyle"],
       globalTone: globalTone || undefined,
       fontFamily: fontFamily || undefined,
       highlightWords: highlights.length > 0 ? highlights : undefined,
+      ctaLabel: ctaLabel.trim() || undefined,
+      brandAssetUrl: brandAssetUrl.trim() || undefined,
       music: music?.id ? { id: music.id, volume: music.volume ?? 0.5 } : undefined,
     };
     createMutation.mutate(dto);
@@ -319,18 +329,18 @@ export function GraphicMotionWorkspace() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <label htmlFor="video-style" className="text-xs font-medium text-foreground">
-                      Style (optional)
+                    <label htmlFor="template-style" className="text-xs font-medium text-foreground">
+                      Visual preset (optional)
                     </label>
-                    <Select value={videoStyle || "auto"} onValueChange={(v) => setVideoStyle(v === "auto" ? "" : v)}>
+                    <Select value={templateStyle || "auto"} onValueChange={(v) => setTemplateStyle(v === "auto" ? "" : v)}>
                       <SelectTrigger
-                        id="video-style"
+                        id="template-style"
                         className="h-10 rounded-xl border border-input bg-background px-3 text-sm font-medium focus:ring-2 focus:ring-primary/10 focus:border-primary hover:bg-muted/30 transition-colors"
                       >
-                        <SelectValue placeholder="Style" />
+                        <SelectValue placeholder="Preset" />
                       </SelectTrigger>
                       <SelectContent className="rounded-xl border border-border bg-popover shadow-lg min-w-[var(--radix-select-trigger-width)]">
-                        {VIDEO_STYLE_OPTIONS.map((o) => (
+                        {TEMPLATE_STYLE_OPTIONS.map((o) => (
                           <SelectItem
                             key={o.value || "auto"}
                             value={o.value || "auto"}
@@ -405,6 +415,30 @@ export function GraphicMotionWorkspace() {
                     value={highlightWords}
                     onChange={(e) => setHighlightWords(e.target.value)}
                     placeholder="e.g. success, time, dream"
+                    className="rounded-xl h-10"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="cta-label" className="text-xs font-medium text-foreground">
+                    CTA button label (optional)
+                  </label>
+                  <Input
+                    id="cta-label"
+                    value={ctaLabel}
+                    onChange={(e) => setCtaLabel(e.target.value)}
+                    placeholder="e.g. Try Free, Get Started"
+                    className="rounded-xl h-10"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="brand-asset" className="text-xs font-medium text-foreground">
+                    Brand image URL (optional)
+                  </label>
+                  <Input
+                    id="brand-asset"
+                    value={brandAssetUrl}
+                    onChange={(e) => setBrandAssetUrl(e.target.value)}
+                    placeholder="https://... (shown in hero-split layout)"
                     className="rounded-xl h-10"
                   />
                 </div>

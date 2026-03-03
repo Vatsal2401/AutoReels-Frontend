@@ -36,6 +36,12 @@ export interface CreateProjectDto {
   format?: "reels" | "tiktok" | "horizontal" | "square";
   videoStyle?: string;
   globalTone?: string;
+  /** Visual style preset (controls colors, typography, motion, glow). */
+  templateStyle?: "minimal" | "bold" | "corporate" | "neon" | "editorial" | "gradient-pop" | "dark-luxury" | "pastel-soft";
+  /** CTA label text for hero-split template (e.g. "Try Free"). */
+  ctaLabel?: string;
+  /** Brand asset image URL — shown in left column of hero-split template. */
+  brandAssetUrl?: string;
   /** Background music (graphic motion): id from GET /music/system, volume 0–1. */
   music?: { id: string; volume?: number };
   [key: string]: unknown;
