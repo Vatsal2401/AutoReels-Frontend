@@ -5,6 +5,7 @@ export interface UserSettingsResponse {
   has_completed_onboarding: boolean;
   image_to_video_enabled: boolean;
   lipsync_enabled: boolean;
+  ugc_enabled: boolean;
 }
 
 export async function getUserSettings(): Promise<UserSettingsResponse> {
