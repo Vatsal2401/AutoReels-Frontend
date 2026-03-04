@@ -14,16 +14,19 @@ import {
   RefreshCw,
   ImageIcon,
   Music,
+  Video,
 } from "lucide-react";
 import { cn } from "@/lib/utils/format";
 
 const ACCEPTED_AUDIO = "audio/wav,audio/mpeg,audio/mp4,audio/m4a,audio/aac,audio/ogg,audio/flac";
+const ACCEPTED_FACE = "image/png,image/jpeg,image/webp,video/mp4,video/quicktime,video/webm";
 
 export function LipSyncWorkspace() {
   const { lipSyncEnabled, isLoading: settingsLoading } = useUserSettings();
 
   const [faceFile, setFaceFile] = useState<File | null>(null);
   const [facePreviewUrl, setFacePreviewUrl] = useState<string | null>(null);
+  const [faceIsVideo, setFaceIsVideo] = useState(false);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [bboxShift, setBboxShift] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -47,11 +50,14 @@ export function LipSyncWorkspace() {
   }, [isLoading]);
 
   const handleFaceFile = useCallback((f: File) => {
-    if (!f.type.startsWith("image/")) {
-      setError("Please upload a PNG or JPEG face image.");
+    const isImg = f.type.startsWith("image/");
+    const isVid = f.type.startsWith("video/");
+    if (!isImg && !isVid) {
+      setError("Please upload an image (PNG/JPEG) or short reference video (MP4/MOV).");
       return;
     }
     setFaceFile(f);
+    setFaceIsVideo(isVid);
     setFacePreviewUrl(URL.createObjectURL(f));
     setResult(null);
     setError(null);
@@ -76,7 +82,7 @@ export function LipSyncWorkspace() {
   }, [handleAudioFile]);
 
   async function handleGenerate() {
-    if (!faceFile) { setError("Please upload a face image."); return; }
+    if (!faceFile) { setError("Please upload a face image or reference video."); return; }
     if (!audioFile) { setError("Please upload an audio file."); return; }
 
     setIsLoading(true);
@@ -98,6 +104,7 @@ export function LipSyncWorkspace() {
     setError(null);
     setFaceFile(null);
     setFacePreviewUrl(null);
+    setFaceIsVideo(false);
     setAudioFile(null);
   }
 
@@ -147,11 +154,16 @@ export function LipSyncWorkspace() {
             </p>
           </div>
 
-          {/* Face image upload */}
+          {/* Face image / video upload */}
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Face Image
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Face Reference
+              </label>
+              <span className="text-[10px] text-muted-foreground/60 bg-muted px-1.5 py-0.5 rounded">
+                Image or Video
+              </span>
+            </div>
             <div
               onDrop={handleFaceDrop}
               onDragOver={(e) => e.preventDefault()}
@@ -166,37 +178,54 @@ export function LipSyncWorkspace() {
               <input
                 ref={faceInputRef}
                 type="file"
-                accept="image/png,image/jpeg,image/webp"
+                accept={ACCEPTED_FACE}
                 className="hidden"
                 onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFaceFile(f); }}
                 disabled={isLoading}
               />
               {facePreviewUrl ? (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
-                  src={facePreviewUrl}
-                  alt="Face preview"
-                  className="max-h-[180px] w-auto rounded-lg object-contain p-2"
-                />
+                faceIsVideo ? (
+                  /* eslint-disable-next-line jsx-a11y/media-has-caption */
+                  <video
+                    src={facePreviewUrl}
+                    muted
+                    loop
+                    autoPlay
+                    playsInline
+                    className="max-h-[180px] w-auto rounded-lg object-contain p-2"
+                  />
+                ) : (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={facePreviewUrl}
+                    alt="Face preview"
+                    className="max-h-[180px] w-auto rounded-lg object-contain p-2"
+                  />
+                )
               ) : (
                 <div className="flex flex-col items-center gap-3 py-6 px-4 text-center">
                   <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
-                    <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                    <Video className="h-5 w-5 text-muted-foreground" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-foreground">Drop face image here</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">PNG, JPEG · clear frontal face</p>
+                    <p className="text-sm font-medium text-foreground">Drop face image or video</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">PNG/JPEG for static · MP4/MOV for head motion</p>
                   </div>
                 </div>
               )}
             </div>
             {facePreviewUrl && !isLoading && (
               <button
-                onClick={() => { setFaceFile(null); setFacePreviewUrl(null); setResult(null); }}
+                onClick={() => { setFaceFile(null); setFacePreviewUrl(null); setFaceIsVideo(false); setResult(null); }}
                 className="text-xs text-muted-foreground hover:text-foreground transition-colors self-end"
               >
-                Remove image
+                Remove {faceIsVideo ? "video" : "image"}
               </button>
+            )}
+            {!facePreviewUrl && (
+              <p className="text-[10px] text-muted-foreground/70 leading-relaxed">
+                Tip: Upload a short looping video (5–15s) of a person talking for natural head movement.
+              </p>
             )}
           </div>
 
@@ -366,7 +395,7 @@ export function LipSyncWorkspace() {
                 <div className="text-center">
                   <p className="text-sm font-medium text-foreground">Your video will appear here</p>
                   <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                    Upload a face image and audio, then click Generate Lip Sync.
+                    Upload a face image or reference video + audio, then click Generate.
                   </p>
                 </div>
               </>
