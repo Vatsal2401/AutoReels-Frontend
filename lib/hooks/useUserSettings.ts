@@ -22,6 +22,7 @@ export function useUserSettings() {
     socialSchedulerEnabled: data?.social_media_scheduler_enabled ?? false,
     hasCompletedOnboarding: data?.has_completed_onboarding ?? false,
     imageToVideoEnabled: data?.image_to_video_enabled ?? false,
+    lipSyncEnabled: data?.lipsync_enabled ?? false,
     isLoading,
     error,
   };

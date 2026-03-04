@@ -8,6 +8,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { GraphicMotionWorkspace } from "@/components/studio/GraphicMotionWorkspace";
 import { TextToImageWorkspace } from "@/components/studio/TextToImageWorkspace";
 import { ImageToVideoWorkspace } from "@/components/studio/ImageToVideoWorkspace";
+import { LipSyncWorkspace } from "@/components/studio/LipSyncWorkspace";
 import { CreateVideoForm } from "@/components/video/CreateVideoForm";
 import { Loader2 } from "lucide-react";
 
@@ -105,6 +106,16 @@ export default function StudioToolPage() {
       <DashboardLayout>
         <div className="h-full min-h-0 overflow-hidden flex flex-col bg-background">
           <ImageToVideoWorkspace />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (tool.id === "lipsync") {
+    return (
+      <DashboardLayout>
+        <div className="h-full min-h-0 overflow-hidden flex flex-col bg-background">
+          <LipSyncWorkspace />
         </div>
       </DashboardLayout>
     );

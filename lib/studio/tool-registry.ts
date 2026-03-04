@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { Video, Type, Image, Maximize2, Minus, Clapperboard } from "lucide-react";
+import { Video, Type, Image, Maximize2, Minus, Clapperboard, Mic2, UserCheck } from "lucide-react";
 
 export type ToolCategory = "video" | "image" | "text";
 
@@ -43,6 +43,16 @@ const VIDEO_COMPRESSOR_TOOL: ToolEntry = {
   category: "video",
 };
 
+const UGC_VIDEO_TOOL: ToolEntry = {
+  id: "ugc",
+  name: "UGC Video Ad",
+  description: "Generate AI actor-driven influencer-style ads for TikTok and Instagram Reels.",
+  route: "/studio/ugc",
+  icon: UserCheck,
+  creditCost: 3,
+  category: "video",
+};
+
 const TOOL_LIST: ToolEntry[] = [
   {
     id: "reel",
@@ -53,6 +63,7 @@ const TOOL_LIST: ToolEntry[] = [
     creditCost: 1,
     category: "video",
   },
+  UGC_VIDEO_TOOL,
   GRAPHIC_MOTION_TOOL,
   VIDEO_RESIZER_TOOL,
   VIDEO_COMPRESSOR_TOOL,
@@ -71,6 +82,14 @@ const TOOL_LIST: ToolEntry[] = [
     description: "Animate any image into a short cinematic video using AI.",
     route: "/studio/image-to-video",
     icon: Clapperboard,
+    category: "video",
+  },
+  {
+    id: "lipsync",
+    name: "Lip Sync",
+    description: "Animate a face image to speak any audio using AI-driven lip sync.",
+    route: "/studio/lipsync",
+    icon: Mic2,
     category: "video",
   },
 ];
