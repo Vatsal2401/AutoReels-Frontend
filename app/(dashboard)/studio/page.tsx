@@ -7,6 +7,7 @@ import type { ToolEntry } from "@/lib/studio/tool-registry";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils/format";
 import { ArrowRight } from "lucide-react";
+import { useUserSettings } from "@/lib/hooks/useUserSettings";
 
 // 8pt-based vertical rhythm: icon+title group → description → divider+footer
 const CARD_PX = "px-5";
@@ -19,6 +20,11 @@ const FOOTER_PT = "pt-3";            // 12px — footer content
 
 export default function StudioHubPage() {
   const router = useRouter();
+  const { ugcEnabled } = useUserSettings();
+
+  const visibleTools = TOOL_REGISTRY.filter(
+    (t) => t.id !== "ugc" || ugcEnabled
+  );
 
   return (
     <DashboardLayout>
@@ -26,7 +32,7 @@ export default function StudioHubPage() {
         <div className="max-w-6xl mx-auto p-6 sm:p-8 lg:p-14">
           {/* Tool cards — title/subtitle live in TopBar */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-            {TOOL_REGISTRY.map((tool) => (
+            {visibleTools.map((tool) => (
               <ToolCard
                 key={tool.id}
                 tool={tool}

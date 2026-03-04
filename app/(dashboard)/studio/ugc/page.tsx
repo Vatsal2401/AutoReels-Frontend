@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
+import { useUserSettings } from "@/lib/hooks/useUserSettings";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils/format";
@@ -395,6 +396,13 @@ function Step5({ mediaId }: { mediaId: string | null }) {
 
 export default function UgcStudioPage() {
   const router = useRouter();
+  const { ugcEnabled, isLoading: settingsLoading } = useUserSettings();
+
+  useEffect(() => {
+    if (!settingsLoading && !ugcEnabled) {
+      router.replace("/studio");
+    }
+  }, [ugcEnabled, settingsLoading, router]);
 
   const [state, setState] = useState<WizardState>({
     step: 1,

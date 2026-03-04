@@ -43,7 +43,7 @@ const VIDEO_COMPRESSOR_TOOL: ToolEntry = {
   category: "video",
 };
 
-const UGC_VIDEO_TOOL: ToolEntry = {
+export const UGC_VIDEO_TOOL: ToolEntry = {
   id: "ugc",
   name: "UGC Video Ad",
   description: "Generate AI actor-driven influencer-style ads for TikTok and Instagram Reels.",

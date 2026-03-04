@@ -148,7 +148,7 @@ export function Sidebar({ isOpen: forceOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { user, logout } = useAuth();
-  const { socialSchedulerEnabled } = useUserSettings();
+  const { socialSchedulerEnabled, ugcEnabled } = useUserSettings();
   const [isInternalOpen, setIsInternalOpen] = useState(false);
   const [isSidebarHovered, setIsSidebarHovered] = useState(false);
 
@@ -305,7 +305,7 @@ export function Sidebar({ isOpen: forceOpen, onClose }: SidebarProps) {
                           "flex flex-col gap-0.5"
                         )}
                       >
-                        {TOOL_REGISTRY.map((tool) => (
+                        {TOOL_REGISTRY.filter((t) => t.id !== "ugc" || ugcEnabled).map((tool) => (
                           <ToolLink
                             key={tool.id}
                             tool={tool}

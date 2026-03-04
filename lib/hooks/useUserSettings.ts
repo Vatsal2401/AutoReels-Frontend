@@ -23,6 +23,7 @@ export function useUserSettings() {
     hasCompletedOnboarding: data?.has_completed_onboarding ?? false,
     imageToVideoEnabled: data?.image_to_video_enabled ?? false,
     lipSyncEnabled: data?.lipsync_enabled ?? false,
+    ugcEnabled: data?.ugc_enabled ?? false,
     isLoading,
     error,
   };
