@@ -4,6 +4,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { videosApi, CreateVideoDto, Video, VideoStatus } from '@/lib/api/videos';
+import { storyApi, StoryGenre, STORY_GENRES } from '@/lib/api/story';
 import { useCredits } from '@/lib/hooks/useCredits';
 import { useOnboarding } from '@/lib/hooks/useOnboarding';
 import { track } from '@/lib/analytics';
@@ -125,6 +126,8 @@ function InfoTooltip({ text }: { text: string }) {
   );
 }
 
+type ReelMode = 'quick' | 'story';
+
 export function CreateVideoForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -137,6 +140,9 @@ export function CreateVideoForm() {
   const [tone, setTone] = useState('motivational');
   const [hookType, setHookType] = useState('shocking_fact');
   const [cta, setCta] = useState('follow');
+  const [reelMode, setReelMode] = useState<ReelMode>('quick');
+  const [storyGenre, setStoryGenre] = useState<StoryGenre>('horror');
+  const [storySceneCount, setStorySceneCount] = useState<3 | 5 | 7>(5);
   const { credits, hasCredits, isLoading: creditsLoading } = useCredits();
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
   const [showCelebration, setShowCelebration] = useState(false);
@@ -263,6 +269,25 @@ export function CreateVideoForm() {
     setShowCelebration(false);
     prevCompletedRef.current = false;
 
+    if (reelMode === 'story') {
+      storyApi
+        .createStory({
+          prompt: topic.trim(),
+          genre: storyGenre,
+          sceneCount: storySceneCount,
+          voiceId: settings.voiceId,
+          voiceLabel: settings.voiceLabel,
+          musicId: (settings.music as any)?.id,
+        })
+        .then((data) => {
+          setActiveVideoId(data.media_id);
+        })
+        .catch((err) => {
+          toast.error(getApiErrorMessage(err));
+        });
+      return;
+    }
+
     const payload: CreateVideoDto = {
       topic: topic.trim(),
       language: settings.language,
@@ -363,6 +388,29 @@ export function CreateVideoForm() {
               ))}
             </div>
 
+            {/* Reel Mode Toggle */}
+            <div className="flex rounded-xl border border-border overflow-hidden">
+              {(['quick', 'story'] as ReelMode[]).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => setReelMode(m)}
+                  className={cn(
+                    'flex-1 px-4 py-3 text-xs font-bold transition-all',
+                    reelMode === m
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted text-muted-foreground hover:bg-muted/80',
+                  )}
+                >
+                  {m === 'quick' ? (
+                    <span>Quick Reel <span className="font-normal opacity-70">— single scene, fast</span></span>
+                  ) : (
+                    <span>Story Reel <span className="font-normal opacity-70">— narrative, 2 credits</span></span>
+                  )}
+                </button>
+              ))}
+            </div>
+
             <div className="w-full space-y-6 lg:space-y-8 text-center pb-8 lg:pb-12 border-b border-border/40">
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-full border border-primary/20 scale-90">
                 <Sparkles className="w-3 h-3 text-primary" />
@@ -437,7 +485,66 @@ export function CreateVideoForm() {
               </div>
             </div>
 
+            {/* Story-specific fields — Genre + Scene Count */}
+            {reelMode === 'story' && (
+              <div className="w-full space-y-6">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 px-1 border-b border-border/40 pb-3">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                    <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
+                      Story Genre
+                    </h3>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {STORY_GENRES.map((g) => (
+                      <button
+                        key={g.value}
+                        type="button"
+                        onClick={() => setStoryGenre(g.value)}
+                        className={cn(
+                          'px-3 py-1.5 rounded-full text-xs font-semibold border transition-all',
+                          storyGenre === g.value
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'bg-muted text-muted-foreground border-border hover:border-primary/40',
+                        )}
+                      >
+                        {g.emoji} {g.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 px-1 border-b border-border/40 pb-3">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                    <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
+                      Number of Scenes
+                    </h3>
+                  </div>
+                  <div className="flex gap-3">
+                    {([3, 5, 7] as const).map((count) => (
+                      <button
+                        key={count}
+                        type="button"
+                        onClick={() => setStorySceneCount(count)}
+                        className={cn(
+                          'flex-1 py-2.5 rounded-lg text-xs font-bold border transition-all flex flex-col items-center gap-0.5',
+                          storySceneCount === count
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'bg-muted text-muted-foreground border-border hover:border-primary/40',
+                        )}
+                      >
+                        <span className="text-base font-black">{count}</span>
+                        <span className="text-[9px] opacity-70">~{count * 10}s</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* 2. Visual Style (Dominant) — Layer 1 ref + Layer 2 tooltip */}
+            {reelMode === 'quick' && (
             <div ref={visualStyleRef} className="w-full space-y-8">
               <div className="flex items-center gap-3 px-1 border-b border-border/40 pb-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-primary" />
@@ -448,9 +555,10 @@ export function CreateVideoForm() {
               </div>
               <VisualStyleSelector settings={settings} onUpdate={handleUpdate} />
             </div>
+            )}
 
             {/* 3. Caption on/off — shown in basic/beginner modes only */}
-            {skillMode !== 'pro' && (
+            {reelMode === 'quick' && skillMode !== 'pro' && (
               <div className="w-full pt-3">
                 <div className="flex items-center justify-between rounded-xl border border-border bg-muted/30 px-4 py-3">
                   <div className="flex items-center gap-2 text-sm font-medium text-foreground">
@@ -479,22 +587,22 @@ export function CreateVideoForm() {
               </div>
             )}
 
-            {/* 3. Caption Style — Layer 1 ref, full settings for Pro mode */}
-            {skillMode === 'pro' && (
+            {/* 3. Caption Style — Layer 1 ref, full settings for Pro mode (Quick Reel only) */}
+            {reelMode === 'quick' && skillMode === 'pro' && (
               <div ref={captionSettingsRef} className="w-full pt-4">
                 <CaptionSettings settings={settings} onUpdate={handleUpdate} />
               </div>
             )}
 
-            {/* 3.1 Background Atmosphere — Layer 1 ref, hidden in Beginner mode */}
+            {/* 3.1 Background Atmosphere — hidden in Beginner mode */}
             {skillMode === 'pro' && (
               <div ref={musicSelectorRef} className="w-full pt-4">
                 <MusicSelector settings={settings} onUpdate={handleUpdate} />
               </div>
             )}
 
-            {/* 4. Configuration Grid (Remaining) — hidden in Beginner mode */}
-            {skillMode === 'pro' && (
+            {/* 4. Configuration Grid (Remaining) — hidden in Beginner mode, hidden in Story mode */}
+            {reelMode === 'quick' && skillMode === 'pro' && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 pt-8 pb-12 lg:pb-12">
                 <div className="space-y-6">
                   <div className="flex items-center gap-3 pb-3 border-b border-border/40 px-1">
@@ -528,8 +636,8 @@ export function CreateVideoForm() {
               </div>
             )}
 
-            {/* 5. Script Style — hidden in Beginner mode */}
-            {skillMode === 'pro' && (
+            {/* 5. Script Style — hidden in Beginner mode and Story mode */}
+            {reelMode === 'quick' && skillMode === 'pro' && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 pb-12 lg:pb-12">
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 pb-3 border-b border-border/40 px-1">
@@ -634,7 +742,13 @@ export function CreateVideoForm() {
                 <div className="flex items-center gap-1.5 font-bold text-amber-600 dark:text-amber-500">
                   <Zap className="w-3 h-3 fill-current" />
                   <span>
-                    {settings.duration === 'Long' ? 3 : settings.duration === 'Medium' ? 2 : 1}{' '}
+                    {reelMode === 'story'
+                      ? 2
+                      : settings.duration === 'Long'
+                        ? 3
+                        : settings.duration === 'Medium'
+                          ? 2
+                          : 1}{' '}
                     Credit Cost
                   </span>
                 </div>
@@ -686,7 +800,9 @@ export function CreateVideoForm() {
                       ? 'Try Again'
                       : retryVideoId
                         ? 'Retry Generate Reel'
-                        : 'Generate Reel'}
+                        : reelMode === 'story'
+                          ? 'Generate Story Reel'
+                          : 'Generate Reel'}
                 </Button>
               </div>
             </div>
