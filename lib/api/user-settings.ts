@@ -6,6 +6,7 @@ export interface UserSettingsResponse {
   image_to_video_enabled: boolean;
   lipsync_enabled: boolean;
   ugc_enabled: boolean;
+  story_reel_enabled: boolean;
 }
 
 export async function getUserSettings(): Promise<UserSettingsResponse> {
