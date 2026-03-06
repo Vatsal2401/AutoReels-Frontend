@@ -7,6 +7,7 @@ import { videosApi, CreateVideoDto, Video, VideoStatus } from '@/lib/api/videos'
 import { storyApi, StoryGenre, STORY_GENRES } from '@/lib/api/story';
 import { useCredits } from '@/lib/hooks/useCredits';
 import { useOnboarding } from '@/lib/hooks/useOnboarding';
+import { useUserSettings } from '@/lib/hooks/useUserSettings';
 import { track } from '@/lib/analytics';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -43,6 +44,8 @@ import {
   Loader2,
   FileText,
   HelpCircle,
+  Lock,
+  MessageCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/format';
 import { toast } from 'sonner';
@@ -143,7 +146,9 @@ export function CreateVideoForm() {
   const [reelMode, setReelMode] = useState<ReelMode>('quick');
   const [storyGenre, setStoryGenre] = useState<StoryGenre>('horror');
   const [storySceneCount, setStorySceneCount] = useState<3 | 5 | 7>(5);
+  const [showStoryLockedModal, setShowStoryLockedModal] = useState(false);
   const { credits, hasCredits, isLoading: creditsLoading } = useCredits();
+  const { storyReelEnabled } = useUserSettings();
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
   const [showCelebration, setShowCelebration] = useState(false);
   const prevCompletedRef = useRef(false);
@@ -343,6 +348,37 @@ export function CreateVideoForm() {
 
   return (
     <div className="flex flex-col lg:h-full bg-background lg:rounded-xl lg:border lg:border-border lg:overflow-hidden lg:shadow-sm">
+      {/* Story Reel Locked Modal */}
+      {showStoryLockedModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-background rounded-2xl border border-border shadow-2xl w-full max-w-sm p-6 flex flex-col items-center gap-4 text-center">
+            <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
+              <Lock className="w-7 h-7 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-foreground">Story Reel is Locked</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                This feature is in early access. Contact our support team to unlock Story Reels for your account.
+              </p>
+            </div>
+            <a
+              href="mailto:support@autoreels.in?subject=Unlock Story Reel"
+              className="inline-flex items-center gap-2 w-full justify-center px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors"
+            >
+              <MessageCircle className="w-4 h-4" />
+              Contact Support
+            </a>
+            <button
+              type="button"
+              onClick={() => setShowStoryLockedModal(false)}
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Maybe later
+            </button>
+          </div>
+        </div>
+      )}
+
       {showCelebration && activeVideoId && (
         <CelebrationOverlay
           videoId={activeVideoId}
@@ -394,7 +430,13 @@ export function CreateVideoForm() {
                 <button
                   key={m}
                   type="button"
-                  onClick={() => setReelMode(m)}
+                  onClick={() => {
+                    if (m === 'story' && !storyReelEnabled) {
+                      setShowStoryLockedModal(true);
+                      return;
+                    }
+                    setReelMode(m);
+                  }}
                   className={cn(
                     'flex-1 px-4 py-3 text-xs font-bold transition-all',
                     reelMode === m

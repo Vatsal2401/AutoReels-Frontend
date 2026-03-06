@@ -24,6 +24,7 @@ export function useUserSettings() {
     imageToVideoEnabled: data?.image_to_video_enabled ?? false,
     lipSyncEnabled: data?.lipsync_enabled ?? false,
     ugcEnabled: data?.ugc_enabled ?? false,
+    storyReelEnabled: data?.story_reel_enabled ?? false,
     isLoading,
     error,
   };
