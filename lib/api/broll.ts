@@ -95,7 +95,23 @@ export interface BrollScript {
   results?: BrollMatchResult[];
 }
 
-// ─── AIR import types ─────────────────────────────────────────────────────────
+// ─── AIR browse & import types ────────────────────────────────────────────────
+
+export interface AirClipPreview {
+  id: string;
+  title: string;
+  ext: string;
+  size?: number;       // bytes
+  duration?: number;   // seconds
+  mimeType?: string;
+  thumbnailUrl: string | null;
+}
+
+export interface AirBrowseResult {
+  boardId: string;
+  totalClips: number;
+  clips: AirClipPreview[];
+}
 
 export interface BrollAirImport {
   id: string;
@@ -298,10 +314,12 @@ export const brollApi = {
       .delete(`/broll/libraries/${libId}/videos/abort-multipart`, { data: { videoId, uploadId, key } })
       .then(() => undefined),
 
-  // AIR → S3 server-side import
+  // AIR → S3 server-side browse & import
+  browseAirBoard: (libId: string, dto: { boardUrl: string }): Promise<AirBrowseResult> =>
+    apiClient.post(`/broll/libraries/${libId}/import/air/browse`, dto).then((r) => r.data as AirBrowseResult),
   importFromAir: (
     libId: string,
-    dto: { boardUrl: string; airApiKey: string; autoIndex?: boolean },
+    dto: { boardUrl: string; airApiKey?: string; clipIds?: string[]; autoIndex?: boolean },
   ): Promise<BrollAirImport> =>
     apiClient.post(`/broll/libraries/${libId}/import/air`, dto).then((r) => r.data as BrollAirImport),
   listImportJobs: (libId: string): Promise<BrollAirImport[]> =>
