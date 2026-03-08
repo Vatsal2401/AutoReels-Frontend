@@ -4,7 +4,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { videosApi, CreateVideoDto, Video, VideoStatus } from '@/lib/api/videos';
-import { storyApi, StoryGenre, STORY_GENRES } from '@/lib/api/story';
+import { storyApi, StoryGenre, StoryImageStyle, STORY_GENRES, STORY_IMAGE_STYLES } from '@/lib/api/story';
 import { useCredits } from '@/lib/hooks/useCredits';
 import { useOnboarding } from '@/lib/hooks/useOnboarding';
 import { useUserSettings } from '@/lib/hooks/useUserSettings';
@@ -146,6 +146,7 @@ export function CreateVideoForm() {
   const [reelMode, setReelMode] = useState<ReelMode>('quick');
   const [storyGenre, setStoryGenre] = useState<StoryGenre>('horror');
   const [storySceneCount, setStorySceneCount] = useState<3 | 5 | 7>(5);
+  const [storyImageStyle, setStoryImageStyle] = useState<StoryImageStyle>('cartoon');
   const [showStoryLockedModal, setShowStoryLockedModal] = useState(false);
   const { credits, hasCredits, isLoading: creditsLoading } = useCredits();
   const { storyReelEnabled } = useUserSettings();
@@ -283,6 +284,7 @@ export function CreateVideoForm() {
           voiceId: settings.voiceId,
           voiceLabel: settings.voiceLabel,
           musicId: (settings.music as any)?.id,
+          imageStyle: STORY_IMAGE_STYLES.find((s) => s.value === storyImageStyle)?.prompt,
         })
         .then((data) => {
           setActiveVideoId(data.media_id);
@@ -578,6 +580,33 @@ export function CreateVideoForm() {
                       >
                         <span className="text-base font-black">{count}</span>
                         <span className="text-[9px] opacity-70">~{count * 10}s</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 px-1 border-b border-border/40 pb-3">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                    <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
+                      Visual Style
+                    </h3>
+                  </div>
+                  <div className="flex gap-2">
+                    {STORY_IMAGE_STYLES.map((style) => (
+                      <button
+                        key={style.value}
+                        type="button"
+                        onClick={() => setStoryImageStyle(style.value)}
+                        className={cn(
+                          'flex-1 py-2.5 rounded-lg text-xs font-bold border transition-all flex flex-col items-center gap-1',
+                          storyImageStyle === style.value
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'bg-muted text-muted-foreground border-border hover:border-primary/40',
+                        )}
+                      >
+                        <span className="text-base">{style.emoji}</span>
+                        <span>{style.label}</span>
                       </button>
                     ))}
                   </div>

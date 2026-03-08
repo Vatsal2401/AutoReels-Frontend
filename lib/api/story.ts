@@ -10,6 +10,29 @@ export const STORY_GENRES: Array<{ value: StoryGenre; label: string; emoji: stri
   { value: 'comedy', label: 'Comedy', emoji: '😂' },
 ];
 
+export type StoryImageStyle = 'cartoon' | 'cinematic' | 'dark_anime';
+
+export const STORY_IMAGE_STYLES: Array<{ value: StoryImageStyle; label: string; emoji: string; prompt: string }> = [
+  {
+    value: 'cartoon',
+    label: 'Cartoon',
+    emoji: '🎨',
+    prompt: 'cartoon comic illustration, bold black outlines, vibrant colors, animated storybook art style',
+  },
+  {
+    value: 'cinematic',
+    label: 'Cinematic',
+    emoji: '🎬',
+    prompt: 'cinematic photography, dramatic lighting, hyper-realistic, film grain, ultra-detailed',
+  },
+  {
+    value: 'dark_anime',
+    label: 'Dark Anime',
+    emoji: '⚔️',
+    prompt: 'dark anime illustration, detailed Japanese manga art, dramatic shadows, bold linework, high contrast',
+  },
+];
+
 export interface CreateStoryDto {
   prompt: string;
   genre: StoryGenre;
@@ -17,6 +40,7 @@ export interface CreateStoryDto {
   voiceId?: string;
   voiceLabel?: string;
   musicId?: string;
+  imageStyle?: string;
 }
 
 export const storyApi = {
