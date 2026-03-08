@@ -311,7 +311,7 @@ function MatchResultCard({
     onError: () => toast.error("Failed to revert"),
   });
 
-  const { mutate: useAlt } = useMutation({
+  const { mutate: applyAlt } = useMutation({
     mutationFn: () =>
       brollApi.overrideResult(libraryId, scriptId, result.lineIndex, {
         overrideVideoId: result.altVideoId ?? "",
@@ -432,7 +432,7 @@ function MatchResultCard({
                   </div>
                   <ScorePill score={result.altScore} />
                   <button
-                    onClick={() => useAlt()}
+                    onClick={() => applyAlt()}
                     className="shrink-0 h-6 px-2.5 rounded bg-primary text-primary-foreground text-[11px] font-medium flex items-center gap-1 hover:bg-primary/90 transition-colors"
                   >
                     <Check className="w-2.5 h-2.5" /> Use
