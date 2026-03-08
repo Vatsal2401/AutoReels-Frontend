@@ -19,6 +19,20 @@ function formatDuration(s: number | null): string {
   return `${m}:${String(sec).padStart(2, "0")}`;
 }
 
+const MIME_MAP: Record<string, string> = {
+  mp4: "video/mp4",
+  mov: "video/mp4", // most MOV files from iOS/macOS are H.264 — declare as mp4 so Chrome plays them
+  m4v: "video/mp4",
+  webm: "video/webm",
+  avi: "video/x-msvideo",
+  mkv: "video/x-matroska",
+};
+
+function getMimeType(filename: string): string {
+  const ext = filename.split(".").pop()?.toLowerCase() ?? "";
+  return MIME_MAP[ext] ?? "video/mp4";
+}
+
 function formatDate(iso: string | null): string {
   if (!iso) return "—";
   return new Date(iso).toLocaleDateString("en-US", {
@@ -66,10 +80,15 @@ export function VideoPreviewPanel({ libraryId, video, onClose }: VideoPreviewPan
             ) : signedUrl ? (
               <video
                 ref={videoRef}
-                src={signedUrl}
                 controls
                 className="w-full h-full object-contain"
-              />
+                onError={() => {
+                  // Hide video element on error — download link below will show
+                  if (videoRef.current) videoRef.current.style.display = "none";
+                }}
+              >
+                <source src={signedUrl} type={getMimeType(video.filename)} />
+              </video>
             ) : (
               <p className="text-white/50 text-xs">Preview unavailable</p>
             )}
@@ -91,6 +110,17 @@ export function VideoPreviewPanel({ libraryId, video, onClose }: VideoPreviewPan
                 <p className="text-xs text-destructive font-medium mb-0.5">Error</p>
                 <p className="text-xs text-destructive/80">{video.error_message}</p>
               </div>
+            )}
+
+            {signedUrl && (
+              <a
+                href={signedUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground underline-offset-4 hover:underline"
+              >
+                Open in new tab
+              </a>
             )}
           </div>
         </div>
