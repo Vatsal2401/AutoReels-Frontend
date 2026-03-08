@@ -4,6 +4,20 @@ import { useCallback, useRef, useState } from "react";
 import { brollApi } from "@/lib/api/broll";
 
 const MULTIPART_THRESHOLD = 100 * 1024 * 1024; // 100 MB
+
+const EXT_CONTENT_TYPE: Record<string, string> = {
+  ".mp4": "video/mp4",
+  ".mov": "video/quicktime",
+  ".avi": "video/x-msvideo",
+  ".mkv": "video/x-matroska",
+  ".webm": "video/webm",
+  ".m4v": "video/x-m4v",
+};
+
+function inferContentType(filename: string): string {
+  const ext = filename.slice(filename.lastIndexOf(".")).toLowerCase();
+  return EXT_CONTENT_TYPE[ext] ?? "video/mp4";
+}
 const PART_SIZE = 10 * 1024 * 1024; // 10 MB per part
 const CONCURRENT_PARTS = 3;
 
@@ -81,12 +95,20 @@ export function useUploadManager(
   const startSinglePart = async (item: UploadFile) => {
     updateUpload(item.id, { status: "uploading" });
     try {
-      const presign = await brollApi.presignUpload(libraryId, item.file.name, item.file.type || "video/mp4");
+      // Infer content type from extension when browser doesn't supply one (common for .mov)
+      const contentType = item.file.type || inferContentType(item.file.name);
+      const presign = await brollApi.presignUpload(libraryId, item.file.name, contentType);
       updateUpload(item.id, { videoId: presign.videoId, key: presign.s3Key });
 
-      await xhrPut(presign.uploadUrl, item.file, item.file.type || "video/mp4", item.id, (bytes) => {
-        updateUpload(item.id, { bytesUploaded: bytes });
+      // Accumulate delta bytes into a running total — xhrPut calls back with deltas
+      let totalUploaded = 0;
+      await xhrPut(presign.uploadUrl, item.file, contentType, item.id, (deltaBytes) => {
+        totalUploaded += deltaBytes;
+        updateUpload(item.id, { bytesUploaded: totalUploaded });
       });
+
+      // Confirm the upload with the backend — this promotes status from 'uploading' → 'uploaded'
+      await brollApi.confirmUpload(libraryId, presign.videoId);
 
       updateUpload(item.id, { status: "done", bytesUploaded: item.file.size });
       onFileAdded?.();

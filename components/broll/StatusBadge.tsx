@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 const STATUS_STYLES: Record<string, string> = {
   draft: "bg-muted text-muted-foreground border-border",
   uploading: "bg-blue-500/10 text-blue-600 border-blue-500/30",
+  importing: "bg-muted text-muted-foreground border-border",
   processing: "bg-yellow-500/10 text-yellow-600 border-yellow-500/30",
   indexed: "bg-green-500/10 text-green-600 border-green-500/30",
   active: "bg-green-500/10 text-green-600 border-green-500/30",
@@ -20,6 +21,7 @@ const STATUS_STYLES: Record<string, string> = {
 const STATUS_DOTS: Record<string, string> = {
   draft: "bg-muted-foreground",
   uploading: "bg-blue-500 animate-pulse",
+  importing: "bg-muted-foreground animate-pulse",
   processing: "bg-yellow-500 animate-pulse",
   indexed: "bg-green-500",
   active: "bg-green-500",
@@ -49,7 +51,7 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
       )}
     >
       <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", dot)} />
-      {status.charAt(0).toUpperCase() + status.slice(1)}
+      {status === "importing" ? "Importing…" : status.charAt(0).toUpperCase() + status.slice(1)}
     </span>
   );
 }

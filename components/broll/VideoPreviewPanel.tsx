@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { SlidePanel } from "./shared/SlidePanel";
 import { StatusBadge } from "./StatusBadge";
@@ -44,6 +45,12 @@ function formatDate(iso: string | null): string {
   });
 }
 
+function formatTimestamp(s: number): string {
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  return `${m}:${String(sec).padStart(2, "0")}`;
+}
+
 export function VideoPreviewPanel({ libraryId, video, onClose }: VideoPreviewPanelProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
@@ -63,13 +70,19 @@ export function VideoPreviewPanel({ libraryId, video, onClose }: VideoPreviewPan
       .finally(() => setLoadingUrl(false));
   }, [libraryId, video]);
 
+  const { data: frames = [], isLoading: framesLoading } = useQuery({
+    queryKey: ["broll-frames", libraryId, video?.id],
+    queryFn: () => brollApi.getVideoFrames(libraryId, video!.id),
+    enabled: !!video && video.status === "indexed",
+  });
+
   return (
     <SlidePanel
       open={!!video}
       onClose={onClose}
       title={video?.filename ?? "Preview"}
       subtitle={video ? `${formatDuration(video.duration_seconds)} · ${video.frame_count ?? 0} frames` : undefined}
-      width="w-[420px]"
+      width="w-[480px]"
     >
       {video && (
         <div className="flex flex-col h-full">
@@ -109,6 +122,49 @@ export function VideoPreviewPanel({ libraryId, video, onClose }: VideoPreviewPan
               <div className="rounded-md bg-destructive/10 border border-destructive/20 px-3 py-2">
                 <p className="text-xs text-destructive font-medium mb-0.5">Error</p>
                 <p className="text-xs text-destructive/80">{video.error_message}</p>
+              </div>
+            )}
+
+            {video.video_summary && (
+              <div className="rounded-md bg-muted/50 px-3 py-2.5">
+                <p className="text-xs text-muted-foreground font-medium mb-1">Video Summary</p>
+                <p className="text-xs text-foreground/80 leading-relaxed">{video.video_summary}</p>
+              </div>
+            )}
+
+            {video.status === "indexed" && (
+              <div>
+                <p className="text-xs text-muted-foreground font-medium mb-2">
+                  Frame Index ({frames.length} frames)
+                </p>
+                <div className="space-y-0.5 max-h-64 overflow-y-auto rounded-md border border-border/50">
+                  {framesLoading ? (
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground px-2 py-3">
+                      <Loader2 className="w-3 h-3 animate-spin" /> Loading frames…
+                    </div>
+                  ) : frames.length === 0 ? (
+                    <p className="text-xs text-muted-foreground px-2 py-3">
+                      No frame data — re-index this video to generate captions.
+                    </p>
+                  ) : (
+                    frames.map((f) => (
+                      <button
+                        key={f.frameIndex}
+                        className="w-full flex items-start gap-2.5 px-2 py-1.5 text-left hover:bg-muted/60 transition-colors"
+                        onClick={() => {
+                          if (videoRef.current) videoRef.current.currentTime = f.frameTime;
+                        }}
+                      >
+                        <span className="text-xs tabular-nums text-muted-foreground shrink-0 w-8">
+                          {formatTimestamp(f.frameTime)}
+                        </span>
+                        <span className="text-xs text-foreground/80 leading-relaxed">
+                          {f.caption ?? "—"}
+                        </span>
+                      </button>
+                    ))
+                  )}
+                </div>
               </div>
             )}
 

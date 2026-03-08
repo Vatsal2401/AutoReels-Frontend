@@ -31,6 +31,13 @@ export interface BrollVideo {
   job_stage: string | null;
   job_frames_processed: number | null;
   job_total_frames: number | null;
+  video_summary?: string | null;
+}
+
+export interface FrameData {
+  frameTime: number;
+  frameIndex: number;
+  caption: string | null;
 }
 
 export interface BrollIngestionJob {
@@ -86,6 +93,23 @@ export interface BrollScript {
   createdAt: string;
   updatedAt: string;
   results?: BrollMatchResult[];
+}
+
+// ─── AIR import types ─────────────────────────────────────────────────────────
+
+export interface BrollAirImport {
+  id: string;
+  libraryId: string;
+  userId: string;
+  boardUrl: string;
+  boardId: string;
+  status: string; // running | completed | partial | failed
+  totalClips: number;
+  importedClips: number;
+  failedClips: number;
+  errorMessage: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // ─── Legacy types (kept for backward compat) ─────────────────────────────────
@@ -175,6 +199,9 @@ export const brollApi = {
     return { videoId: presign.videoId, s3Key: presign.s3Key };
   },
 
+  confirmUpload: (libId: string, videoId: string): Promise<void> =>
+    apiClient.post(`/broll/libraries/${libId}/videos/${videoId}/confirm`).then(() => undefined),
+
   listVideos: (libId: string) =>
     apiClient.get<BrollVideo[]>(`/broll/libraries/${libId}/videos`).then((r) => r.data),
   deleteVideo: (libId: string, videoId: string) =>
@@ -190,6 +217,10 @@ export const brollApi = {
   getVideoPreviewUrl: (libId: string, videoId: string) =>
     apiClient
       .get<{ signedUrl: string }>(`/broll/libraries/${libId}/videos/${videoId}/preview`)
+      .then((r) => r.data),
+  getVideoFrames: (libId: string, videoId: string): Promise<FrameData[]> =>
+    apiClient
+      .get<FrameData[]>(`/broll/libraries/${libId}/videos/${videoId}/frames`)
       .then((r) => r.data),
 
   // Scripts
@@ -266,6 +297,15 @@ export const brollApi = {
     apiClient
       .delete(`/broll/libraries/${libId}/videos/abort-multipart`, { data: { videoId, uploadId, key } })
       .then(() => undefined),
+
+  // AIR → S3 server-side import
+  importFromAir: (
+    libId: string,
+    dto: { boardUrl: string; airApiKey: string; autoIndex?: boolean },
+  ): Promise<BrollAirImport> =>
+    apiClient.post(`/broll/libraries/${libId}/import/air`, dto).then((r) => r.data as BrollAirImport),
+  listImportJobs: (libId: string): Promise<BrollAirImport[]> =>
+    apiClient.get(`/broll/libraries/${libId}/import-jobs`).then((r) => r.data as BrollAirImport[]),
 
   // Clip search (for ClipPickerPanel — Replace flow)
   searchClips: (libId: string, query: string, topK = 10): Promise<ClipMatch[]> =>

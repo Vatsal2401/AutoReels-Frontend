@@ -10,6 +10,7 @@ import {
   Trash2,
   Upload,
   CloudUpload,
+  CloudDownload,
   Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ import { StatusBadge } from "./StatusBadge";
 import { IndexProgressBar } from "./IndexProgressBar";
 import { UploadQueue } from "./upload/UploadQueue";
 import { VideoPreviewPanel } from "./VideoPreviewPanel";
+import { AirImportDialog } from "./AirImportDialog";
 import { EmptyState } from "./shared/EmptyState";
 import { brollApi, type BrollVideo } from "@/lib/api/broll";
 import { useUploadManager } from "@/lib/hooks/useUploadManager";
@@ -45,6 +47,7 @@ export function VideoList({ libraryId, onRefreshStats }: VideoListProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
   const [previewVideo, setPreviewVideo] = useState<BrollVideo | null>(null);
+  const [airImportOpen, setAirImportOpen] = useState(false);
 
   const refreshAll = () => {
     queryClient.invalidateQueries({ queryKey: ["broll-videos", libraryId] });
@@ -68,6 +71,17 @@ export function VideoList({ libraryId, onRefreshStats }: VideoListProps) {
       return hasActive ? 3000 : false;
     },
   });
+
+  const { data: airImports = [] } = useQuery({
+    queryKey: ["broll-air-imports", libraryId],
+    queryFn: () => brollApi.listImportJobs(libraryId),
+    refetchInterval: (query) => {
+      const hasRunning = (query.state.data ?? []).some((j) => j.status === "running");
+      return hasRunning ? 3000 : false;
+    },
+  });
+
+  const runningImport = airImports.find((j) => j.status === "running");
 
   const { mutate: deleteVideo } = useMutation({
     mutationFn: (videoId: string) => brollApi.deleteVideo(libraryId, videoId),
@@ -140,6 +154,23 @@ export function VideoList({ libraryId, onRefreshStats }: VideoListProps) {
           Upload Videos
         </Button>
 
+        <Button
+          size="sm"
+          variant="outline"
+          className="h-9 gap-1.5 border-border/80 bg-background shadow-none hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-primary/20"
+          onClick={() => setAirImportOpen(true)}
+        >
+          <CloudDownload className="w-3.5 h-3.5" />
+          Import from AIR
+        </Button>
+
+        {runningImport && (
+          <span className="text-xs text-muted-foreground ml-1 tabular-nums">
+            Importing: {runningImport.importedClips}/
+            {runningImport.totalClips > 0 ? runningImport.totalClips : "?"}
+          </span>
+        )}
+
         {pending.length > 0 && (
           <Button
             size="sm"
@@ -205,7 +236,7 @@ export function VideoList({ libraryId, onRefreshStats }: VideoListProps) {
                   <th className="py-3 px-3 text-left font-semibold text-foreground text-xs w-32">
                     Status
                   </th>
-                  <th className="py-3 px-3 w-44" />
+                  <th className="py-3 px-3 w-52" />
                 </tr>
               </thead>
               <tbody>
@@ -232,6 +263,13 @@ export function VideoList({ libraryId, onRefreshStats }: VideoListProps) {
         libraryId={libraryId}
         video={previewVideo}
         onClose={() => setPreviewVideo(null)}
+      />
+
+      {/* AIR import dialog */}
+      <AirImportDialog
+        libraryId={libraryId}
+        open={airImportOpen}
+        onClose={() => setAirImportOpen(false)}
       />
     </div>
   );
@@ -290,12 +328,12 @@ function VideoRow({
           </div>
         )}
       </td>
-      <td className="px-3 py-3">
+      <td className="px-3 py-3 whitespace-nowrap">
         <div className="flex items-center gap-1">
           <Tip label="Preview this video clip">
             <button
               onClick={onPreview}
-              className="inline-flex items-center gap-1 h-7 px-2 rounded text-xs font-medium border border-border/70 bg-background hover:bg-muted/60 transition-colors text-muted-foreground hover:text-foreground"
+              className="inline-flex items-center gap-1 h-7 px-2 rounded text-xs font-medium border border-border/70 bg-background hover:bg-muted/60 transition-colors text-muted-foreground hover:text-foreground whitespace-nowrap"
             >
               <Eye className="w-3.5 h-3.5" />
               Preview
@@ -305,7 +343,7 @@ function VideoRow({
             <Tip label="Extract frames and build CLIP embeddings for matching">
               <button
                 onClick={onIndex}
-                className="inline-flex items-center gap-1 h-7 px-2 rounded text-xs font-medium border border-border/70 bg-background hover:bg-muted/60 transition-colors text-muted-foreground hover:text-foreground"
+                className="inline-flex items-center gap-1 h-7 px-2 rounded text-xs font-medium border border-border/70 bg-background hover:bg-muted/60 transition-colors text-muted-foreground hover:text-foreground whitespace-nowrap"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 Index
@@ -316,7 +354,7 @@ function VideoRow({
             <Tip label="Re-extract frames and rebuild embeddings (overwrites existing)">
               <button
                 onClick={onReindex}
-                className="inline-flex items-center gap-1 h-7 px-2 rounded text-xs font-medium border border-border/70 bg-background hover:bg-muted/60 transition-colors text-muted-foreground hover:text-foreground"
+                className="inline-flex items-center gap-1 h-7 px-2 rounded text-xs font-medium border border-border/70 bg-background hover:bg-muted/60 transition-colors text-muted-foreground hover:text-foreground whitespace-nowrap"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 Re-index
