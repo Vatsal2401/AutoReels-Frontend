@@ -25,6 +25,7 @@ export function useUserSettings() {
     lipSyncEnabled: data?.lipsync_enabled ?? false,
     ugcEnabled: data?.ugc_enabled ?? false,
     storyReelEnabled: data?.story_reel_enabled ?? false,
+    brollEnabled: data?.broll_enabled ?? false,
     isLoading,
     error,
   };

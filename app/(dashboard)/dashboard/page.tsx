@@ -175,7 +175,7 @@ function DashboardContent() {
         <div className="h-full overflow-hidden flex flex-col bg-background w-full">
           <div className="flex flex-col lg:flex-row flex-1 min-h-0 w-full">
             {/* MAIN: uses full width, sticky single viewport */}
-            <div className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8 flex flex-col min-h-0 border-b lg:border-b-0 lg:border-r border-border">
+            <div className="flex-1 min-w-0 p-3 sm:p-6 lg:p-8 flex flex-col min-h-0 border-b lg:border-b-0 lg:border-r border-border">
               {showLowCreditWarning && (
                 <div className="flex items-center justify-between gap-4 p-3 rounded-xl bg-amber-500/[0.06] border border-amber-500/20 flex-shrink-0 mb-4">
                   <div className="flex items-center gap-3">
@@ -194,25 +194,25 @@ function DashboardContent() {
               )}
 
               {/* Top row: subtitle + primary CTA + engagement (title is in TopBar) */}
-              <div className="flex flex-wrap items-center justify-between gap-4 flex-shrink-0">
-                <p className="text-muted-foreground text-sm">
+              <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4 flex-shrink-0">
+                <p className="text-muted-foreground text-xs sm:text-sm">
                   {activeCount > 0
                     ? `${activeCount} project${activeCount === 1 ? '' : 's'} in progress`
                     : 'Choose a tool and start creating.'}
                 </p>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3">
                   <div className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-card border border-border">
                     <Heart className="h-4 w-4 text-primary" />
                     <span className="text-sm font-semibold">{engagementValue}</span>
                   </div>
                   <Link href="/studio">
-                    <Button className="h-10 px-5 font-semibold bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl shadow-sm">
-                      <Palette className="mr-2 h-4 w-4" />
+                    <Button className="h-8 sm:h-10 px-3 sm:px-5 text-xs sm:text-sm font-semibold bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl shadow-sm">
+                      <Palette className="mr-1.5 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4" />
                       Open Studio
                     </Button>
                   </Link>
-                  <Link href="/dashboard?purchase=credits">
-                    <Button variant="outline" size="sm" className="h-10 rounded-xl">
+                  <Link href="/dashboard?purchase=credits" className="hidden xs:block sm:block">
+                    <Button variant="outline" size="sm" className="h-8 sm:h-10 rounded-xl text-xs sm:text-sm">
                       Add Credits
                     </Button>
                   </Link>
@@ -220,7 +220,7 @@ function DashboardContent() {
               </div>
 
               {/* Stats: full-width row */}
-              <div className="grid grid-cols-3 gap-4 sm:gap-6 flex-shrink-0 mt-6">
+              <div className="grid grid-cols-3 gap-2 sm:gap-4 lg:gap-6 flex-shrink-0 mt-4 sm:mt-6">
                 <StatsCard title="Total Projects" value={projects.length} icon={Video} />
                 <StatsCard
                   title="Active"

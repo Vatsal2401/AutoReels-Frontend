@@ -67,17 +67,17 @@ export function TopBar({ onMenuClick }: TopBarProps) {
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <div className="min-w-0 flex-1 py-1.5 space-y-0.5">
+          <div className="min-w-0 flex-1 py-1 space-y-0.5">
             {label && (
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/90">
                 {label}
               </p>
             )}
-            <h1 className="text-xl lg:text-2xl font-bold tracking-tight text-foreground leading-tight">
+            <h1 className="text-lg lg:text-2xl font-bold tracking-tight text-foreground leading-tight truncate">
               {title}
             </h1>
             {subtitle && (
-              <p className="text-[13px] text-muted-foreground/90 leading-snug max-w-xl">
+              <p className="hidden sm:block text-[13px] text-muted-foreground/90 leading-snug max-w-xl">
                 {subtitle}
               </p>
             )}

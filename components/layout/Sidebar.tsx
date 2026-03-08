@@ -18,6 +18,7 @@ import {
   Share2,
   Users,
   CalendarClock,
+  Film,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { TOOL_REGISTRY, type ToolEntry, type ToolCategory } from "@/lib/studio/tool-registry";
@@ -148,7 +149,7 @@ export function Sidebar({ isOpen: forceOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { user, logout } = useAuth();
-  const { socialSchedulerEnabled, ugcEnabled } = useUserSettings();
+  const { socialSchedulerEnabled, ugcEnabled, brollEnabled } = useUserSettings();
   const [isInternalOpen, setIsInternalOpen] = useState(false);
   const [isSidebarHovered, setIsSidebarHovered] = useState(false);
 
@@ -320,6 +321,69 @@ export function Sidebar({ isOpen: forceOpen, onClose }: SidebarProps) {
                 );
               })}
             </nav>
+
+            {/* B-roll Libraries nav item — only when feature flag is enabled */}
+            {brollEnabled && (
+              <>
+                <SectionDivider />
+                <nav
+                  className={cn(
+                    "py-1 flex flex-col gap-1.5 min-w-0",
+                    "px-2 lg:pl-3 lg:pr-2 lg:group-hover:px-2"
+                  )}
+                  aria-label="B-roll navigation"
+                >
+                  {([
+                    { id: "broll-libraries", name: "B-roll Libraries", href: "/studio/broll", icon: Film },
+                  ] as const).map((item) => {
+                    const isActive =
+                      pathname === item.href || pathname?.startsWith(item.href + '/');
+                    return (
+                      <Link
+                        key={item.id}
+                        href={item.href}
+                        onClick={() => setIsMobileOpen(false)}
+                        title={item.name}
+                        className={cn(
+                          "relative flex items-center h-10 rounded-lg transition-colors duration-[150ms] ease-out group/nav",
+                          "lg:justify-start lg:gap-0 lg:px-0 lg:w-full lg:max-w-full",
+                          "group-hover:justify-start group-hover:gap-3 group-hover:pl-2.5 group-hover:pr-2",
+                          "gap-3 pl-2.5 pr-2 min-w-0",
+                          isActive
+                            ? "text-primary hover:bg-primary/5"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+                        )}
+                      >
+                        {isActive && (
+                          <div
+                            className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-primary rounded-r-full"
+                            aria-hidden
+                          />
+                        )}
+                        <NavItemContent
+                          icon={item.icon}
+                          label={item.name}
+                          isActive={isActive}
+                          showLabel={isMobileOpen}
+                        />
+                        {isCollapsed && (
+                          <span
+                            className={cn(
+                              "pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2.5 py-1.5",
+                              "rounded-md border border-border bg-popover text-popover-foreground text-xs font-medium shadow-md",
+                              "opacity-0 group-hover/nav:opacity-100 transition-opacity duration-150 z-[110] whitespace-nowrap"
+                            )}
+                            role="tooltip"
+                          >
+                            {item.name}
+                          </span>
+                        )}
+                      </Link>
+                    );
+                  })}
+                </nav>
+              </>
+            )}
 
             {/* Social nav item — only when feature flag is enabled */}
             {socialSchedulerEnabled && (

@@ -7,6 +7,7 @@ export interface UserSettingsResponse {
   lipsync_enabled: boolean;
   ugc_enabled: boolean;
   story_reel_enabled: boolean;
+  broll_enabled: boolean;
 }
 
 export async function getUserSettings(): Promise<UserSettingsResponse> {
