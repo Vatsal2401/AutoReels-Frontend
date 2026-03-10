@@ -5,8 +5,11 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useCredits } from '@/lib/hooks/useCredits';
+import { useUserSettings } from '@/lib/hooks/useUserSettings';
 import { projectsApi } from '@/lib/api/projects';
 import { showcaseApi, type ShowcaseItem as ShowcaseItemType } from '@/lib/api/showcase';
+import { mediaApi } from '@/lib/api/media';
+import { STORY_GENRES } from '@/lib/api/story';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { CreditPurchase } from '@/components/credits/CreditPurchase';
 import { StatsCard } from '@/components/dashboard/StatsCard';
@@ -21,6 +24,8 @@ import {
   TrendingUp,
   AlertCircle,
   Heart,
+  BookOpen,
+  Download,
 } from 'lucide-react';
 
 /** Redirect href for showcase item type (click opens that engine). */
@@ -98,6 +103,62 @@ function ShowcaseItemCard({ item, slots }: { item: ShowcaseItemType; slots: 1 | 
   );
 }
 
+function StoryReelCard({ reel }: { reel: { id: string; final_url?: string; input_config: Record<string, any> | null } }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoError, setVideoError] = useState(false);
+  const prompt = reel.input_config?.prompt ?? '';
+  const genre = reel.input_config?.genre ?? '';
+  const genreEntry = STORY_GENRES.find((g) => g.value === genre);
+
+  return (
+    <div
+      className="flex-shrink-0 w-[140px] rounded-xl border border-border bg-card overflow-hidden"
+      onMouseEnter={() => videoRef.current?.play().catch(() => {})}
+      onMouseLeave={() => videoRef.current?.pause()}
+    >
+      <div className="aspect-[9/16] bg-muted relative overflow-hidden">
+        {reel.final_url && !videoError ? (
+          <video
+            ref={videoRef}
+            src={reel.final_url}
+            className="w-full h-full object-cover"
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            onError={() => setVideoError(true)}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <BookOpen className="h-8 w-8 text-muted-foreground/40" />
+          </div>
+        )}
+        {genreEntry && (
+          <div className="absolute top-2 left-2 text-xs bg-black/60 text-white px-1.5 py-0.5 rounded-md font-medium">
+            {genreEntry.emoji}
+          </div>
+        )}
+      </div>
+      <div className="p-2 space-y-1.5">
+        <p className="text-[10px] text-muted-foreground line-clamp-2 leading-relaxed">
+          {prompt.slice(0, 60)}{prompt.length > 60 ? '...' : ''}
+        </p>
+        {reel.final_url && (
+          <a href={reel.final_url} download onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="flex items-center gap-1 text-[9px] text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Download className="h-3 w-3" />
+              Download
+            </button>
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -117,6 +178,19 @@ function DashboardContent() {
     enabled: isAuthenticated,
     staleTime: 5 * 60 * 1000, // 5 min — showcase changes rarely; instant from cache on tab return
   });
+
+  const { storyReelEnabled } = useUserSettings();
+
+  const { data: allMedia } = useQuery({
+    queryKey: ['my-media'],
+    queryFn: mediaApi.getAllMedia,
+    enabled: isAuthenticated && storyReelEnabled,
+    staleTime: 60_000,
+  });
+
+  const storyReels = (allMedia ?? [])
+    .filter((m) => m.flow_key === 'storyReel' && m.status === 'completed' && m.final_url)
+    .slice(0, 6);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -275,6 +349,47 @@ function DashboardContent() {
                 </div>
               </div>
             </div>
+
+            {/* Story Reels gallery — only when flag is enabled */}
+            {storyReelEnabled && (
+              <div className="mt-6 flex-shrink-0">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="h-4 w-4 text-muted-foreground" />
+                    <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                      Your Story Reels
+                    </h2>
+                  </div>
+                  <Link href="/studio/story">
+                    <Button variant="outline" size="sm" className="rounded-xl text-xs font-medium">
+                      Create Story
+                    </Button>
+                  </Link>
+                </div>
+                {storyReels.length === 0 ? (
+                  <Link href="/studio/story">
+                    <div className="flex items-center gap-4 p-4 rounded-xl border border-dashed border-border bg-card/50 hover:border-primary/40 transition-colors cursor-pointer">
+                      <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                        <BookOpen className="h-5 w-5 text-muted-foreground" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-foreground">Create your first Story Reel</p>
+                        <p className="text-xs text-muted-foreground">AI-generated cinematic story with narration →</p>
+                      </div>
+                    </div>
+                  </Link>
+                ) : (
+                  <div
+                    className="flex gap-3 overflow-x-auto pb-2 no-scrollbar"
+                    style={{ scrollbarWidth: 'none' }}
+                  >
+                    {storyReels.map((reel) => (
+                      <StoryReelCard key={reel.id} reel={reel} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Right panel: fills height, uses remaining width */}
             <div className="w-full lg:w-[320px] xl:w-[360px] flex-shrink-0 p-4 lg:p-6 flex flex-col gap-6 bg-muted/20 border-t lg:border-t-0 lg:border-l border-border overflow-hidden min-h-0">
