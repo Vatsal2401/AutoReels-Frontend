@@ -20,6 +20,7 @@ import {
   CalendarClock,
   Film,
   BookOpen,
+  Megaphone,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { TOOL_REGISTRY, type ToolEntry, type ToolCategory } from "@/lib/studio/tool-registry";
@@ -39,10 +40,11 @@ interface MainNavItem {
 }
 
 const MAIN_NAV_ITEMS: MainNavItem[] = [
-  { id: "dashboard", name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { id: "studio", name: "Studio", href: "/studio", icon: Palette, hasSubItems: true },
-  { id: "projects", name: "Projects", href: "/projects", icon: FolderOpen },
-  { id: "credits", name: "Credits", href: "/dashboard?purchase=credits", icon: CreditCard },
+  { id: "dashboard",  name: "Dashboard",  href: "/dashboard",                  icon: LayoutDashboard },
+  { id: "studio",     name: "Studio",     href: "/studio",                     icon: Palette, hasSubItems: true },
+  { id: "campaigns",  name: "Campaigns",  href: "/campaigns",                  icon: Megaphone },
+  { id: "projects",   name: "Projects",   href: "/projects",                   icon: FolderOpen },
+  { id: "credits",    name: "Credits",    href: "/dashboard?purchase=credits", icon: CreditCard },
 ];
 
 // Optional: separate tool sections (e.g. by category). Currently tools live under Studio only.
@@ -171,6 +173,8 @@ export function Sidebar({ isOpen: forceOpen, onClose }: SidebarProps) {
     if (item.href === "/studio") return isStudioSectionActive;
     if (item.href === "/projects")
       return pathname === "/projects" || pathname?.startsWith("/projects/");
+    if (item.href === "/campaigns")
+      return pathname === "/campaigns" || pathname?.startsWith("/campaigns/");
     if (item.href === "/dashboard?purchase=credits")
       return pathname === "/dashboard" && searchParams?.get("purchase") === "credits";
     if (item.href === "/dashboard")
