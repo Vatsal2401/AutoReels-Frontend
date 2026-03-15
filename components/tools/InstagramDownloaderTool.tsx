@@ -120,10 +120,8 @@ export function InstagramDownloaderTool() {
                 </div>
               </div>
               <a
-                href={result.downloadUrl}
+                href={`${process.env.NEXT_PUBLIC_API_URL}/tools/instagram-downloader/proxy-download?cdnUrl=${encodeURIComponent(result.downloadUrl)}&filename=${encodeURIComponent(result.filename)}`}
                 download={result.filename}
-                target="_blank"
-                rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 w-full h-12 rounded-xl font-bold text-sm bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:opacity-90 transition-opacity"
               >
                 <Download className="h-4 w-4" />
