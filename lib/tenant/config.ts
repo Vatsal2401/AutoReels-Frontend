@@ -10,9 +10,9 @@ export interface TenantConfig {
 const TENANT_CONFIGS: Record<string, TenantConfig> = {
   'broll-client': {
     id: 'broll-client',
-    name: 'B-Roll Studio',
-    logoPath: null, // set to '/tenants/broll-client/logo.png' once client provides the file
-    tagline: 'Your B-Roll Asset Manager',
+    name: 'Reach Digital',
+    logoPath: '/tenants/broll-client/logo.svg',
+    tagline: 'Customer Acquisition For High Growth Brands',
     defaultRoute: '/studio/broll',
     allowSignup: false,
   },
