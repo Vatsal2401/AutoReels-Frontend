@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { authApi, AuthResponse, User } from '@/lib/api/auth';
 import { tokenStorage } from '@/lib/utils/token';
 import { track } from '@/lib/analytics';
+import { getTenantConfig } from '@/lib/tenant/config';
 
 interface AuthContextType {
   user: User | null;
@@ -54,7 +55,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email: response.user.email,
       email_verified: response.user.email_verified,
     });
-    router.push('/dashboard');
+    // In tenant mode the login page handles the redirect after checking broll_enabled
+    if (!getTenantConfig()) {
+      router.push('/dashboard');
+    }
   };
 
   const signup = async (email: string, password: string, name?: string, country?: string) => {
