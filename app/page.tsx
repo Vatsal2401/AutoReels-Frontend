@@ -1,3 +1,5 @@
+import { redirect } from 'next/navigation';
+import { getTenantConfig } from '@/lib/tenant/config';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/layout/Header';
@@ -44,6 +46,8 @@ async function getShowcaseItems() {
 }
 
 export default async function LandingPage() {
+  if (getTenantConfig()) redirect('/login');
+
   const showcaseItems = await getShowcaseItems();
   return (
     <>
