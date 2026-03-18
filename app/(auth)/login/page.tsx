@@ -17,9 +17,10 @@ export default function LoginPage() {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
 
-  // In tenant mode: fetch user settings after login to route correctly.
-  // `enabled: false` when not in tenant mode (non-tenant goes straight to /dashboard).
-  const { data: settings, isLoading: settingsLoading } = useQuery({
+  // In tenant mode: fetch user settings after login to determine correct redirect.
+  // Use isSuccess (not !isLoading) — avoids race condition where effect fires before
+  // TanStack Query starts the fetch (settings=undefined, isLoading=false momentarily).
+  const { data: settings, isSuccess: settingsLoaded, isError: settingsError } = useQuery({
     queryKey: ['user-settings'],
     queryFn: getUserSettings,
     enabled: isAuthenticated && !!tenantConfig,
@@ -30,16 +31,17 @@ export default function LoginPage() {
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
       if (tenantConfig) {
-        // Wait for settings before deciding where to send the user
-        if (!settingsLoading) {
-          const brollEnabled = settings?.broll_enabled ?? false;
-          router.push(brollEnabled ? tenantConfig.defaultRoute : '/access-denied');
+        if (settingsLoaded) {
+          router.push(settings!.broll_enabled ? tenantConfig.defaultRoute : '/access-denied');
+        } else if (settingsError) {
+          router.push('/access-denied');
         }
+        // else: query still in-flight — wait for next effect trigger
       } else {
         router.push('/dashboard');
       }
     }
-  }, [isAuthenticated, isLoading, settings, settingsLoading, router]);
+  }, [isAuthenticated, isLoading, settings, settingsLoaded, settingsError, router]);
 
   if (isLoading || isAuthenticated) {
     return null;
