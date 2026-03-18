@@ -4,6 +4,8 @@ import './globals.css';
 import { Providers } from './providers';
 import { SITE_CONFIG } from '@/lib/seo';
 import { Toaster } from 'sonner';
+import { ThemeProvider } from '@/components/theme-provider';
+import { Analytics } from '@vercel/analytics/next';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -59,9 +61,6 @@ export const metadata: Metadata = {
     apple: '/apple-icon.png',
   },
 };
-
-import { ThemeProvider } from '@/components/theme-provider';
-import { Analytics } from '@vercel/analytics/next';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
