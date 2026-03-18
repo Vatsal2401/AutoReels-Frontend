@@ -1,26 +1,100 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/useAuth';
 import Link from 'next/link';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Film } from 'lucide-react';
 import { LoginForm } from '@/components/auth/LoginForm';
+import { getTenantConfig } from '@/lib/tenant/config';
+import { getUserSettings } from '@/lib/api/user-settings';
+
+// Computed once at module load — stable for the lifetime of this deployment
+const tenantConfig = getTenantConfig();
 
 export default function LoginPage() {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
 
+  // In tenant mode: fetch user settings after login to route correctly.
+  // `enabled: false` when not in tenant mode (non-tenant goes straight to /dashboard).
+  const { data: settings, isLoading: settingsLoading } = useQuery({
+    queryKey: ['user-settings'],
+    queryFn: getUserSettings,
+    enabled: isAuthenticated && !!tenantConfig,
+    staleTime: 5 * 60 * 1000,
+    retry: 1,
+  });
+
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      router.push('/dashboard');
+      if (tenantConfig) {
+        // Wait for settings before deciding where to send the user
+        if (!settingsLoading) {
+          const brollEnabled = settings?.broll_enabled ?? false;
+          router.push(brollEnabled ? tenantConfig.defaultRoute : '/access-denied');
+        }
+      } else {
+        router.push('/dashboard');
+      }
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticated, isLoading, settings, settingsLoading, router]);
 
   if (isLoading || isAuthenticated) {
     return null;
   }
 
+  // ── Tenant-branded login ───────────────────────────────────────────────────
+  if (tenantConfig) {
+    return (
+      <div className="min-h-screen grid lg:grid-cols-[1.3fr_1fr]">
+        {/* Left Column — Tenant branding (no AutoReels mentions) */}
+        <div className="hidden lg:flex flex-col justify-between bg-[#F3F4FE] p-12 relative overflow-hidden">
+          <div className="z-10">
+            {tenantConfig.logoPath ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={tenantConfig.logoPath}
+                alt={tenantConfig.name}
+                className="h-10 w-auto object-contain"
+              />
+            ) : (
+              <div className="flex items-center gap-2 font-bold text-2xl text-primary">
+                <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
+                  <Film className="w-5 h-5" />
+                </div>
+                {tenantConfig.name}
+              </div>
+            )}
+          </div>
+
+          <div className="z-10 max-w-lg space-y-4">
+            <h1 className="text-4xl font-bold text-slate-900 leading-tight">
+              {tenantConfig.tagline}
+            </h1>
+          </div>
+
+          <div className="z-10 text-sm text-slate-500">
+            &copy; 2026 {tenantConfig.name}. All rights reserved.
+          </div>
+
+          {/* Background decoration */}
+          <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-purple-500/5 rounded-full blur-3xl" />
+        </div>
+
+        {/* Right Column — Login form (signup link leads to blocked /signup page) */}
+        <main className="flex flex-col items-center justify-center px-4 py-8 lg:px-12 bg-white">
+          <div className="w-full max-w-md space-y-8">
+            <LoginForm />
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // ── Default AutoReels login ────────────────────────────────────────────────
   return (
     <div className="min-h-screen grid lg:grid-cols-[1.3fr_1fr]">
       {/* Left Column - Branding */}

@@ -21,6 +21,7 @@ import {
   Film,
   BookOpen,
 } from "lucide-react";
+import { getTenantConfig } from "@/lib/tenant/config";
 import { useState, useEffect } from "react";
 import { TOOL_REGISTRY, type ToolEntry, type ToolCategory } from "@/lib/studio/tool-registry";
 import type { LucideIcon } from "lucide-react";
@@ -151,6 +152,7 @@ export function Sidebar({ isOpen: forceOpen, onClose }: SidebarProps) {
   const searchParams = useSearchParams();
   const { user, logout } = useAuth();
   const { socialSchedulerEnabled, ugcEnabled, brollEnabled, storyReelEnabled } = useUserSettings();
+  const tenantConfig = getTenantConfig();
   const [isInternalOpen, setIsInternalOpen] = useState(false);
   const [isSidebarHovered, setIsSidebarHovered] = useState(false);
 
@@ -213,7 +215,11 @@ export function Sidebar({ isOpen: forceOpen, onClose }: SidebarProps) {
             )}
           >
             <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 shrink-0">
-              <Sparkles className="h-5 w-5 text-primary shrink-0" />
+              {tenantConfig ? (
+                <Film className="h-5 w-5 text-primary shrink-0" />
+              ) : (
+                <Sparkles className="h-5 w-5 text-primary shrink-0" />
+              )}
             </div>
             <div
               className={cn(
@@ -224,10 +230,10 @@ export function Sidebar({ isOpen: forceOpen, onClose }: SidebarProps) {
               )}
             >
               <h1 className="text-sm font-bold tracking-tight text-foreground truncate">
-                AUTOREELS
+                {tenantConfig ? tenantConfig.name.toUpperCase() : "AUTOREELS"}
               </h1>
               <p className="text-[9px] text-muted-foreground uppercase tracking-wider font-medium truncate mt-0.5">
-                Studio
+                {tenantConfig ? "B-Roll" : "Studio"}
               </p>
             </div>
           </header>
@@ -235,7 +241,8 @@ export function Sidebar({ isOpen: forceOpen, onClose }: SidebarProps) {
           <div
             className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden flex flex-col min-w-0"
           >
-            {/* ----- Main navigation ----- */}
+            {/* ----- Main navigation (hidden in tenant mode) ----- */}
+            {!tenantConfig && (
             <nav
               className={cn(
                 "py-3 flex flex-col gap-1.5 min-w-0",
@@ -322,9 +329,10 @@ export function Sidebar({ isOpen: forceOpen, onClose }: SidebarProps) {
                 );
               })}
             </nav>
+            )}
 
-            {/* B-roll Libraries nav item — only when feature flag is enabled */}
-            {brollEnabled && (
+            {/* B-roll Libraries nav item — shown when broll enabled OR in tenant mode */}
+            {(brollEnabled || !!tenantConfig) && (
               <>
                 <SectionDivider />
                 <nav
@@ -386,8 +394,8 @@ export function Sidebar({ isOpen: forceOpen, onClose }: SidebarProps) {
               </>
             )}
 
-            {/* Story Reel nav item — only when feature flag is enabled */}
-            {storyReelEnabled && (
+            {/* Story Reel nav item — only when feature flag is enabled (not in tenant mode) */}
+            {!tenantConfig && storyReelEnabled && (
               <>
                 <SectionDivider />
                 <nav
@@ -449,8 +457,8 @@ export function Sidebar({ isOpen: forceOpen, onClose }: SidebarProps) {
               </>
             )}
 
-            {/* Social nav item — only when feature flag is enabled */}
-            {socialSchedulerEnabled && (
+            {/* Social nav item — only when feature flag is enabled (not in tenant mode) */}
+            {!tenantConfig && socialSchedulerEnabled && (
               <>
                 <SectionDivider />
                 <nav

@@ -6,7 +6,9 @@ import { useAuth } from '@/lib/hooks/useAuth';
 import Link from 'next/link';
 import { Sparkles } from 'lucide-react';
 import { SignupForm } from '@/components/auth/SignupForm';
-import { Header } from '@/components/layout/Header';
+import { getTenantConfig } from '@/lib/tenant/config';
+
+const tenantConfig = getTenantConfig();
 
 export default function SignupPage() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -22,6 +24,27 @@ export default function SignupPage() {
     return null;
   }
 
+  // ── Tenant mode: block self-registration ──────────────────────────────────
+  if (tenantConfig) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F3F4FE] p-8">
+        <div className="max-w-sm w-full text-center space-y-4 bg-white rounded-xl p-8 shadow-sm border border-border">
+          <h1 className="text-xl font-bold text-slate-900">Registration Not Available</h1>
+          <p className="text-slate-600 text-sm">
+            Account registration is not available. Contact your administrator to request access.
+          </p>
+          <Link
+            href="/login"
+            className="inline-block text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+          >
+            Back to sign in
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Default AutoReels signup ───────────────────────────────────────────────
   return (
     <div className="min-h-screen grid lg:grid-cols-[1.3fr_1fr]">
       {/* Left Column - Branding */}
