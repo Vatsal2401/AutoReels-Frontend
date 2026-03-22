@@ -3,30 +3,46 @@
 import { cn } from "@/lib/utils/format";
 import type { CaptionStyle } from "@/lib/api/clip-extractor";
 
-const STYLES: { id: CaptionStyle; label: string; description: string; preview: string }[] = [
+const STYLES: {
+  id: CaptionStyle;
+  name: string;
+  desc: string;
+  activeColor: string;
+  inactiveColor: string;
+  bg: string;
+  outline?: boolean;
+}[] = [
   {
     id: "bold",
-    label: "Bold",
-    description: "Gold active word, black box",
-    preview: "bg-black text-yellow-400 font-black",
+    name: "Bold",
+    desc: "Gold highlight",
+    activeColor: "#FFD700",
+    inactiveColor: "#ffffff",
+    bg: "bg-zinc-900",
   },
   {
     id: "minimal",
-    label: "Minimal",
-    description: "Clean white, no background",
-    preview: "bg-transparent text-white font-normal border border-white/20",
+    name: "Minimal",
+    desc: "Clean & subtle",
+    activeColor: "#ffffff",
+    inactiveColor: "#888888",
+    bg: "bg-zinc-900",
   },
   {
     id: "neon",
-    label: "Neon",
-    description: "Cyan glow, dark outline",
-    preview: "bg-black/30 text-cyan-400 font-bold",
+    name: "Neon",
+    desc: "Cyan glow",
+    activeColor: "#00FFFF",
+    inactiveColor: "#ffffff",
+    bg: "bg-zinc-900",
   },
   {
     id: "classic",
-    label: "Classic",
-    description: "Yellow captions, dark bar",
-    preview: "bg-black/70 text-yellow-300 font-semibold",
+    name: "Classic",
+    desc: "Yellow on dark",
+    activeColor: "#FFFF00",
+    inactiveColor: "#ffffff",
+    bg: "bg-black",
   },
 ];
 
@@ -37,40 +53,33 @@ interface CaptionStylePickerProps {
 
 export function CaptionStylePicker({ value, onChange }: CaptionStylePickerProps) {
   return (
-    <div className="grid grid-cols-2 gap-3">
-      {STYLES.map((style) => (
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+      {STYLES.map((s) => (
         <button
-          key={style.id}
+          key={s.id}
           type="button"
-          onClick={() => onChange(style.id)}
+          onClick={() => onChange(s.id)}
           className={cn(
-            "relative flex flex-col gap-2 rounded-xl border-2 p-4 text-left transition-all",
-            value === style.id
+            "group relative flex flex-col items-center gap-2 rounded-xl border-2 p-3 transition-all",
+            value === s.id
               ? "border-primary bg-primary/5"
-              : "border-border hover:border-primary/50 hover:bg-accent/30",
+              : "border-border hover:border-primary/40"
           )}
         >
-          {/* Preview swatch */}
-          <div
-            className={cn(
-              "flex h-10 w-full items-center justify-center rounded-lg text-sm",
-              style.preview,
-            )}
-          >
-            <span>Word</span>
-            <span className="mx-1 opacity-50">by</span>
-            <span>word</span>
+          {/* Mini caption preview */}
+          <div className={cn("w-full rounded-lg px-2 py-3 text-center", s.bg)}>
+            <p className="text-[11px] font-black leading-tight tracking-wide">
+              <span style={{ color: s.inactiveColor, opacity: 0.6 }}>say </span>
+              <span style={{ color: s.activeColor }}>THIS</span>
+              <span style={{ color: s.inactiveColor, opacity: 0.6 }}> now</span>
+            </p>
           </div>
-
-          <div>
-            <p className="text-sm font-medium">{style.label}</p>
-            <p className="text-xs text-muted-foreground">{style.description}</p>
+          <div className="text-center">
+            <p className="text-xs font-semibold">{s.name}</p>
+            <p className="text-[10px] text-muted-foreground">{s.desc}</p>
           </div>
-
-          {value === style.id && (
-            <div className="absolute right-2 top-2 h-4 w-4 rounded-full bg-primary text-[10px] text-primary-foreground flex items-center justify-center">
-              ✓
-            </div>
+          {value === s.id && (
+            <div className="absolute right-1.5 top-1.5 h-3 w-3 rounded-full bg-primary" />
           )}
         </button>
       ))}

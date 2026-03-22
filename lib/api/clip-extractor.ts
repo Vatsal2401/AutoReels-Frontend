@@ -27,6 +27,7 @@ export interface ClipExtractOptions {
   captionStyle: CaptionStyle;
   splitScreenBroll: boolean;
   brollLibraryId?: string;
+  outputFormat?: 'portrait_9x16' | 'original';
 }
 
 export interface CreateClipExtractJobDto {
@@ -38,6 +39,7 @@ export interface CreateClipExtractJobDto {
   captionStyle?: CaptionStyle;
   splitScreenBroll?: boolean;
   brollLibraryId?: string;
+  outputFormat?: 'portrait_9x16' | 'original';
 }
 
 export interface ExtractedClip {

@@ -5,16 +5,12 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { JobProgress } from "@/components/clip-extractor/JobProgress";
 import { ClipGallery } from "@/components/clip-extractor/ClipGallery";
 import { clipExtractorApi } from "@/lib/api/clip-extractor";
-import { ArrowLeft, Scissors, Clock, Trash2, Loader2 } from "lucide-react";
+import { ArrowLeft, Clock, Trash2, Loader2, CheckCircle2, Film } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Page
-// ─────────────────────────────────────────────────────────────────────────────
+import { cn } from "@/lib/utils/format";
 
 export default function ClipExtractorJobPage({
   params,
@@ -31,13 +27,13 @@ export default function ClipExtractorJobPage({
     refetchInterval: (query) => {
       const status = query.state.data?.status;
       if (!status) return 3000;
-      return ["completed", "failed"].includes(status) ? false : 3000;
+      return ["completed", "failed", "rate_limited"].includes(status) ? false : 3000;
     },
     staleTime: 0,
   });
 
   const handleDelete = async () => {
-    if (!confirm("Delete this job? Credits will be refunded for pending jobs.")) return;
+    if (!confirm("Delete this job? Credits will be refunded for pending/failed jobs.")) return;
     setDeleting(true);
     try {
       await clipExtractorApi.deleteJob(jobId);
@@ -64,10 +60,10 @@ export default function ClipExtractorJobPage({
     return (
       <DashboardLayout>
         <div className="flex flex-col items-center gap-4 py-24 text-center">
-          <Scissors className="h-10 w-10 text-muted-foreground" />
-          <p className="text-muted-foreground">Job not found</p>
-          <Link href="/studio/clip-extractor">
-            <Button variant="outline" size="sm">Back to Clip Extractor</Button>
+          <Film className="h-10 w-10 text-muted-foreground" />
+          <p className="text-muted-foreground text-sm">Job not found</p>
+          <Link href="/studio/clip-extractor" className="text-xs text-primary hover:underline">
+            ← Back to Clip Extractor
           </Link>
         </div>
       </DashboardLayout>
@@ -79,47 +75,56 @@ export default function ClipExtractorJobPage({
 
   return (
     <DashboardLayout>
-      <div className="mx-auto max-w-5xl space-y-8 py-6 px-4">
+      <div className="mx-auto max-w-5xl space-y-6 py-6 px-4">
+
         {/* Header */}
         <div className="flex items-start justify-between gap-4">
-          <div className="space-y-1 min-w-0">
+          <div className="min-w-0 space-y-1">
             <Link
               href="/studio/clip-extractor"
-              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
               <ArrowLeft className="h-3 w-3" />
               Clip Extractor
             </Link>
-            <h1 className="truncate text-xl font-bold">
-              {job.videoTitle ?? "Extracting clips..."}
+            <h1 className="truncate text-xl font-bold leading-tight">
+              {job.videoTitle ?? "Processing..."}
             </h1>
-            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
                 <Clock className="h-3 w-3" />
                 {new Date(job.createdAt).toLocaleString()}
               </span>
               {job.sourceVideoDurationSec && (
-                <span>{formatDuration(job.sourceVideoDurationSec)} source video</span>
+                <span>{formatDuration(job.sourceVideoDurationSec)} source</span>
+              )}
+              {job.status === "completed" && (
+                <span className="flex items-center gap-1 text-green-600 dark:text-green-400 font-medium">
+                  <CheckCircle2 className="h-3 w-3" />
+                  {readyClips.length} clip{readyClips.length !== 1 ? "s" : ""} ready
+                </span>
               )}
             </div>
           </div>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            className="shrink-0 text-muted-foreground hover:text-destructive"
+          <button
             onClick={handleDelete}
             disabled={deleting || isActive}
-            title={isActive ? "Cannot delete an active job" : "Delete job"}
+            title={isActive ? "Cannot delete while processing" : "Delete job"}
+            className={cn(
+              "shrink-0 flex h-9 w-9 items-center justify-center rounded-xl transition-colors",
+              isActive || deleting
+                ? "text-muted-foreground/30 cursor-not-allowed"
+                : "text-muted-foreground hover:text-destructive hover:bg-destructive/5"
+            )}
           >
             {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-          </Button>
+          </button>
         </div>
 
-        {/* Progress */}
+        {/* Progress card */}
         {job.status !== "completed" && (
           <div className="rounded-2xl border bg-card p-6">
-            <h2 className="mb-4 text-sm font-semibold">Progress</h2>
             <JobProgress
               status={job.status}
               progressPct={job.progressPct}
@@ -129,16 +134,7 @@ export default function ClipExtractorJobPage({
           </div>
         )}
 
-        {/* Completed summary */}
-        {job.status === "completed" && (
-          <div className="rounded-2xl border border-green-500/30 bg-green-500/5 p-4">
-            <p className="text-sm font-semibold text-green-700 dark:text-green-400">
-              {readyClips.length} viral clip{readyClips.length !== 1 ? "s" : ""} extracted successfully
-            </p>
-          </div>
-        )}
-
-        {/* Clip gallery — shows clips as they trickle in during rendering */}
+        {/* Clip gallery */}
         <ClipGallery
           clips={job.clips}
           jobId={jobId}

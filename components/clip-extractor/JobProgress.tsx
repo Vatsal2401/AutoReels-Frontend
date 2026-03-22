@@ -2,42 +2,30 @@
 
 import { cn } from "@/lib/utils/format";
 import type { ClipExtractStatus } from "@/lib/api/clip-extractor";
-import { Download, Mic, Zap, Scissors, Film, CheckCircle, XCircle, Clock } from "lucide-react";
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Stage config
-// ─────────────────────────────────────────────────────────────────────────────
+import { Download, Mic, Zap, Scissors, Film, CheckCircle2, XCircle, Clock, Loader2 } from "lucide-react";
 
 const STAGES: {
-  status: ClipExtractStatus;
+  statuses: ClipExtractStatus[];
   label: string;
-  description: string;
   icon: React.ElementType;
-  progressRange: [number, number]; // pct
 }[] = [
-  { status: "downloading", label: "Download", description: "Fetching video", icon: Download, progressRange: [0, 20] },
-  { status: "transcribing", label: "Transcribe", description: "Extracting speech", icon: Mic, progressRange: [20, 45] },
-  { status: "analyzing", label: "Analyze", description: "Finding viral moments", icon: Zap, progressRange: [45, 55] },
-  { status: "clipping", label: "Clip", description: "Cutting segments", icon: Scissors, progressRange: [55, 70] },
-  { status: "rendering", label: "Render", description: "Adding captions", icon: Film, progressRange: [70, 95] },
-  { status: "completed", label: "Done", description: "Clips ready", icon: CheckCircle, progressRange: [95, 100] },
+  { statuses: ["downloading"], label: "Download", icon: Download },
+  { statuses: ["transcribing"], label: "Transcribe", icon: Mic },
+  { statuses: ["analyzing"], label: "Analyze", icon: Zap },
+  { statuses: ["clipping"], label: "Clip", icon: Scissors },
+  { statuses: ["rendering"], label: "Render", icon: Film },
+  { statuses: ["completed"], label: "Done", icon: CheckCircle2 },
 ];
 
-const STATUS_ORDER: Record<ClipExtractStatus, number> = {
-  pending: -1,
+const STATUS_IDX: Partial<Record<ClipExtractStatus, number>> = {
+  pending: 0,
   downloading: 0,
   transcribing: 1,
   analyzing: 2,
   clipping: 3,
   rendering: 4,
   completed: 5,
-  failed: -1,
-  rate_limited: -1,
 };
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Props
-// ─────────────────────────────────────────────────────────────────────────────
 
 interface JobProgressProps {
   status: ClipExtractStatus;
@@ -46,102 +34,98 @@ interface JobProgressProps {
   errorMessage: string | null;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Component
-// ─────────────────────────────────────────────────────────────────────────────
-
 export function JobProgress({ status, progressPct, currentStage, errorMessage }: JobProgressProps) {
-  const currentStageIdx = STATUS_ORDER[status] ?? -1;
-  const isFailed = status === "failed";
-  const isRateLimited = status === "rate_limited";
-
-  if (isFailed) {
+  if (status === "failed") {
     return (
-      <div className="rounded-xl border border-destructive/50 bg-destructive/5 p-6 space-y-3">
-        <div className="flex items-center gap-3 text-destructive">
-          <XCircle className="h-5 w-5 shrink-0" />
-          <p className="font-semibold">Extraction failed</p>
+      <div className="rounded-2xl border border-destructive/40 bg-destructive/5 p-6 space-y-3">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10">
+            <XCircle className="h-5 w-5 text-destructive" />
+          </div>
+          <div>
+            <p className="font-semibold text-destructive">Extraction failed</p>
+            <p className="text-xs text-muted-foreground">Credits have been refunded</p>
+          </div>
         </div>
         {errorMessage && (
-          <p className="text-sm text-muted-foreground">{errorMessage}</p>
+          <p className="rounded-lg bg-muted/50 px-3 py-2 text-xs text-muted-foreground font-mono">{errorMessage}</p>
         )}
-        <p className="text-xs text-muted-foreground">Credits have been refunded to your account.</p>
       </div>
     );
   }
 
-  if (isRateLimited) {
+  if (status === "rate_limited") {
     return (
-      <div className="rounded-xl border border-yellow-500/50 bg-yellow-500/5 p-6 space-y-2">
-        <div className="flex items-center gap-3 text-yellow-600">
-          <Clock className="h-5 w-5 shrink-0" />
-          <p className="font-semibold">Rate limited — waiting to retry</p>
+      <div className="rounded-2xl border border-yellow-500/40 bg-yellow-500/5 p-6 space-y-2">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-500/10">
+            <Clock className="h-5 w-5 text-yellow-600" />
+          </div>
+          <div>
+            <p className="font-semibold text-yellow-700 dark:text-yellow-400">Rate limited</p>
+            <p className="text-xs text-muted-foreground">YouTube is throttling — will retry automatically</p>
+          </div>
         </div>
-        <p className="text-sm text-muted-foreground">
-          YouTube is temporarily rate limiting requests. Your job will automatically retry in a few minutes.
-        </p>
       </div>
     );
   }
+
+  const currentIdx = STATUS_IDX[status] ?? 0;
 
   return (
-    <div className="space-y-4">
-      {/* Stage timeline */}
-      <div className="flex items-center gap-1 overflow-x-auto pb-1">
+    <div className="space-y-5">
+      {/* Stage steps */}
+      <div className="flex items-center">
         {STAGES.map((stage, i) => {
-          const stageIdx = i; // index in STAGES matches STATUS_ORDER for active stages
-          const isDone = status === "completed" || stageIdx < currentStageIdx;
-          const isActive = stageIdx === currentStageIdx;
-          const isPending = stageIdx > currentStageIdx;
+          const isDone = status === "completed" || i < currentIdx;
+          const isActive = i === currentIdx && status !== "completed";
+          const isPending = i > currentIdx;
           const Icon = stage.icon;
 
           return (
-            <div key={stage.status} className="flex items-center shrink-0">
-              <div className="flex flex-col items-center gap-1 min-w-[60px]">
-                <div
-                  className={cn(
-                    "h-8 w-8 rounded-full flex items-center justify-center transition-all",
-                    isDone && "bg-primary text-primary-foreground",
-                    isActive && "bg-primary/20 text-primary ring-2 ring-primary",
-                    isPending && "bg-muted text-muted-foreground",
+            <div key={i} className="flex flex-1 items-center">
+              <div className="flex flex-col items-center gap-1.5 flex-shrink-0">
+                <div className={cn(
+                  "flex h-9 w-9 items-center justify-center rounded-full border-2 transition-all duration-300",
+                  isDone && "border-primary bg-primary text-primary-foreground",
+                  isActive && "border-primary bg-primary/10 text-primary",
+                  isPending && "border-border bg-background text-muted-foreground"
+                )}>
+                  {isActive ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Icon className="h-4 w-4" />
                   )}
-                >
-                  <Icon className="h-4 w-4" />
                 </div>
-                <span
-                  className={cn(
-                    "text-[10px] font-medium text-center",
-                    (isDone || isActive) ? "text-foreground" : "text-muted-foreground",
-                  )}
-                >
+                <span className={cn(
+                  "text-[10px] font-medium whitespace-nowrap",
+                  (isDone || isActive) ? "text-foreground" : "text-muted-foreground"
+                )}>
                   {stage.label}
                 </span>
               </div>
-
               {i < STAGES.length - 1 && (
-                <div
-                  className={cn(
-                    "h-0.5 w-6 mx-0.5 rounded transition-all",
-                    stageIdx < currentStageIdx ? "bg-primary" : "bg-muted",
-                  )}
-                />
+                <div className={cn(
+                  "h-0.5 flex-1 mx-1 mb-5 rounded transition-colors duration-500",
+                  i < currentIdx ? "bg-primary" : "bg-border"
+                )} />
               )}
             </div>
           );
         })}
       </div>
 
-      {/* Progress bar */}
-      <div className="space-y-1.5">
-        <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+      {/* Progress bar + label */}
+      <div className="space-y-2">
+        <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-muted">
           <div
-            className="h-full rounded-full bg-primary transition-all duration-500"
-            style={{ width: `${progressPct}%` }}
+            className="h-full rounded-full bg-primary transition-all duration-700 ease-out"
+            style={{ width: `${Math.max(progressPct, 2)}%` }}
           />
         </div>
         <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>{currentStage ?? "Processing..."}</span>
-          <span>{progressPct}%</span>
+          <span>{currentStage ?? "Initializing..."}</span>
+          <span className="font-semibold text-primary">{progressPct}%</span>
         </div>
       </div>
     </div>
