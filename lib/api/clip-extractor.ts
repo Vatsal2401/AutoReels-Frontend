@@ -93,6 +93,60 @@ export interface ClipExtractJobListResponse {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Snake_case → camelCase mappers (backend returns raw TypeORM entities)
+// ─────────────────────────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mapClip(c: any): ExtractedClip {
+  return {
+    id: c.id,
+    clipIndex: c.clip_index,
+    viralScore: c.viral_score,
+    hookLine: c.hook_line,
+    reasoning: c.reasoning,
+    tags: c.tags ?? [],
+    startSec: c.start_sec,
+    endSec: c.end_sec,
+    durationSec: c.duration_sec,
+    rawClipS3Key: c.raw_clip_s3_key,
+    renderedClipS3Key: c.rendered_clip_s3_key,
+    thumbnailS3Key: c.thumbnail_s3_key,
+    renderStatus: c.render_status,
+    renderError: c.render_error,
+    createdAt: c.created_at,
+    updatedAt: c.updated_at,
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mapJobSummary(j: any): ClipExtractJobSummary {
+  return {
+    id: j.id,
+    status: j.status,
+    progressPct: j.progress_pct,
+    currentStage: j.current_stage,
+    videoTitle: j.video_title,
+    sourceVideoUrl: j.source_url,
+    options: j.options,
+    creditsReserved: j.credits_reserved,
+    createdAt: j.created_at,
+    updatedAt: j.updated_at,
+    completedAt: j.completed_at,
+    clipsCount: j.clips?.length ?? 0,
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mapJobStatus(j: any): ClipExtractJobStatus {
+  return {
+    ...mapJobSummary(j),
+    clips: (j.clips ?? []).map(mapClip),
+    errorMessage: j.error_message,
+    sourceVideoDurationSec: j.source_video_duration_sec,
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // API Client
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -103,20 +157,25 @@ export const clipExtractorApi = {
   },
 
   listJobs: async (page = 1, limit = 20): Promise<ClipExtractJobListResponse> => {
-    const res = await apiClient.get<ClipExtractJobListResponse>(
+    const res = await apiClient.get<{ items: unknown[]; total: number; page: number; limit: number }>(
       `/clip-extractor/jobs?page=${page}&limit=${limit}`,
     );
-    return res.data;
+    return {
+      items: res.data.items.map(mapJobSummary),
+      total: res.data.total,
+      page: res.data.page,
+      limit: res.data.limit,
+    };
   },
 
   getJob: async (jobId: string): Promise<ClipExtractJobStatus> => {
-    const res = await apiClient.get<ClipExtractJobStatus>(`/clip-extractor/jobs/${jobId}`);
-    return res.data;
+    const res = await apiClient.get(`/clip-extractor/jobs/${jobId}`);
+    return mapJobStatus(res.data);
   },
 
   getClips: async (jobId: string): Promise<ExtractedClip[]> => {
-    const res = await apiClient.get<ExtractedClip[]>(`/clip-extractor/jobs/${jobId}/clips`);
-    return res.data;
+    const res = await apiClient.get<unknown[]>(`/clip-extractor/jobs/${jobId}/clips`);
+    return res.data.map(mapClip);
   },
 
   getClipUrl: async (clipId: string): Promise<ClipSignedUrl> => {

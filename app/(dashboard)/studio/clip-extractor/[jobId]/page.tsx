@@ -1,6 +1,5 @@
 "use client";
 
-import { use } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { JobProgress } from "@/components/clip-extractor/JobProgress";
@@ -20,9 +19,9 @@ import { toast } from "sonner";
 export default function ClipExtractorJobPage({
   params,
 }: {
-  params: Promise<{ jobId: string }>;
+  params: { jobId: string };
 }) {
-  const { jobId } = use(params);
+  const { jobId } = params;
   const router = useRouter();
   const [deleting, setDeleting] = useState(false);
 
