@@ -19,7 +19,6 @@ function VerifyEmailContent() {
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [message, setMessage] = useState("");
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!token) {
       setStatus("error");
@@ -67,7 +66,7 @@ function VerifyEmailContent() {
     };
 
     verify();
-  }, [token, email, authUser, router]);
+  }, [token, email, authUser, router, refreshUser]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">

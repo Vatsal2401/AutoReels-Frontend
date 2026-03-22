@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { useUserSettings } from "@/lib/hooks/useUserSettings";
@@ -222,10 +223,12 @@ function ActorCard({
       {/* Portrait */}
       <div className="aspect-[3/4] bg-muted flex items-center justify-center relative">
         {actor.portrait_url ? (
-          <img
+          <Image
             src={actor.portrait_url}
             alt={actor.name}
-            className="w-full h-full object-cover"
+            fill
+            className="object-cover"
+            unoptimized
           />
         ) : (
           <div className="text-4xl text-muted-foreground/30">👤</div>

@@ -105,9 +105,9 @@ export function SchedulePostModal({
     (a) => a.platform === platform && a.isActive && !a.needsReauth,
   );
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     setAccountId(platformAccounts[0]?.id ?? '');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [platform, accounts]);
 
   // If the effect hasn't run yet (cached query → same reference → no re-render),

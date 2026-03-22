@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { projectsApi, Project, ProjectStatus } from "@/lib/api/projects";
@@ -279,11 +280,15 @@ export default function ProjectDetailPage() {
                     </div>
                   ) : outputUrl ? (
                     isTextToImage ? (
-                      <img
+                      <Image
                         src={outputUrl}
                         alt={getProjectTitle(project)}
+                        width={0}
+                        height={0}
+                        sizes="100vw"
                         className="max-w-full max-h-full rounded-2xl shadow-lg object-contain"
-                        style={{ maxHeight: "70vh" }}
+                        style={{ maxHeight: "70vh", width: "auto", height: "auto" }}
+                        unoptimized
                       />
                     ) : (
                       <div className={cn("w-full max-w-full rounded-2xl overflow-hidden shadow-lg bg-black", aspectClass)}>
