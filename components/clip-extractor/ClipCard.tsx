@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Download, Play, Flame, Zap, BarChart2, Clock, CalendarPlus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -48,9 +48,18 @@ interface ClipCardProps {
 export function ClipCard({ clip, jobId }: ClipCardProps) {
   const [downloading, setDownloading] = useState(false);
   const [previewing, setPreviewing] = useState(false);
+  const [thumbUrl, setThumbUrl] = useState<string | null>(null);
 
   const isReady = clip.renderStatus === "done" && clip.renderedClipS3Key;
   const durationStr = formatDuration(clip.durationSec ?? clip.endSec - clip.startSec);
+
+  useEffect(() => {
+    if (clip.thumbnailS3Key) {
+      clipExtractorApi.getClipThumbUrl(clip.id)
+        .then(setThumbUrl)
+        .catch(() => {});
+    }
+  }, [clip.id, clip.thumbnailS3Key]);
 
   const handleDownload = async () => {
     if (!isReady) return;
@@ -101,10 +110,10 @@ export function ClipCard({ clip, jobId }: ClipCardProps) {
     >
       {/* Thumbnail / placeholder */}
       <div className="relative aspect-[9/16] bg-muted overflow-hidden">
-        {clip.thumbnailS3Key ? (
+        {thumbUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={`/api/thumb-proxy?key=${encodeURIComponent(clip.thumbnailS3Key)}`}
+            src={thumbUrl}
             alt={`Clip ${clip.clipIndex + 1} thumbnail`}
             className="h-full w-full object-cover"
           />

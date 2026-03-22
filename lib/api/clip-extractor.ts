@@ -180,6 +180,11 @@ export const clipExtractorApi = {
     return res.data;
   },
 
+  getClipThumbUrl: async (clipId: string): Promise<string | null> => {
+    const res = await apiClient.get<{ url: string | null }>(`/clip-extractor/clips/${clipId}/thumb-url`);
+    return res.data.url;
+  },
+
   deleteJob: async (jobId: string): Promise<void> => {
     await apiClient.delete(`/clip-extractor/jobs/${jobId}`);
   },
