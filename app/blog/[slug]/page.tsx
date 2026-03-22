@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import NextImage from 'next/image';
 import type { Metadata } from 'next';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
@@ -110,11 +111,15 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
 
               <header className="mb-10 space-y-4">
                 {post.cover_image_url && (
-                  <img
-                    src={post.cover_image_url}
-                    alt={post.title}
-                    className="w-full h-[400px] object-cover rounded-2xl mb-8"
-                  />
+                  <div className="relative w-full h-[400px] rounded-2xl overflow-hidden mb-8">
+                    <NextImage
+                      src={post.cover_image_url}
+                      alt={post.title}
+                      fill
+                      className="object-cover"
+                      unoptimized
+                    />
+                  </div>
                 )}
                 <div className="flex items-center gap-2 text-xs font-bold text-primary uppercase tracking-widest">
                   <span>{post.category || 'General'}</span>

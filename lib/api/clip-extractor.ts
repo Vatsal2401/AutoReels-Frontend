@@ -96,7 +96,6 @@ export interface ClipExtractJobListResponse {
 // Snake_case → camelCase mappers (backend returns raw TypeORM entities)
 // ─────────────────────────────────────────────────────────────────────────────
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapClip(c: any): ExtractedClip {
   return {
     id: c.id,
@@ -118,7 +117,6 @@ function mapClip(c: any): ExtractedClip {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapJobSummary(j: any): ClipExtractJobSummary {
   return {
     id: j.id,
@@ -136,7 +134,6 @@ function mapJobSummary(j: any): ClipExtractJobSummary {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapJobStatus(j: any): ClipExtractJobStatus {
   return {
     ...mapJobSummary(j),
