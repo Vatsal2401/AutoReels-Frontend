@@ -8,6 +8,7 @@ export interface UserSettingsResponse {
   ugc_enabled: boolean;
   story_reel_enabled: boolean;
   broll_enabled: boolean;
+  clip_extractor_enabled: boolean;
 }
 
 export async function getUserSettings(): Promise<UserSettingsResponse> {

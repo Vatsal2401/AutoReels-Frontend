@@ -20,6 +20,7 @@ import {
   CalendarClock,
   Film,
   BookOpen,
+  Scissors,
 } from "lucide-react";
 import { getTenantConfig } from "@/lib/tenant/config";
 import { useState, useEffect } from "react";
@@ -151,7 +152,7 @@ export function Sidebar({ isOpen: forceOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { user, logout } = useAuth();
-  const { socialSchedulerEnabled, ugcEnabled, brollEnabled, storyReelEnabled } = useUserSettings();
+  const { socialSchedulerEnabled, ugcEnabled, brollEnabled, storyReelEnabled, clipExtractorEnabled } = useUserSettings();
   const tenantConfig = getTenantConfig();
   const [isInternalOpen, setIsInternalOpen] = useState(false);
   const [isSidebarHovered, setIsSidebarHovered] = useState(false);
@@ -407,6 +408,69 @@ export function Sidebar({ isOpen: forceOpen, onClose }: SidebarProps) {
                 >
                   {([
                     { id: "story-reel", name: "Story Reel", href: "/studio/story", icon: BookOpen },
+                  ] as const).map((item) => {
+                    const isActive =
+                      pathname === item.href || pathname?.startsWith(item.href + '/');
+                    return (
+                      <Link
+                        key={item.id}
+                        href={item.href}
+                        onClick={() => setIsMobileOpen(false)}
+                        title={item.name}
+                        className={cn(
+                          "relative flex items-center h-10 rounded-lg transition-colors duration-[150ms] ease-out group/nav",
+                          "lg:justify-start lg:gap-0 lg:px-0 lg:w-full lg:max-w-full",
+                          "group-hover:justify-start group-hover:gap-3 group-hover:pl-2.5 group-hover:pr-2",
+                          "gap-3 pl-2.5 pr-2 min-w-0",
+                          isActive
+                            ? "text-primary hover:bg-primary/5"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+                        )}
+                      >
+                        {isActive && (
+                          <div
+                            className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-primary rounded-r-full"
+                            aria-hidden
+                          />
+                        )}
+                        <NavItemContent
+                          icon={item.icon}
+                          label={item.name}
+                          isActive={isActive}
+                          showLabel={isMobileOpen}
+                        />
+                        {isCollapsed && (
+                          <span
+                            className={cn(
+                              "pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2.5 py-1.5",
+                              "rounded-md border border-border bg-popover text-popover-foreground text-xs font-medium shadow-md",
+                              "opacity-0 group-hover/nav:opacity-100 transition-opacity duration-150 z-[110] whitespace-nowrap"
+                            )}
+                            role="tooltip"
+                          >
+                            {item.name}
+                          </span>
+                        )}
+                      </Link>
+                    );
+                  })}
+                </nav>
+              </>
+            )}
+
+            {/* Clip Extractor nav item — only when feature flag is enabled (not in tenant mode) */}
+            {!tenantConfig && clipExtractorEnabled && (
+              <>
+                <SectionDivider />
+                <nav
+                  className={cn(
+                    "py-1 flex flex-col gap-1.5 min-w-0",
+                    "px-2 lg:pl-3 lg:pr-2 lg:group-hover:px-2"
+                  )}
+                  aria-label="Clip Extractor navigation"
+                >
+                  {([
+                    { id: "clip-extractor", name: "Clip Extractor", href: "/studio/clip-extractor", icon: Scissors },
                   ] as const).map((item) => {
                     const isActive =
                       pathname === item.href || pathname?.startsWith(item.href + '/');
