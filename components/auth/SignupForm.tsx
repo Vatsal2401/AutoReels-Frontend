@@ -11,6 +11,19 @@ import { COUNTRIES } from '@/lib/constants/countries';
 import { SearchableSelect } from '@/components/ui/searchable-select';
 import Image from 'next/image';
 
+const DIAL_CODES = [
+  { code: '+91', flag: '🇮🇳', label: 'IN' },
+  { code: '+1', flag: '🇺🇸', label: 'US' },
+  { code: '+44', flag: '🇬🇧', label: 'GB' },
+  { code: '+61', flag: '🇦🇺', label: 'AU' },
+  { code: '+49', flag: '🇩🇪', label: 'DE' },
+  { code: '+33', flag: '🇫🇷', label: 'FR' },
+  { code: '+65', flag: '🇸🇬', label: 'SG' },
+  { code: '+971', flag: '🇦🇪', label: 'AE' },
+  { code: '+81', flag: '🇯🇵', label: 'JP' },
+  { code: '+55', flag: '🇧🇷', label: 'BR' },
+];
+
 export function SignupForm() {
   const { signup } = useAuth();
   const [formData, setFormData] = useState({
@@ -18,6 +31,8 @@ export function SignupForm() {
     email: '',
     password: '',
     country: '',
+    phoneNumber: '',
+    dialCode: '+91',
   });
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -43,6 +58,13 @@ export function SignupForm() {
       newErrors.email = 'Please enter a valid email address';
     }
 
+    if (formData.phoneNumber.trim()) {
+      const digitsOnly = formData.phoneNumber.replace(/[\s\-()]/g, '');
+      if (!/^\d{7,15}$/.test(digitsOnly)) {
+        newErrors.phoneNumber = 'Please enter a valid phone number (7–15 digits)';
+      }
+    }
+
     if (!formData.password) {
       newErrors.password = 'Password is required';
     } else if (formData.password.length < 8) {
@@ -57,10 +79,14 @@ export function SignupForm() {
     e.preventDefault();
     if (!validate()) return;
 
+    const phoneNumber = formData.phoneNumber.trim()
+      ? `${formData.dialCode}${formData.phoneNumber.replace(/[\s\-()]/g, '')}`
+      : undefined;
+
     setIsLoading(true);
     setErrors({});
     try {
-      await signup(formData.email, formData.password, formData.name, formData.country);
+      await signup(formData.email, formData.password, formData.name, formData.country, phoneNumber);
     } catch (error: any) {
       if (error.response?.status === 409) {
         setErrors({ email: 'This email is already registered. Please sign in instead.' });
@@ -139,22 +165,68 @@ export function SignupForm() {
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <label htmlFor="email" className="text-sm font-medium text-slate-700">
-              Work Email
-            </label>
-            <Input
-              id="email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              placeholder="name@company.com"
-              required
-              className="h-11 bg-slate-50 border-slate-200 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all rounded-lg"
-              disabled={isLoading}
-              aria-invalid={errors.email ? 'true' : 'false'}
-            />
-            {errors.email && <p className="text-xs text-destructive font-medium">{errors.email}</p>}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label htmlFor="email" className="text-sm font-medium text-slate-700">
+                Work Email <span className="text-destructive">*</span>
+              </label>
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                placeholder="name@company.com"
+                required
+                className="h-11 bg-slate-50 border-slate-200 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all rounded-lg"
+                disabled={isLoading}
+                aria-invalid={errors.email ? 'true' : 'false'}
+              />
+              {errors.email && (
+                <p className="text-xs text-destructive font-medium">{errors.email}</p>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
+              <label htmlFor="phoneNumber" className="text-sm font-medium text-slate-700">
+                Phone number
+              </label>
+              <div
+                className={`flex h-11 items-center rounded-lg border bg-slate-50 transition-all focus-within:bg-white focus-within:ring-4 focus-within:ring-primary/10 ${
+                  errors.phoneNumber
+                    ? 'border-destructive focus-within:border-destructive focus-within:ring-destructive/10'
+                    : 'border-slate-200 focus-within:border-primary'
+                }`}
+              >
+                <select
+                  value={formData.dialCode}
+                  onChange={(e) => setFormData({ ...formData, dialCode: e.target.value })}
+                  disabled={isLoading}
+                  aria-label="Country dial code"
+                  className="h-full shrink-0 appearance-none bg-transparent pl-3 pr-6 text-sm font-medium text-slate-700 focus:outline-none disabled:opacity-50 cursor-pointer"
+                  style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 6px center' }}
+                >
+                  {DIAL_CODES.map((d) => (
+                    <option key={d.code + d.label} value={d.code}>
+                      {d.flag} {d.code}
+                    </option>
+                  ))}
+                </select>
+                <div className="h-5 w-px shrink-0 bg-slate-200" aria-hidden="true" />
+                <input
+                  id="phoneNumber"
+                  type="tel"
+                  value={formData.phoneNumber}
+                  onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                  placeholder="98765 43210"
+                  disabled={isLoading}
+                  aria-invalid={errors.phoneNumber ? 'true' : 'false'}
+                  className="h-full flex-1 min-w-0 bg-transparent px-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none disabled:opacity-50"
+                />
+              </div>
+              {errors.phoneNumber && (
+                <p className="text-xs text-destructive font-medium">{errors.phoneNumber}</p>
+              )}
+            </div>
           </div>
 
           <div className="space-y-1.5">

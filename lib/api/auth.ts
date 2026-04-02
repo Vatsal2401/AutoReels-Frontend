@@ -5,6 +5,7 @@ export interface SignUpDto {
   password: string;
   name?: string;
   country?: string;
+  phoneNumber?: string;
 }
 
 export interface SignInDto {
