@@ -5,6 +5,7 @@ import './globals.css';
 import { Providers } from './providers';
 import { SITE_CONFIG } from '@/lib/seo';
 import { Toaster } from 'sonner';
+import { Analytics } from '@vercel/analytics/next';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -91,6 +92,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             />
           </Providers>
         </ThemeProvider>
+        <Analytics />
         {/* Google Analytics */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-1H5X1KSDL6"
